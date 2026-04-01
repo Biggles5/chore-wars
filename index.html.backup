@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="theme-color" content="#0a0a1a">
+<title>⚔️ Chore Wars</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:#0a0a1a;font-family:'Fredoka',sans-serif;color:#fff;overflow-x:hidden}
+input::placeholder{color:#444}
+@keyframes confFall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.12)}50%{box-shadow:0 0 20px rgba(255,215,0,.25)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fadeIn{animation:fadeIn .3s ease-out}.hoverCard{transition:all .15s ease;cursor:pointer}.hoverCard:active{transform:scale(.97)}
+.pFill{transition:width .8s cubic-bezier(.4,0,.2,1)}.mono{font-family:'Space Mono',monospace}
+.wrap{background:#0a0a1a;min-height:100vh;max-width:500px;margin:0 auto;position:relative}
+.hdr{background:linear-gradient(180deg,#111128,#0a0a1a);padding:12px 12px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.nav{display:flex;justify-content:space-around;padding:4px 2px;background:rgba(10,10,26,0.95);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.04);position:sticky;top:0;z-index:100}
+.tab{display:flex;flex-direction:column;align-items:center;padding:5px;border-radius:7px;background:transparent;color:#555;border:none;cursor:pointer;font-family:'Fredoka',sans-serif}
+.tabOn{background:rgba(255,215,0,0.08);color:#FFD700}
+.card{background:rgba(255,255,255,0.025);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,0.05);margin-bottom:8px}
+.lbl{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:#FFD700;letter-spacing:1.5px;text-transform:uppercase;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid rgba(255,215,0,0.1)}
+.iLbl{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:#FFD700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.pTrack{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,0.06);overflow:hidden}
+.pBar{height:100%;border-radius:3px}
+.unlock{text-align:center;margin-top:6px;padding:5px 8px;background:rgba(0,230,118,0.08);border-radius:8px;color:#00E676;font-weight:700;font-size:11px}
+.toast{position:fixed;top:0;left:0;right:0;background:rgba(10,10,26,0.96);backdrop-filter:blur(20px);padding:10px;z-index:10000;text-align:center;border-bottom:2px solid #FFD700}
+.inp{padding:7px 10px;border-radius:7px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);color:#fff;font-size:12px;font-family:'Fredoka',sans-serif;outline:none;width:100%}
+.actBtn{padding:7px 12px;border-radius:7px;border:none;background:rgba(255,215,0,0.12);color:#FFD700;font-family:'Fredoka',sans-serif;font-weight:700;font-size:11px;cursor:pointer;flex:1}
+.eRow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.rwRow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.03)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10000;display:flex;align-items:center;justify-content:center}
+.tripC{border-radius:14px;padding:18px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.06);text-align:center}
+.row{display:flex;justify-content:space-between;align-items:center;padding:9px;border-radius:9px;border:1px solid;margin-top:4px;width:100%;cursor:pointer;text-align:left}
+.syncDot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script>
+// ╔═══════════════════════════════════════════════════════╗
+// ║  PASTE YOUR FIREBASE CONFIG BELOW                     ║
+// ║  Get it from: Firebase Console → Project Settings     ║
+// ╚═══════════════════════════════════════════════════════╝
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY_HERE",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "YOUR_APP_ID"
+};
+
+let db = null;
+let firebaseReady = false;
+try {
+  if (FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY_HERE") {
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    firebaseReady = true;
+  }
+} catch(e) { console.error("Firebase init error:", e); }
+
+// DB helper: works with Firebase if configured, falls back to localStorage
+const DB = {
+  set: function(path, val) {
+    if (firebaseReady && db) {
+      return db.ref(path).set(val);
+    } else {
+      localStorage.setItem("cw_" + path.replace(/\//g, "_"), JSON.stringify(val));
+      return Promise.resolve();
+    }
+  },
+  get: function(path) {
+    if (firebaseReady && db) {
+      return db.ref(path).once("value").then(s => s.val());
+    } else {
+      try { return Promise.resolve(JSON.parse(localStorage.getItem("cw_" + path.replace(/\//g, "_")))); }
+      catch { return Promise.resolve(null); }
+    }
+  },
+  listen: function(path, callback) {
+    if (firebaseReady && db) {
+      db.ref(path).on("value", snap => callback(snap.val()));
+      return () => db.ref(path).off("value");
+    } else {
+      // No real-time for localStorage — just call once
+      try { callback(JSON.parse(localStorage.getItem("cw_" + path.replace(/\//g, "_")))); } catch {}
+      return () => {};
+    }
+  }
+};
+</script>
+<script type="text/babel">
+const{useState,useEffect,useCallback,useRef}=React;
+
+const DF=[{id:"kaden",name:"Kaden",emoji:"⚡",group:"ym",chores:["Make Bed","Unload Dishes"],color:"#FF6B35",title:"The Storm"},{id:"cohen",name:"Cohen",emoji:"🔥",group:"ym",chores:["Make Bed","Take Trash Out"],color:"#00B4D8",title:"The Flame"},{id:"leighton",name:"Leighton",emoji:"💎",group:"yw",chores:["Make Bed","Clean Bathrooms"],color:"#E040FB",title:"The Gem"},{id:"bo",name:"Bo",emoji:"🚀",group:"ym",chores:["Make Bed","Sweep Floor"],color:"#00E676",title:"The Rocket"}];
+const DH=[{id:"workout",label:"Workout",icon:"💪",pts:3},{id:"scripture",label:"Scripture Study",icon:"📖",pts:3},{id:"homework",label:"Homework",icon:"📝",pts:3},{id:"reading",label:"Read 10 min",icon:"📚",pts:3},{id:"journal",label:"Journal",icon:"✍️",pts:3}];
+const DC={chorePts:5,allowance:15,mvpBonus:10,stGWks:4,bigWks:12,pin:"",multi:2};
+const BN=[{id:"service",label:"Served Someone",icon:"❤️",pts:5,type:"daily"},{id:"ymyw",label:"YM/YW Attendance",icon:"⛪",pts:5,type:"weekly"}];
+const LVS=[{min:0,n:"Rookie",i:"🌱"},{min:50,n:"Grinder",i:"⚙️"},{min:120,n:"Warrior",i:"⚔️"},{min:200,n:"Champion",i:"🏆"},{min:350,n:"Legend",i:"👑"}];
+const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat"];
+const RX=["🔥","💪","👏","⭐","🙌","💯","🏆","❤️"];
+const BGS=[{id:"streak_3",n:"3-Day Streak",i:"🔥"},{id:"streak_6",n:"Perfect Week",i:"⭐"},{id:"mvp",n:"Weekly MVP",i:"👑"},{id:"team",n:"Team Player",i:"🤝"},{id:"habit",n:"Habit Hero",i:"💎"},{id:"first",n:"First Done",i:"🏁"},{id:"dish",n:"Dish Destroyer",i:"🍽️"},{id:"trash",n:"Trash Titan",i:"🗑️"},{id:"bath",n:"Bath Boss",i:"🛁"},{id:"sweep",n:"Sweep Sniper",i:"🧹"}];
+const MOACT=["🎳 Bowling","🎬 Movie Night","🕹️ Arcade","🍕 Pizza Night","⛳ Mini Golf","🤸 Trampoline Park","🏌️ TopGolf","😴 Late Bedtime Fri"];
+const CI=["20 push-ups","Clean room race","10 min plank","Run a mile","No phone 2 hrs","Read 30 min","Help with dinner","Organize closet"];
+
+function wkKey(){const x=new Date();x.setHours(0,0,0,0);const d=x.getDay();x.setDate(x.getDate()-d+(d===0?-6:1));return x.toISOString().split("T")[0]}
+function dIdx(){const d=new Date().getDay();return d===0?-1:d-1}
+function fT(t){return t?new Date(t).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):""}
+function gLv(p){let l=LVS[0];for(const v of LVS)if(p>=v.min)l=v;return l}
+function nLv(p){for(const v of LVS)if(p<v.min)return v;return null}
+const iH=()=>({perfectFamilyWeeks:0,consecutivePerfect:0,weeklyWinners:[],activity:[],chat:[],totalEarnings:{},challenges:[],extraChores:[]});
+
+function App(){
+  const[FAM,setFam]=useState(DF);
+  const[HAB,setHab]=useState(DH);
+  const[cfg,setCfg]=useState(DC);
+  const wk0=wkKey(),td=dIdx();
+  const mkW=(f,h)=>{const w={};(f||FAM).forEach(m=>{w[m.id]={ymyw:false};DAYS.forEach((_,i)=>{w[m.id][i]={chores:m.chores.map(()=>({done:false,ts:null})),habits:(h||HAB).map(()=>false),bonus:BN.map(()=>false)}})});return w};
+  const[wk,setWk]=useState(null);
+  const[hist,setHist]=useState(null);
+  const[loading,setLoading]=useState(true);
+  const[me,setMe]=useState(null);
+  const[pm,setPm]=useState(false);
+  const[view,setView]=useState("dash");
+  const[conf,setConf]=useState(false);
+  const[toast,setToast]=useState("");
+  const[showPin,setShowPin]=useState(false);
+  const[pinV,setPinV]=useState("");
+  const[pinC,setPinC]=useState("");
+  const[ct,setCt]=useState("");
+  const[cTxt,setCTxt]=useState("");
+  const[cPts,setCPts]=useState("10");
+  const[exD,setExD]=useState("");
+  const[exA,setExA]=useState("5");
+  const[chatM,setChatM]=useState("");
+  const[eCfg,setECfg]=useState(null);
+  const[eFam,setEFam]=useState(null);
+  const[eHab,setEHab]=useState(null);
+  const[synced,setSynced]=useState(false);
+  const[songQ,setSongQ]=useState("");
+  const[songRes,setSongRes]=useState([]);
+  const[songPrev,setSongPrev]=useState(null);
+  const[songKid,setSongKid]=useState(null);
+  const audioRef=useRef(null);
+  const walkupRef=useRef(null);
+  const walkupTimer=useRef(null);
+
+  const playWalkup=useCallback((kid)=>{
+    const m=typeof kid==="string"?(FAM||DF).find(x=>x.id===kid):kid;
+    if(!m?.songUrl)return;
+    if(walkupTimer.current)clearTimeout(walkupTimer.current);
+    if(walkupRef.current){walkupRef.current.pause();walkupRef.current=null}
+    const a=new Audio(m.songUrl);a.volume=0.8;
+    a.play().catch(()=>{});
+    walkupRef.current=a;
+    walkupTimer.current=setTimeout(()=>{a.pause();walkupRef.current=null},10000);
+  },[FAM]);
+
+  const searchSongs=async(q)=>{
+    if(!q.trim())return setSongRes([]);
+    try{const r=await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=8`);const d=await r.json();setSongRes(d.results||[])}catch{setSongRes([])}
+  };
+
+  const previewSong=(url)=>{
+    if(audioRef.current){audioRef.current.pause();audioRef.current=null}
+    if(songPrev===url){setSongPrev(null);return}
+    const a=new Audio(url);a.volume=0.7;a.play().catch(()=>{});
+    audioRef.current=a;setSongPrev(url);
+    setTimeout(()=>{if(audioRef.current===a){a.pause();audioRef.current=null;setSongPrev(null)}},10000);
+  };
+
+  const pickSong=(kidId,song)=>{
+    if(audioRef.current){audioRef.current.pause();audioRef.current=null}
+    setSongPrev(null);
+    const f=JSON.parse(JSON.stringify(eFam||FAM));
+    const mi=f.findIndex(x=>x.id===kidId);
+    if(mi<0)return;
+    f[mi].songUrl=song.previewUrl;
+    f[mi].songName=`${song.trackName} — ${song.artistName}`;
+    setEFam(f);sF(f);setEFam(null);
+    setSongRes([]);setSongQ("");setSongKid(null);
+    pop(`🎵 ${f[mi].name}'s walkup song set!`);
+  };
+
+  const clearSong=(kidId)=>{
+    const f=JSON.parse(JSON.stringify(eFam||FAM));
+    const mi=f.findIndex(x=>x.id===kidId);
+    if(mi<0)return;
+    delete f[mi].songUrl;delete f[mi].songName;
+    setEFam(f);sF(f);setEFam(null);
+    pop("🔇 Song removed");
+  };
+
+  // Load initial + set up real-time listeners
+  useEffect(()=>{
+    let unsubs=[];
+    async function init(){
+      // Load config, family, habits
+      const c=await DB.get("config")||DC;
+      const f=await DB.get("family")||DF;
+      const h=await DB.get("habits")||DH;
+      setCfg(c);setFam(f);setHab(h);
+
+      // Load week data
+      let w=await DB.get("weeks/"+wk0);
+      if(!w){w={};f.forEach(m=>{w[m.id]={ymyw:false};DAYS.forEach((_,i)=>{w[m.id][i]={chores:m.chores.map(()=>({done:false,ts:null})),habits:h.map(()=>false),bonus:BN.map(()=>false)}})});}
+      setWk(w);
+
+      // Load history
+      const hi=await DB.get("history")||iH();
+      setHist(hi);
+      setLoading(false);
+      setSynced(true);
+
+      // Set up real-time listeners (Firebase only)
+      if(firebaseReady){
+        unsubs.push(DB.listen("weeks/"+wk0,v=>{if(v)setWk(v)}));
+        unsubs.push(DB.listen("history",v=>{if(v)setHist(v)}));
+        unsubs.push(DB.listen("config",v=>{if(v)setCfg(v)}));
+        unsubs.push(DB.listen("family",v=>{if(v)setFam(v)}));
+        unsubs.push(DB.listen("habits",v=>{if(v)setHab(v)}));
+      }
+    }
+    init();
+    return()=>unsubs.forEach(u=>u&&u());
+  },[wk0]);
+
+  // Save helpers — write to Firebase, state updates via listener
+  const sW=d=>{setWk(d);DB.set("weeks/"+wk0,d)};
+  const sH=h=>{setHist(h);DB.set("history",h)};
+  const sC=c=>{setCfg(c);DB.set("config",c)};
+  const sF=f=>{setFam(f);DB.set("family",f)};
+  const sHb=h=>{setHab(h);DB.set("habits",h)};
+  const pop=m=>{setToast(m);setConf(true);setTimeout(()=>{setConf(false);setToast("")},2800)};
+  const addA=t=>{const h={...hist};if(!h.activity)h.activity=[];h.activity=[{text:t,ts:Date.now()},...h.activity].slice(0,60);sH(h)};
+  const addCh=(fid,t,rx=false)=>{const h={...hist};if(!h.chat)h.chat=[];const fr=FAM.find(x=>x.id===fid);h.chat=[{from:fid,name:fr?.name,emoji:fr?.emoji,text:t,ts:Date.now(),isReaction:rx},...h.chat].slice(0,80);sH(h)};
+
+  // Actions
+  const doChore=(di,ci)=>{if(!me||me==="_parent")return;const d=JSON.parse(JSON.stringify(wk));if(!d[me]?.[di]?.chores?.[ci])return;const c=d[me][di].chores[ci];c.done=!c.done;c.ts=c.done?Date.now():null;sW(d);const m=FAM.find(x=>x.id===me);if(c.done){addA(`${m.emoji} ${m.name} completed ${m.chores[ci]}`);if(m.chores.every((_,j)=>d[me][di].chores[j]?.done)){pop(`${m.emoji} All chores done!`);const sk=(()=>{let s=0;for(let x=Math.min(td,5);x>=0;x--){if(m.chores.every((_2,ci2)=>d[me]?.[x]?.chores?.[ci2]?.done))s++;else break}return s})();if(sk===3||sk===6)playWalkup(me)}}};
+  const doHabit=(di,hi)=>{if(!me||me==="_parent")return;const d=JSON.parse(JSON.stringify(wk));if(!d[me]?.[di])return;d[me][di].habits[hi]=!d[me][di].habits[hi];sW(d);const m=FAM.find(x=>x.id===me);if(d[me][di].habits[hi]){addA(`${m.emoji} ${m.name} did ${HAB[hi]?.icon} ${HAB[hi]?.label}`);if(d[me][di].habits.every(Boolean)){pop("💎 HABIT HERO!");playWalkup(me)}}};
+  const doBonus=(di,bi)=>{if(!me||me==="_parent")return;const d=JSON.parse(JSON.stringify(wk));if(BN[bi].type==="weekly")d[me].ymyw=!d[me].ymyw;else{if(!d[me]?.[di])return;d[me][di].bonus[bi]=!d[me][di].bonus[bi]}sW(d);const m=FAM.find(x=>x.id===me);const on=BN[bi].type==="weekly"?d[me].ymyw:d[me][di].bonus[bi];if(on){addA(`${m.emoji} ${m.name} earned ${BN[bi].icon}`);pop(`${BN[bi].icon} +${BN[bi].pts}!`)}};
+  const sendCh=()=>{if(!me||!ct||!cTxt.trim())return;const h={...hist};if(!h.challenges)h.challenges=[];h.challenges=[{id:Date.now(),from:me,to:ct,text:cTxt.trim(),pts:parseInt(cPts)||10,status:"pending",ts:Date.now()},...h.challenges].slice(0,30);sH(h);pop("⚔️ Sent!");setCTxt("");setCt("")};
+  const respCh=(id,ok)=>{const h={...hist};const c=h.challenges?.find(x=>x.id===id);if(!c)return;c.status=ok?"accepted":"declined";sH(h);if(ok)pop("⚔️ Accepted!")};
+  const compCh=(id,wid)=>{if(!pm)return;const h={...hist};const c=h.challenges?.find(x=>x.id===id);if(!c)return;c.status="complete";c.winner=wid;sH(h);playWalkup(wid);pop("🏆 Winner!")};
+  const subEx=()=>{if(!me||!exD.trim())return;const h={...hist};if(!h.extraChores)h.extraChores=[];h.extraChores=[{id:Date.now(),from:me,desc:exD.trim(),amount:parseInt(exA)||5,status:"pending",ts:Date.now()},...h.extraChores].slice(0,40);sH(h);pop("📋 Submitted!");setExD("");setExA("5")};
+  const apvEx=(id,ok)=>{if(!pm)return;const h={...hist};const e=h.extraChores?.find(x=>x.id===id);if(!e)return;e.status=ok?"approved":"denied";if(ok){if(!h.totalEarnings)h.totalEarnings={};h.totalEarnings[e.from]=(h.totalEarnings[e.from]||0)+e.amount;playWalkup(e.from)}sH(h);pop(ok?"💰 Approved!":"❌ Denied")};
+
+  // Scoring
+  const dP=(mid,di)=>{if(!wk?.[mid]?.[di])return 0;const m=FAM.find(x=>x.id===mid);let p=0;m.chores.forEach((_,ci)=>{if(wk[mid][di].chores?.[ci]?.done)p+=cfg.chorePts});HAB.forEach((h,hi)=>{if(wk[mid][di].habits?.[hi])p+=h.pts});BN.forEach((b,bi)=>{if(b.type==="daily"&&wk[mid][di].bonus?.[bi])p+=b.pts});return p};
+  const wP=mid=>{if(!wk?.[mid])return 0;let t=0;DAYS.forEach((_,di)=>t+=dP(mid,di));if(wk[mid]?.ymyw)t+=5;const m=FAM.find(x=>x.id===mid);const cd=DAYS.filter((_,di)=>m.chores.every((_,ci)=>wk[mid]?.[di]?.chores?.[ci]?.done)).length;if(cd===6)t=Math.round(t*cfg.multi);return t};
+  const cD=mid=>{if(!wk?.[mid])return 0;const m=FAM.find(x=>x.id===mid);return DAYS.filter((_,di)=>m.chores.every((_,ci)=>wk[mid]?.[di]?.chores?.[ci]?.done)).length};
+  const skF=mid=>{if(!wk?.[mid])return 0;const m=FAM.find(x=>x.id===mid);let s=0;for(let di=Math.min(td,5);di>=0;di--){if(m.chores.every((_,ci)=>wk[mid]?.[di]?.chores?.[ci]?.done))s++;else break}return s};
+  const fire=s=>s===0?"":s<=2?"🔥":s<=4?"🔥🔥":"🔥🔥🔥";
+  const board=FAM.map(m=>({...m,pts:wP(m.id),days:cD(m.id),streak:skF(m.id),todayDone:td>=0&&m.chores.every((_,ci)=>wk?.[m.id]?.[td]?.chores?.[ci]?.done),hc:td>=0?(wk?.[m.id]?.[td]?.habits?.filter(Boolean)?.length||0):0,lv:gLv(wP(m.id))})).sort((a,b)=>b.pts-a.pts||b.streak-a.streak);
+  const ld=board[0];
+  const fOk=()=>FAM.every(m=>cD(m.id)>=6);
+  const pw=hist?.consecutivePerfect||0;
+  const mD=FAM.find(x=>x.id===me);
+  const closeWk=()=>{const h=JSON.parse(JSON.stringify(hist));if(!h.totalEarnings)h.totalEarnings={};FAM.forEach(m=>{if(!h.totalEarnings[m.id])h.totalEarnings[m.id]=0;if(cD(m.id)>=6)h.totalEarnings[m.id]+=cfg.allowance});if(board[0])h.totalEarnings[board[0].id]=(h.totalEarnings[board[0].id]||0)+cfg.mvpBonus;h.weeklyWinners=[...(h.weeklyWinners||[]),{week:wk0,winner:board[0]?.name}];if(fOk()){h.consecutivePerfect=(h.consecutivePerfect||0)+1;h.perfectFamilyWeeks=(h.perfectFamilyWeeks||0)+1}else h.consecutivePerfect=0;sH(h);pop("📊 Week closed!")};
+  const resetWk=()=>{sW(mkW());pop("🆕 Fresh week!")};
+
+  if(loading||!wk||!hist)return(<div className="wrap"><div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",height:"100vh"}}><div style={{fontSize:56,animation:"float 2s ease-in-out infinite"}}>⚔️</div><p className="mono" style={{color:"#555",fontSize:12,marginTop:12}}>Loading Chore Wars...</p>{!firebaseReady&&<p className="mono" style={{color:"#FF6B35",fontSize:10,marginTop:8}}>⚠️ Firebase not configured — using local storage</p>}</div></div>);
+
+  // === LOGIN ===
+  if(!me&&!pm)return(
+    <div className="wrap">
+      <div style={{padding:"50px 20px",textAlign:"center"}}>
+        <div style={{fontSize:52,marginBottom:6}}>⚔️</div>
+        <h1 style={{fontSize:30,fontWeight:700,background:"linear-gradient(135deg,#FFD700,#FF6B35)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>CHORE WARS</h1>
+        <p className="mono" style={{color:"#555",fontSize:12,marginTop:4}}>Choose your fighter</p>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginTop:6}}>
+          <span className="syncDot" style={{background:firebaseReady?"#00E676":"#FF6B35"}}/>
+          <span className="mono" style={{fontSize:9,color:firebaseReady?"#00E676":"#FF6B35"}}>{firebaseReady?"Live Sync On":"Local Only"}</span>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginTop:24}}>
+          {FAM.map(m=><button key={m.id} className="hoverCard" onClick={()=>{setMe(m.id);playWalkup(m)}} style={{borderRadius:16,padding:"20px 12px",textAlign:"center",border:`2px solid ${m.color}44`,display:"flex",flexDirection:"column",alignItems:"center",background:"rgba(255,255,255,0.02)",width:"100%"}}><span style={{fontSize:44}}>{m.emoji}</span><p style={{fontSize:18,fontWeight:700,color:m.color,marginTop:4}}>{m.name}</p><p style={{fontSize:10,color:"#555",fontStyle:"italic"}}>"{m.title}"</p><div style={{marginTop:6,display:"flex",alignItems:"center",gap:3}}><span style={{fontSize:11}}>{gLv(wP(m.id)).i}</span><span className="mono" style={{fontSize:9,color:"#777"}}>{gLv(wP(m.id)).n}</span></div></button>)}
+        </div>
+        <button onClick={()=>setShowPin(true)} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:10,padding:"10px 20px",color:"#888",fontSize:12,fontFamily:"'Space Mono',monospace",cursor:"pointer",marginTop:24}}>🔒 Parent Admin</button>
+        {showPin&&<div className="modal" onClick={()=>{setShowPin(false);setPinV("");setPinC("")}}>
+          <div style={{background:"#1a1a2e",borderRadius:14,padding:22,width:260,textAlign:"center",border:"1px solid rgba(255,215,0,0.2)"}} onClick={e=>e.stopPropagation()}>
+            {!cfg.pin?<>
+              <p style={{color:"#FFD700",fontSize:16,fontWeight:700,marginBottom:4}}>🔐 Create Your PIN</p>
+              <p style={{color:"#888",fontSize:11,marginBottom:10}}>Pick something the kids won't guess</p>
+              <input type="password" value={pinV} onChange={e=>setPinV(e.target.value)} maxLength={6} placeholder="Create PIN" className="inp" style={{textAlign:"center",fontSize:18,marginBottom:8}} autoFocus/>
+              <input type="password" value={pinC} onChange={e=>setPinC(e.target.value)} maxLength={6} placeholder="Confirm PIN" className="inp" style={{textAlign:"center",fontSize:18,marginBottom:8}}/>
+              {pinV&&pinC&&pinV!==pinC&&<p style={{color:"#FF1744",fontSize:10,marginBottom:4}}>PINs don't match</p>}
+              <button onClick={()=>{if(pinV&&pinV===pinC){sC({...cfg,pin:pinV});setPm(true);setShowPin(false);setPinV("");setPinC("");setMe("_parent");pop("🔐 PIN created!")}}} style={{width:"100%",padding:8,borderRadius:7,border:"none",background:"rgba(255,215,0,0.15)",color:"#FFD700",fontSize:13,fontWeight:700,cursor:"pointer",opacity:pinV&&pinV===pinC?1:0.4}}>Create PIN & Enter</button>
+            </>:<>
+              <p style={{color:"#FFD700",fontSize:16,fontWeight:700,marginBottom:10}}>🔐 Enter PIN</p>
+              <input type="password" value={pinV} onChange={e=>setPinV(e.target.value)} maxLength={6} placeholder="PIN" className="inp" style={{textAlign:"center",fontSize:18,marginBottom:8}} autoFocus onKeyDown={e=>{if(e.key==="Enter"){if(pinV===cfg.pin){setPm(true);setShowPin(false);setPinV("");setMe("_parent");pop("🔓 Admin on")}else{setPinV("");pop("❌ Wrong PIN")}}}}/>
+              <button onClick={()=>{if(pinV===cfg.pin){setPm(true);setShowPin(false);setPinV("");setMe("_parent");pop("🔓 Admin on")}else{setPinV("");pop("❌ Wrong PIN")}}} style={{width:"100%",padding:8,borderRadius:7,border:"none",background:"rgba(255,215,0,0.15)",color:"#FFD700",fontSize:13,fontWeight:700,cursor:"pointer"}}>Unlock</button>
+            </>}
+          </div>
+        </div>}
+      </div>
+      {toast&&<div className="toast"><p style={{fontSize:13,fontWeight:700,color:"#FFD700"}}>{toast}</p></div>}
+    </div>
+  );
+
+  // === MAIN ===
+  const tabs=[{id:"dash",ic:"🏆",lb:"Board"},{id:"play",ic:"🎮",lb:"My Day"},{id:"battle",ic:"⚔️",lb:"Battle"},{id:"earn",ic:"💰",lb:"Earn"},{id:"chat",ic:"💬",lb:"Chat"},{id:"quest",ic:"🗺️",lb:"Quests"}];
+  if(pm)tabs.push({id:"settings",ic:"⚙️",lb:"Settings"});
+
+  return(
+    <div className="wrap">
+      {conf&&<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:9999}}>{Array.from({length:25},(_,i)=><div key={i} style={{position:"absolute",top:-10,left:`${Math.random()*100}%`,width:6+Math.random()*6,height:6+Math.random()*6,borderRadius:Math.random()>0.5?"50%":"2px",backgroundColor:["#FF6B35","#00B4D8","#E040FB","#00E676","#FFD700","#FF1744"][i%6],animation:`confFall ${1.5+Math.random()*1.5}s ease-in ${Math.random()*0.4}s forwards`}}/>)}</div>}
+      {toast&&<div className="toast"><p style={{fontSize:13,fontWeight:700,color:"#FFD700"}}>{toast}</p></div>}
+
+      <div className="hdr"><div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div style={{display:"flex",alignItems:"center",gap:6}}><span style={{fontSize:18}}>⚔️</span><div><h1 style={{fontSize:15,fontWeight:700,background:"linear-gradient(135deg,#FFD700,#FF6B35)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>CHORE WARS</h1><p className="mono" style={{fontSize:9,color:"#444"}}><span className="syncDot" style={{background:firebaseReady?"#00E676":"#FF6B35"}}/>{new Date(wk0+"T12:00:00").toLocaleDateString("en-US",{month:"short",day:"numeric"})}</p></div></div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          {mD&&<div style={{display:"flex",alignItems:"center",gap:3,padding:"3px 7px",borderRadius:7,background:`${mD.color}12`,border:`1px solid ${mD.color}33`}}><span style={{fontSize:12}}>{mD.emoji}</span><span style={{fontSize:10,color:mD.color,fontWeight:700}}>{mD.name}</span></div>}
+          {pm&&<span className="mono" style={{fontSize:9,color:"#FFD700"}}>ADMIN</span>}
+          <button onClick={()=>{setMe(null);setPm(false);setView("dash")}} style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,padding:"4px 8px",color:"#666",fontSize:12,cursor:"pointer"}}>↩</button>
+        </div>
+      </div></div>
+
+      <div className="nav">{tabs.map(t=><button key={t.id} onClick={()=>setView(t.id)} className={`tab ${view===t.id?"tabOn":""}`}><span style={{fontSize:13}}>{t.ic}</span><span style={{fontSize:8,fontWeight:600}}>{t.lb}</span></button>)}</div>
+
+      <div style={{padding:"8px 10px 0"}}>
+
+      {/* DASHBOARD */}
+      {view==="dash"&&<div className="fadeIn">
+        <div className="card"><p className="lbl">📍 TODAY</p><div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginTop:6}}>{board.map(m=><div key={m.id} style={{padding:7,borderRadius:8,border:`1px solid ${m.todayDone?m.color:"rgba(255,255,255,0.06)"}`,background:"rgba(255,255,255,0.02)"}}><div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontSize:16}}>{m.emoji}</span><span style={{fontWeight:600,color:"#fff",fontSize:12}}>{m.name}</span></div><div style={{display:"flex",gap:3,marginTop:4}}><span className="mono" style={{padding:"1px 5px",borderRadius:4,fontSize:9,fontWeight:600,background:m.todayDone?`${m.color}22`:"rgba(255,255,255,0.04)",color:m.todayDone?m.color:"#555"}}>{m.todayDone?"✅":"⬜"}</span><span className="mono" style={{padding:"1px 5px",borderRadius:4,fontSize:9,fontWeight:600,background:"rgba(255,255,255,0.04)",color:m.hc>=5?"#FFD700":"#555"}}>{m.hc}/5</span></div></div>)}</div></div>
+        <div style={{background:"rgba(255,255,255,0.025)",borderRadius:14,padding:16,border:`2px solid ${ld?.color||"#333"}`,textAlign:"center",position:"relative",marginBottom:8,animation:"glow 3s ease-in-out infinite"}}><div style={{position:"absolute",top:-4,right:10,fontSize:22,animation:"float 3s ease-in-out infinite"}}>👑</div><p className="mono" style={{fontSize:10,color:"#666",letterSpacing:2}}>LEADING</p><span style={{fontSize:32}}>{ld?.emoji}</span><p style={{fontSize:20,fontWeight:700,color:ld?.color}}>{ld?.name}</p><p className="mono" style={{fontSize:22,fontWeight:700,color:"#FFD700"}}>{ld?.pts} pts</p><p style={{fontSize:11,color:"#555"}}>{fire(ld?.streak||0)} {ld?.streak||0} day streak</p></div>
+        <div className="card"><p className="lbl">⚔️ STANDINGS</p>{board.map((m,i)=><div key={m.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:9,borderRadius:9,background:"rgba(255,255,255,0.02)",marginBottom:4,borderLeft:`3px solid ${m.color}`}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18,minWidth:24,textAlign:"center"}}>{["🥇","🥈","🥉","4️⃣"][i]}</span><span style={{fontSize:20}}>{m.emoji}</span><div><p style={{fontWeight:700,color:"#fff",fontSize:13}}>{m.name} <span style={{fontSize:9,color:"#555"}}>{m.lv.i}</span></p><p style={{fontSize:10,color:"#555"}}>{m.days}/6 {fire(m.streak)}</p></div></div><p className="mono" style={{fontSize:18,fontWeight:700,color:m.color}}>{m.pts}</p></div>)}</div>
+        <div className="card"><p className="lbl">👨‍👩‍👦‍👦 FAMILY METER</p>{FAM.map(m=>{const d=cD(m.id);return <div key={m.id} style={{display:"flex",alignItems:"center",gap:6,padding:"4px 0"}}><span style={{minWidth:50,fontSize:11,color:"#bbb"}}>{m.emoji} {m.name}</span><div className="pTrack"><div className="pFill pBar" style={{width:`${(d/6)*100}%`,background:m.color}}/></div><span className="mono" style={{fontSize:10,color:"#666",minWidth:24}}>{d}/6</span></div>})}{fOk()&&<div className="unlock">🎉🍦 ICE CREAM UNLOCKED! 🍦🎉</div>}</div>
+        {hist?.activity?.length>0&&<div className="card"><p className="lbl">📡 ACTIVITY</p>{hist.activity.slice(0,6).map((a,i)=><div key={i} style={{padding:"4px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}><p style={{fontSize:11,color:"#aaa"}}>{a.text}</p><p style={{fontSize:9,color:"#444"}}>{fT(a.ts)}</p></div>)}</div>}
+        {pm&&<div style={{display:"flex",gap:6,marginTop:8}}><button onClick={closeWk} className="actBtn">📊 Close Week</button><button onClick={resetWk} className="actBtn" style={{background:"rgba(255,23,68,0.1)",color:"#FF1744"}}>🔄 Reset</button></div>}
+      </div>}
+
+      {/* MY DAY */}
+      {view==="play"&&(mD?<MyDay m={mD} wk={wk} td={td} doChore={doChore} doHabit={doHabit} doBonus={doBonus} pts={wP(me)} days={cD(me)} streak={skF(me)} fire={fire} dP={dP} me={me} cfg={cfg} HAB={HAB}/>:<div className="fadeIn" style={{textAlign:"center",padding:40}}><p style={{color:"#888"}}>Switch to a kid profile</p></div>)}
+
+      {/* BATTLE */}
+      {view==="battle"&&<div className="fadeIn"><p className="lbl">⚔️ CHALLENGES</p>
+        {mD&&<div className="card"><p className="iLbl">🎯 THROW A CHALLENGE</p><div style={{display:"flex",gap:5,marginBottom:6}}>{FAM.filter(m=>m.id!==me).map(m=><button key={m.id} onClick={()=>setCt(m.id)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"5px 7px",borderRadius:7,border:`2px solid ${ct===m.id?m.color:"transparent"}`,background:ct===m.id?`${m.color}12`:"rgba(255,255,255,0.03)",cursor:"pointer"}}><span style={{fontSize:14}}>{m.emoji}</span><span style={{fontSize:8,color:"#888"}}>{m.name}</span></button>)}</div><input value={cTxt} onChange={e=>setCTxt(e.target.value)} placeholder="What's the challenge?" className="inp"/><div style={{display:"flex",gap:6,marginTop:6}}><div style={{display:"flex",alignItems:"center",gap:3}}><span className="mono" style={{fontSize:10,color:"#888"}}>Pts:</span><input value={cPts} onChange={e=>setCPts(e.target.value)} className="inp" style={{width:45,textAlign:"center"}} type="number"/></div><button onClick={sendCh} className="actBtn">⚔️ Send</button></div><div style={{display:"flex",gap:3,marginTop:6,flexWrap:"wrap"}}>{CI.slice(0,6).map(c=><button key={c} onClick={()=>setCTxt(c)} style={{padding:"3px 7px",borderRadius:5,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:"#888",fontSize:9,cursor:"pointer"}}>{c}</button>)}</div></div>}
+        <div className="card"><p className="iLbl">🔥 ACTIVE</p>
+          {(!hist?.challenges||hist.challenges.filter(c=>c.status!=="complete"&&c.status!=="declined").length===0)&&<p style={{color:"#555",fontSize:11}}>No active challenges</p>}
+          {hist?.challenges?.filter(c=>c.status!=="complete"&&c.status!=="declined").map(c=>{const fr=FAM.find(x=>x.id===c.from),to=FAM.find(x=>x.id===c.to);return <div key={c.id} style={{padding:8,borderRadius:9,border:`1px solid ${fr?.color||"#333"}`,background:"rgba(255,255,255,0.02)",marginBottom:5}}><div style={{display:"flex",alignItems:"center",gap:5,marginBottom:3}}><span style={{fontSize:16}}>{fr?.emoji}</span><span style={{color:"#666",fontSize:11}}>vs</span><span style={{fontSize:16}}>{to?.emoji}</span><span className="mono" style={{padding:"2px 5px",borderRadius:4,fontSize:8,fontWeight:700,marginLeft:"auto",background:c.status==="pending"?"rgba(255,215,0,0.12)":"rgba(0,230,118,0.12)",color:c.status==="pending"?"#FFD700":"#00E676"}}>{c.status==="pending"?"⏳":"✅"}</span></div><p style={{color:"#fff",fontWeight:600,fontSize:12}}>"{c.text}"</p><p style={{fontSize:9,color:"#555"}}>+{c.pts} pts</p>
+            {c.status==="pending"&&me===c.to&&<div style={{display:"flex",gap:5,marginTop:6}}><button onClick={()=>respCh(c.id,true)} className="actBtn" style={{background:"rgba(0,230,118,0.12)",color:"#00E676"}}>Accept</button><button onClick={()=>respCh(c.id,false)} className="actBtn" style={{background:"rgba(255,23,68,0.1)",color:"#FF1744"}}>Decline</button></div>}
+            {c.status==="accepted"&&pm&&<div style={{marginTop:6}}><p className="mono" style={{fontSize:9,color:"#FFD700",marginBottom:3}}>PICK WINNER:</p><div style={{display:"flex",gap:5}}><button onClick={()=>compCh(c.id,c.from)} className="actBtn">{fr?.emoji} {fr?.name}</button><button onClick={()=>compCh(c.id,c.to)} className="actBtn">{to?.emoji} {to?.name}</button></div></div>}
+          </div>})}
+        </div>
+      </div>}
+
+      {/* EARN */}
+      {view==="earn"&&<div className="fadeIn"><p className="lbl">💰 EARNINGS</p>
+        <div className="card"><p className="iLbl">WEEKLY ALLOWANCE — ${cfg.allowance}</p>{FAM.map(m=>{const d=cD(m.id),q=d>=6;return <div key={m.id} className="eRow"><div style={{display:"flex",alignItems:"center",gap:6}}><span>{m.emoji}</span><span style={{color:"#fff",fontWeight:600,fontSize:12}}>{m.name}</span><span style={{fontSize:10,color:"#555"}}>{d}/6</span></div><span className="mono" style={{padding:"3px 7px",borderRadius:5,fontSize:10,fontWeight:700,background:q?"rgba(0,230,118,0.12)":"rgba(255,255,255,0.04)",color:q?"#00E676":"#444"}}>{q?`$${cfg.allowance} ✓`:`$${cfg.allowance}`}</span></div>})}</div>
+        <div className="card" style={{borderColor:"rgba(255,215,0,0.12)"}}><p className="iLbl" style={{color:"#FFD700"}}>👑 MVP +${cfg.mvpBonus}</p><div style={{textAlign:"center",padding:"4px 0"}}><span style={{fontSize:24}}>{ld?.emoji}</span><p style={{color:ld?.color,fontWeight:700,fontSize:14}}>{ld?.name} — {ld?.pts} pts</p></div></div>
+        {mD&&<div className="card"><p className="iLbl">💼 EXTRA WORK FOR $$$</p><input value={exD} onChange={e=>setExD(e.target.value)} placeholder="What did you do?" className="inp"/><div style={{display:"flex",gap:6,marginTop:5}}><div style={{display:"flex",alignItems:"center",gap:3}}><span className="mono" style={{fontSize:10,color:"#888"}}>$</span><input value={exA} onChange={e=>setExA(e.target.value)} className="inp" style={{width:45,textAlign:"center"}} type="number"/></div><button onClick={subEx} className="actBtn">📋 Submit</button></div></div>}
+        {pm&&hist?.extraChores?.filter(e=>e.status==="pending").length>0&&<div className="card"><p className="iLbl" style={{color:"#FFD700"}}>⏳ PENDING</p>{hist.extraChores.filter(e=>e.status==="pending").map(e=>{const m=FAM.find(x=>x.id===e.from);return <div key={e.id} style={{padding:"6px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}><p style={{color:"#ccc",fontSize:12}}>{m?.emoji} {m?.name}: "{e.desc}" — ${e.amount}</p><div style={{display:"flex",gap:5,marginTop:3}}><button onClick={()=>apvEx(e.id,true)} className="actBtn" style={{background:"rgba(0,230,118,0.12)",color:"#00E676"}}>✅</button><button onClick={()=>apvEx(e.id,false)} className="actBtn" style={{background:"rgba(255,23,68,0.1)",color:"#FF1744"}}>❌</button></div></div>})}</div>}
+        <div className="card"><p className="iLbl">📊 LIFETIME EARNINGS</p>{FAM.map(m=><div key={m.id} className="eRow"><div style={{display:"flex",alignItems:"center",gap:6}}><span>{m.emoji}</span><span style={{color:"#fff",fontWeight:600}}>{m.name}</span></div><span className="mono" style={{color:"#00E676",fontWeight:700,fontSize:17}}>${hist?.totalEarnings?.[m.id]||0}</span></div>)}</div>
+      </div>}
+
+      {/* CHAT */}
+      {view==="chat"&&<div className="fadeIn"><p className="lbl">💬 FAMILY CHAT</p>
+        {mD&&<div className="card"><div style={{display:"flex",gap:5,marginBottom:6}}><input value={chatM} onChange={e=>setChatM(e.target.value)} placeholder={`${mD.name} says...`} className="inp" style={{flex:1}} onKeyDown={e=>e.key==="Enter"&&chatM.trim()&&(addCh(me,chatM.trim()),setChatM(""))}/><button onClick={()=>{if(chatM.trim()){addCh(me,chatM.trim());setChatM("")}}} className="actBtn" style={{flex:"none"}}>Send</button></div>
+          <div style={{display:"flex",gap:6,justifyContent:"space-around"}}>{FAM.filter(m=>m.id!==me).map(m=><div key={m.id} style={{textAlign:"center"}}><span style={{fontSize:14}}>{m.emoji}</span><p style={{fontSize:8,color:"#666"}}>{m.name}</p><div style={{display:"flex",flexWrap:"wrap",gap:2,justifyContent:"center",maxWidth:66,marginTop:2}}>{RX.slice(0,5).map(r=><button key={r} onClick={()=>addCh(me,`${r} → ${m.name}`,true)} style={{width:22,height:22,borderRadius:5,border:"1px solid rgba(255,255,255,0.06)",background:"rgba(255,255,255,0.03)",fontSize:11,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>{r}</button>)}</div></div>)}</div></div>}
+        <div className="card">{(!hist?.chat||hist.chat.length===0)&&<p style={{color:"#444",fontSize:11}}>No messages yet</p>}{hist?.chat?.map((c,i)=><div key={i} style={{padding:"7px 9px",borderRadius:9,border:"1px solid rgba(255,255,255,0.05)",marginBottom:3,background:c.isReaction?"rgba(255,215,0,0.06)":"rgba(255,255,255,0.03)"}}><div style={{display:"flex",alignItems:"center",gap:3,marginBottom:1}}><span style={{fontSize:11}}>{c.emoji}</span><span className="mono" style={{fontSize:9,color:"#888",fontWeight:700}}>{c.name}</span><span style={{fontSize:8,color:"#444"}}>{fT(c.ts)}</span></div><p style={{fontSize:c.isReaction?13:12,color:"#ccc"}}>{c.text}</p></div>)}</div>
+      </div>}
+
+      {/* QUESTS */}
+      {view==="quest"&&<div className="fadeIn"><p className="lbl">🗺️ QUESTS & REWARDS</p>
+        <div className="card"><p className="iLbl">🔥 STREAKS</p>{board.map(m=><div key={m.id} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}><span style={{fontSize:14}}>{m.emoji}</span><span style={{minWidth:50,fontSize:11,color:"#ccc"}}>{m.name}</span><div style={{display:"flex",gap:2,flex:1}}>{DAYS.map((d,di)=>{const ok=m.chores.every((_,ci)=>wk?.[m.id]?.[di]?.chores?.[ci]?.done);return <div key={di} style={{width:13,height:13,borderRadius:3,background:ok?m.color:"rgba(255,255,255,0.06)",fontSize:7,color:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}}>{ok?"✓":""}</div>})}</div><span style={{fontSize:11}}>{fire(m.streak)}</span></div>)}</div>
+
+        <div className="card"><p className="iLbl">🎁 REWARDS</p>
+          <div className="rwRow"><span>💰</span><div style={{flex:1}}><p style={{color:"#fff",fontWeight:600,fontSize:12}}>Allowance ${cfg.allowance}/wk</p></div><span className="mono" style={{fontSize:10,color:"#888"}}>{FAM.filter(m=>cD(m.id)>=6).length}/{FAM.length}</span></div>
+          <div className="rwRow"><span>👑</span><div style={{flex:1}}><p style={{color:"#fff",fontWeight:600,fontSize:12}}>MVP +${cfg.mvpBonus}</p></div><span>{ld?.emoji}</span></div>
+          <div className="rwRow"><span>🍦</span><div style={{flex:1}}><p style={{color:"#fff",fontWeight:600,fontSize:12}}>Family Ice Cream</p><p style={{color:"#555",fontSize:9}}>Everyone 6/6</p></div><span>{fOk()?"✅":"🔒"}</span></div>
+          {fOk()&&<div className="unlock">🍦 ICE CREAM UNLOCKED!</div>}
+        </div>
+
+        <div className="card"><p className="iLbl">🎯 MONTHLY ACTIVITY</p><p style={{fontSize:10,color:"#666",marginBottom:5}}>4 perfect family weeks → vote</p><div className="pTrack"><div className="pFill pBar" style={{width:`${Math.min(pw/4,1)*100}%`,background:"linear-gradient(90deg,#FFD700,#FF6B35)"}}/></div><p className="mono" style={{fontSize:10,color:"#777",textAlign:"right",marginTop:2}}>{Math.min(pw,4)}/4</p><div style={{display:"flex",gap:3,flexWrap:"wrap",marginTop:6}}>{MOACT.map(a=><span key={a} style={{padding:"2px 7px",borderRadius:5,background:"rgba(255,255,255,0.04)",fontSize:9,color:"#aaa",border:"1px solid rgba(255,255,255,0.06)"}}>{a}</span>)}</div>{pw>=4&&<div className="unlock">🎯 UNLOCKED! Vote!</div>}</div>
+
+        <div className="tripC" style={{background:"linear-gradient(135deg,#0f172a,#1e3a5f)"}}><span style={{fontSize:38}}>🏜️</span><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginTop:4}}>St. George Getaway</h3><p style={{fontSize:11,color:"#777",marginTop:2}}>Hiking, red rocks, pool — family weekend!</p><div style={{marginTop:10,padding:"6px 8px",borderRadius:7,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",textAlign:"left"}}><p className="mono" style={{fontSize:9,color:"#FFD700",letterSpacing:2,fontWeight:700}}>REQUIREMENT</p><p style={{fontSize:11,color:"#bbb",marginTop:2}}>{cfg.stGWks} consecutive perfect family weeks</p></div><div style={{marginTop:8}}><div className="pTrack"><div className="pFill pBar" style={{width:`${Math.min(pw/cfg.stGWks,1)*100}%`,background:"linear-gradient(90deg,#FF6B35,#FFD700)"}}/></div><p className="mono" style={{fontSize:10,color:"#777",textAlign:"right",marginTop:2}}>{pw}/{cfg.stGWks}</p></div><div style={{display:"flex",gap:6,marginTop:8,justifyContent:"center"}}>{Array.from({length:cfg.stGWks},(_,i)=><span key={i} style={{fontSize:20,filter:i<pw?"none":"grayscale(1) opacity(0.3)"}}>{i<pw?"⭐":"☆"}</span>)}</div>{pw>=cfg.stGWks&&<div className="unlock" style={{marginTop:8}}>🏜️ UNLOCKED!</div>}</div>
+
+        <div className="tripC" style={{background:"linear-gradient(135deg,#1a1a2e,#3d1247)"}}><span style={{fontSize:38}}>🏰</span><h3 style={{fontSize:18,fontWeight:700,color:"#fff",marginTop:4}}>Epic Family Adventure</h3><p style={{fontSize:11,color:"#777",marginTop:2}}>THE BIG ONE — family votes when unlocked!</p><div style={{marginTop:10,padding:"6px 8px",borderRadius:7,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.06)",textAlign:"left"}}><p className="mono" style={{fontSize:9,color:"#E040FB",letterSpacing:2,fontWeight:700}}>REQUIREMENT</p><p style={{fontSize:11,color:"#bbb",marginTop:2}}>{cfg.bigWks} perfect weeks (~3 months)</p></div><div style={{marginTop:8}}><div className="pTrack"><div className="pFill pBar" style={{width:`${Math.min(pw/cfg.bigWks,1)*100}%`,background:"linear-gradient(90deg,#E040FB,#00B4D8)"}}/></div><p className="mono" style={{fontSize:10,color:"#777",textAlign:"right",marginTop:2}}>{pw}/{cfg.bigWks}</p></div>
+        <div style={{display:"flex",justifyContent:"space-around",marginTop:10}}>{[3,6,9,12].map(ms=><div key={ms} style={{padding:"4px 7px",borderRadius:6,textAlign:"center",border:`1px solid ${pw>=ms?"#E040FB":"rgba(255,255,255,0.06)"}`,minWidth:38,background:pw>=ms?"rgba(224,64,251,0.1)":"rgba(255,255,255,0.02)"}}><p style={{fontSize:12}}>{pw>=ms?"✅":"🔒"}</p><p style={{fontSize:8,color:pw>=ms?"#E040FB":"#444",fontWeight:700}}>Wk {ms}</p></div>)}</div>
+        <div style={{marginTop:10,padding:8,background:"rgba(255,255,255,0.03)",borderRadius:8,border:"1px solid rgba(255,255,255,0.05)"}}><p className="mono" style={{fontSize:9,color:"#666",marginBottom:4}}>VOTE OPTIONS</p><div style={{display:"flex",gap:4,flexWrap:"wrap"}}>{["🎢 Disneyland","🏖️ Beach","🏔️ Nat'l Park","🎿 Ski","🐺 Great Wolf","🏨 Lagoon"].map(o=><span key={o} style={{padding:"2px 7px",borderRadius:5,background:"rgba(255,255,255,0.04)",fontSize:9,color:"#aaa",border:"1px solid rgba(255,255,255,0.06)"}}>{o}</span>)}</div></div>
+        {pw>=cfg.bigWks&&<div className="unlock" style={{marginTop:8}}>🏰 ADVENTURE UNLOCKED!</div>}</div>
+
+        {hist?.weeklyWinners?.length>0&&<div className="card"><p className="iLbl">🏆 MVP HISTORY</p>{hist.weeklyWinners.slice(-6).reverse().map((w2,i)=><div key={i} style={{padding:"3px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}><p style={{fontSize:11,color:"#aaa"}}>{w2.week}: <span style={{color:"#FFD700",fontWeight:700}}>{w2.winner} 👑</span></p></div>)}</div>}
+
+        <div className="card"><p className="iLbl">🏅 BADGES</p><div style={{display:"grid",gridTemplateColumns:"repeat(5, 1fr)",gap:4,marginTop:4}}>{BGS.map(b=>{let e=false;if(b.id==="streak_3"&&board.some(m=>m.streak>=3))e=true;if(b.id==="streak_6"&&board.some(m=>m.days>=6))e=true;if(b.id==="mvp"&&hist?.weeklyWinners?.length>0)e=true;if(b.id==="habit"&&board.some(m=>m.hc>=5))e=true;return <div key={b.id} style={{textAlign:"center",padding:4,borderRadius:6,background:e?"rgba(255,215,0,0.06)":"rgba(255,255,255,0.02)",border:`1px solid ${e?"rgba(255,215,0,0.15)":"rgba(255,255,255,0.04)"}`}}><span style={{fontSize:16,filter:e?"none":"grayscale(1) opacity(0.3)"}}>{b.i}</span><p style={{fontSize:7,color:e?"#FFD700":"#444"}}>{b.n}</p></div>})}</div></div>
+      </div>}
+
+      {/* SETTINGS */}
+      {view==="settings"&&pm&&<div className="fadeIn"><p className="lbl">⚙️ PARENT SETTINGS</p>
+        <div className="card"><p className="iLbl">💲 AMOUNTS & POINTS</p>
+          {[{label:"Points per chore",key:"chorePts"},{label:"Allowance ($)",key:"allowance"},{label:"MVP bonus ($)",key:"mvpBonus"},{label:"Perfect week ×",key:"multi"},{label:"St. George weeks",key:"stGWks"},{label:"Big trip weeks",key:"bigWks"}].map(r=><div key={r.key} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}><span style={{color:"#ccc",fontSize:12}}>{r.label}</span><input type="number" value={eCfg?.[r.key]??cfg[r.key]} onChange={e=>{setECfg({...(eCfg||cfg),[r.key]:parseInt(e.target.value)||0})}} className="inp" style={{width:60,textAlign:"center"}}/></div>)}
+          <button onClick={()=>{const c={...cfg,...eCfg};sC(c);setECfg(null);pop("✅ Saved!")}} className="actBtn" style={{marginTop:8,width:"100%"}}>💾 Save Amounts</button>
+        </div>
+        <div className="card"><p className="iLbl">🔐 CHANGE PIN</p><div style={{display:"flex",gap:6}}><input type="text" maxLength={6} value={eCfg?.pin??cfg.pin} onChange={e=>{setECfg({...(eCfg||cfg),pin:e.target.value})}} className="inp" style={{flex:1,textAlign:"center"}}/><button onClick={()=>{if(eCfg?.pin){sC({...cfg,pin:eCfg.pin});setECfg(null);pop("🔐 Updated!")}}} className="actBtn">Save</button></div></div>
+        <div className="card"><p className="iLbl">🧹 EDIT CHORES</p>
+          {(eFam||FAM).map((m,mi)=><div key={m.id} style={{marginBottom:12,padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}><div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}><span style={{fontSize:16}}>{m.emoji}</span><span style={{color:m.color,fontWeight:700,fontSize:14}}>{m.name}</span></div>
+            {m.chores.map((ch,ci)=><div key={ci} style={{display:"flex",gap:5,marginBottom:4}}><input value={ch} onChange={e=>{const f=JSON.parse(JSON.stringify(eFam||FAM));f[mi].chores[ci]=e.target.value;setEFam(f)}} className="inp" style={{flex:1}}/><button onClick={()=>{const f=JSON.parse(JSON.stringify(eFam||FAM));f[mi].chores.splice(ci,1);setEFam(f)}} style={{width:28,height:28,borderRadius:6,border:"1px solid rgba(255,255,255,0.06)",background:"rgba(255,255,255,0.03)",color:"#FF1744",fontSize:14,cursor:"pointer"}}>×</button></div>)}
+            <button onClick={()=>{const f=JSON.parse(JSON.stringify(eFam||FAM));f[mi].chores.push("New Chore");setEFam(f)}} style={{padding:"3px 7px",borderRadius:5,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:"#888",fontSize:9,cursor:"pointer"}}>+ Add</button>
+          </div>)}
+          <button onClick={()=>{if(eFam){sF(eFam);setEFam(null);pop("🧹 Saved!")}}} className="actBtn" style={{width:"100%"}}>💾 Save Chores</button>
+        </div>
+        <div className="card"><p className="iLbl">🎵 WALKUP SONGS</p><p style={{fontSize:10,color:"#555",marginBottom:8}}>Plays on login, approvals, wins & milestones (10s)</p>
+          {FAM.map(m=><div key={m.id} style={{padding:"8px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><span style={{fontSize:16}}>{m.emoji}</span><span style={{color:m.color,fontWeight:700,fontSize:13}}>{m.name}</span>
+              {m.songName&&<span style={{fontSize:9,color:"#888",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.songName}</span>}
+              {m.songUrl&&<button onClick={()=>clearSong(m.id)} style={{padding:"2px 6px",borderRadius:4,border:"1px solid rgba(255,23,68,0.2)",background:"rgba(255,23,68,0.08)",color:"#FF1744",fontSize:9,cursor:"pointer"}}>Remove</button>}
+            </div>
+            {songKid===m.id?<div>
+              <div style={{display:"flex",gap:5,marginBottom:6}}><input value={songQ} onChange={e=>setSongQ(e.target.value)} placeholder="Search songs..." className="inp" style={{flex:1}} onKeyDown={e=>e.key==="Enter"&&searchSongs(songQ)}/><button onClick={()=>searchSongs(songQ)} className="actBtn" style={{flex:"none"}}>Search</button></div>
+              {songRes.map(s=><div key={s.trackId} style={{display:"flex",alignItems:"center",gap:6,padding:"5px 0",borderBottom:"1px solid rgba(255,255,255,0.03)"}}>
+                <img src={s.artworkUrl60} style={{width:32,height:32,borderRadius:5}} alt=""/>
+                <div style={{flex:1,overflow:"hidden"}}><p style={{fontSize:11,color:"#fff",fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.trackName}</p><p style={{fontSize:9,color:"#666",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{s.artistName}</p></div>
+                <button onClick={()=>previewSong(s.previewUrl)} style={{padding:"3px 7px",borderRadius:5,border:"1px solid rgba(255,255,255,0.08)",background:songPrev===s.previewUrl?"rgba(255,215,0,0.12)":"rgba(255,255,255,0.03)",color:songPrev===s.previewUrl?"#FFD700":"#888",fontSize:9,cursor:"pointer"}}>{songPrev===s.previewUrl?"Stop":"Play"}</button>
+                <button onClick={()=>pickSong(m.id,s)} style={{padding:"3px 7px",borderRadius:5,border:"1px solid rgba(0,230,118,0.2)",background:"rgba(0,230,118,0.08)",color:"#00E676",fontSize:9,cursor:"pointer"}}>Pick</button>
+              </div>)}
+              <button onClick={()=>{setSongKid(null);setSongRes([]);setSongQ("");if(audioRef.current){audioRef.current.pause();audioRef.current=null;setSongPrev(null)}}} style={{padding:"3px 7px",borderRadius:5,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:"#888",fontSize:9,cursor:"pointer",marginTop:4}}>Close</button>
+            </div>:<button onClick={()=>{setSongKid(m.id);setSongRes([]);setSongQ("")}} style={{padding:"3px 7px",borderRadius:5,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:"#888",fontSize:9,cursor:"pointer"}}>{m.songUrl?"Change Song":"Pick Song"}</button>}
+          </div>)}
+        </div>
+        <div className="card"><p className="iLbl">📖 EDIT HABITS</p>
+          {(eHab||HAB).map((h,hi)=><div key={hi} style={{display:"flex",gap:5,marginBottom:4,alignItems:"center"}}><input value={h.icon} onChange={e=>{const hb=JSON.parse(JSON.stringify(eHab||HAB));hb[hi].icon=e.target.value;setEHab(hb)}} className="inp" style={{width:36,textAlign:"center"}}/><input value={h.label} onChange={e=>{const hb=JSON.parse(JSON.stringify(eHab||HAB));hb[hi].label=e.target.value;setEHab(hb)}} className="inp" style={{flex:1}}/><input type="number" value={h.pts} onChange={e=>{const hb=JSON.parse(JSON.stringify(eHab||HAB));hb[hi].pts=parseInt(e.target.value)||0;setEHab(hb)}} className="inp" style={{width:40,textAlign:"center"}}/><button onClick={()=>{const hb=JSON.parse(JSON.stringify(eHab||HAB));hb.splice(hi,1);setEHab(hb)}} style={{width:28,height:28,borderRadius:6,border:"1px solid rgba(255,255,255,0.06)",background:"rgba(255,255,255,0.03)",color:"#FF1744",fontSize:14,cursor:"pointer"}}>×</button></div>)}
+          <button onClick={()=>{const hb=JSON.parse(JSON.stringify(eHab||HAB));hb.push({id:`h${Date.now()}`,label:"New Habit",icon:"📌",pts:3});setEHab(hb)}} style={{padding:"3px 7px",borderRadius:5,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)",color:"#888",fontSize:9,cursor:"pointer",marginTop:4}}>+ Add</button>
+          <button onClick={()=>{if(eHab){sHb(eHab);setEHab(null);pop("📖 Saved!")}}} className="actBtn" style={{width:"100%",marginTop:6}}>💾 Save Habits</button>
+        </div>
+        <div className="card"><p className="iLbl" style={{color:"#FF1744"}}>⚠️ DANGER ZONE</p>
+          <button onClick={()=>{sH(iH());pop("History cleared")}} className="actBtn" style={{background:"rgba(255,23,68,0.1)",color:"#FF1744",width:"100%",marginBottom:6}}>🗑️ Reset All History</button>
+          <button onClick={resetWk} className="actBtn" style={{background:"rgba(255,23,68,0.1)",color:"#FF1744",width:"100%"}}>🔄 Reset Week</button>
+        </div>
+      </div>}
+
+      </div>
+      <div style={{height:80}}/>
+    </div>
+  );
+}
+
+function MyDay({m,wk,td,doChore,doHabit,doBonus,pts,days,streak:skv,fire,dP,me,cfg,HAB}){
+  const[vd,setVd]=useState(td>=0?td:0);
+  const dd=wk?.[m.id]?.[vd];const lv=gLv(pts),nx=nLv(pts);
+  return <div className="fadeIn">
+    <div style={{textAlign:"center",padding:"6px 0 10px"}}><span style={{fontSize:44}}>{m.emoji}</span><h2 style={{fontSize:22,color:m.color,fontWeight:700}}>{m.name}</h2>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:3}}><span style={{fontSize:12}}>{lv.i}</span><span className="mono" style={{fontSize:10,color:"#888"}}>{lv.n}</span></div>
+      {nx&&<div style={{maxWidth:140,margin:"3px auto 0"}}><div style={{height:4,borderRadius:2,background:"rgba(255,255,255,0.06)",overflow:"hidden"}}><div className="pFill" style={{height:4,borderRadius:2,background:m.color,width:`${Math.min((pts-lv.min)/(nx.min-lv.min),1)*100}%`}}/></div><p style={{fontSize:8,color:"#555",marginTop:1}}>{nx.min-pts} to {nx.i}</p></div>}
+      <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:5}}>{[{v:pts,l:"Points",c:"#FFD700"},{v:skv,l:`Streak ${fire(skv)}`,c:"#FF6B35"},{v:`${days}/6`,l:"Days",c:"#00E676"}].map((s,i)=><div key={i}><p className="mono" style={{fontSize:18,fontWeight:700,color:s.c}}>{s.v}</p><p style={{fontSize:8,color:"#555",textTransform:"uppercase",letterSpacing:1}}>{s.l}</p></div>)}</div>
+      {days>=6&&<div className="unlock">🎉 PERFECT WEEK — ×{cfg.multi}!</div>}
+    </div>
+    <div style={{display:"flex",gap:3,marginBottom:10}}>{DAYS.map((d,i)=>{const ok=m.chores.every((_,ci)=>wk?.[m.id]?.[i]?.chores?.[ci]?.done);return <button key={d} onClick={()=>setVd(i)} style={{flex:1,padding:"6px 1px",borderRadius:7,cursor:"pointer",textAlign:"center",border:`2px solid ${vd===i?m.color:ok?`${m.color}44`:"rgba(255,255,255,0.06)"}`,background:vd===i?`${m.color}15`:ok?`${m.color}06`:"rgba(255,255,255,0.02)"}}><p className="mono" style={{fontSize:9,fontWeight:700,color:vd===i?m.color:"#666"}}>{d}</p>{ok&&<span style={{fontSize:9}}>⭐</span>}{i===td&&<div style={{width:3,height:3,borderRadius:2,background:m.color,margin:"1px auto 0"}}/>}</button>})}</div>
+    <div className="card"><p className="iLbl">🧹 CHORES — {cfg.chorePts}pts each</p>{m.chores.map((ch,ci)=>{const c=dd?.chores?.[ci];const dn=c?.done;return <button key={ci} className="hoverCard row" onClick={()=>doChore(vd,ci)} style={{borderColor:dn?m.color:"rgba(255,255,255,0.06)",background:dn?`${m.color}0D`:"rgba(255,255,255,0.02)"}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:18}}>{dn?"✅":"⬜"}</span><div><p style={{color:dn?"#fff":"#888",fontWeight:600,fontSize:13}}>{ch}</p>{c?.ts&&<p style={{fontSize:8,color:"#555"}}>{fT(c.ts)}</p>}</div></div><span className="mono" style={{color:dn?m.color:"#333",fontWeight:700,fontSize:12}}>+{cfg.chorePts}</span></button>})}</div>
+    <div className="card"><p className="iLbl">📖 DAILY HABITS</p>{HAB.map((h,hi)=>{const dn=dd?.habits?.[hi];return <button key={hi} className="hoverCard row" onClick={()=>doHabit(vd,hi)} style={{borderColor:dn?"#FFD700":"rgba(255,255,255,0.06)",background:dn?"rgba(255,215,0,0.05)":"rgba(255,255,255,0.02)"}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16}}>{dn?"✅":h.icon}</span><p style={{color:dn?"#fff":"#888",fontWeight:600,fontSize:12}}>{h.label}</p></div><span className="mono" style={{color:dn?"#FFD700":"#333",fontWeight:700,fontSize:12}}>+{h.pts}</span></button>})}
+    {dd?.habits?.every(Boolean)&&<div className="unlock">💎 HABIT HERO!</div>}</div>
+    <div className="card"><p className="iLbl">⭐ BONUS</p>{BN.map((b,bi)=>{const dn=b.type==="weekly"?wk?.[m.id]?.ymyw:dd?.bonus?.[bi];return <button key={bi} className="hoverCard row" onClick={()=>doBonus(vd,bi)} style={{borderColor:dn?"#E040FB":"rgba(255,255,255,0.06)",background:dn?"rgba(224,64,251,0.05)":"rgba(255,255,255,0.02)"}}><div style={{display:"flex",alignItems:"center",gap:8}}><span style={{fontSize:16}}>{dn?"✅":b.icon}</span><div><p style={{color:dn?"#fff":"#888",fontWeight:600,fontSize:12}}>{b.label}</p><p style={{fontSize:8,color:"#555"}}>{b.type==="weekly"?`Weekly — ${m.group==="ym"?"Young Men's":"Young Women's"}`:"Daily"}</p></div></div><span className="mono" style={{color:dn?"#E040FB":"#333",fontWeight:700,fontSize:12}}>+{b.pts}</span></button>})}</div>
+    <div className="card" style={{background:`${m.color}08`,borderColor:`${m.color}33`}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><p style={{color:"#fff",fontWeight:700,fontSize:13}}>{DAYS[vd]} Total</p><p className="mono" style={{color:m.color,fontWeight:700,fontSize:20}}>{dP(me,vd)} pts</p></div></div>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
