@@ -88,4 +88,43 @@ Every public logo below is a company that has budget, a compliance-review pain, 
 
 ---
 
-*Sections 1 (strategy drift), 4 (conference footprint), and 7 (patents & legal) appended below from dedicated research agents.*
+## 4. Conference & community footprint — H2 2026 (October-planning input)
+
+### The calendar that matters (Aug–Dec 2026)
+
+| Event | Date | City | Competitors present | Buyer density |
+|---|---|---|---|---|
+| FinovateFall | Sep 9–11 | NYC | Blee likely (Finovate demo alum; 2026 list unpublished) | Medium |
+| Future Proof Festival | Sep 14–17 | Huntington Beach | None of the six confirmed (COMPLY/ComplySci attends) | High (wealth/RIA) |
+| SIFMA C&L Northeast Regional | Sep 16 | NYC | Smarsh (2025 sponsor; 2026 unpublished) | High (BD/AM compliance) |
+| **ITC Vegas (InsureTech Connect)** | Sep 29–Oct 1 | Las Vegas | **NONE of the six found — white space** | High (9,000+ insurance) |
+| **SIFMA Social Media & Digital Marketing Seminar** | **Oct 1** | NYC | Red Oak (2026 confirmed); Smarsh historically | **VERY HIGH — the exact marketing+compliance crossover room** |
+| **FINRA Advertising Regulation Conference** | **Oct 15–16** | Washington DC | Red Oak confirmed; Saifr probable (sponsor history) | **HIGHEST buyer purity of the half** |
+| Money20/20 USA | Oct 18–21 | Las Vegas | PerformLine (multi-year home turf) | Medium-high |
+| **NSCP National Conference** | **Oct 25–28** | Orlando | Red Oak confirmed; Smarsh (Booth 10 in 2025); Saifr likely | **VERY HIGH — densest CCO room** |
+| Schwab IMPACT | Oct 27–29 | Boston | None confirmed — but conflicts with NSCP | High (RIA) |
+| ComplyConnect (COMPLY/ComplySci — not PerformLine's brand) | Nov 8–11 | Nashville | Smarsh among sponsors | High (RIA/wealth CCOs) |
+| A-Team RegTech Summit NY | Nov 19 (verify) | NYC | Saifr recurring sponsor pattern | High (regtech buyers) |
+
+Already passed (don't plan around): Red Oak Accelerate (Apr, Austin), Smarsh Connect (Apr), PerformLine Client Summit (~Jun), LegalTechTalk London (Jun — Blee was official partner), FINRA Annual (May — **Haast exhibited**, relationship exists).
+
+### Recommended October sequencing
+**Oct 1 SIFMA Social/Digital (NYC — cheap, one day, perfect persona) → Oct 15–16 FINRA Ad Reg (DC — book NOW, limited exhibitor slots via FINRA's Jeffrey Arcuri) → Oct 18–21 Money20/20 walk-the-floor only (PerformLine's turf; booth cost high, buyer purity low) → Oct 25–28 NSCP Orlando (booth; get in the NSCP vendor directory like Saifr/Red Oak).** Add ITC Vegas (Sep 29–Oct 1) if insurance is a live 2026 segment — note it butts against SIFMA Oct 1, so it's an either/or without two teams. Nov 19 RegTech Summit NY is the natural coda — a speaking slot there directly contests Saifr's AI narrative in their room.
+
+### Likely booth pitches you'll walk past
+- **Saifr:** "AI from Fidelity Labs — compliant content 10x faster" (pedigree + agents narrative)
+- **PerformLine:** "omni-channel marketing compliance at scale" + State of Marketing Compliance Report data (Money20/20)
+- **Red Oak:** end-to-end review workflow + books-and-records, FINRA-native reliability (now with MirrorWeb "full lifecycle" language)
+- **Smarsh:** comms capture/archive/supervision + "AI outputs as records" governance framing
+- **Blee/AdClear:** unlikely to have US booths; Blee plays legal-ops rooms (CLOC), AdClear plays the UK circuit
+
+### Community assets you're up against (and three open lanes)
+PerformLine owns the deepest moat (COMPLY community, Kraken Awards, annual State of Marketing Compliance Report — they own the phrase "marketing compliance" in US search). Smarsh rents SIFMA's audience via co-branded forums. Saifr runs an analyst/report cadence. Red Oak runs customer-conference loyalty. Blee = YC/CLOC credibility-by-association. AdClear = UK founder circuit (note: their "Between the Guidelines" podcast could NOT be verified this run — an earlier finding, now flagged unconfirmed).
+**Three community lanes nobody owns:** (a) insurance marketing compliance, (b) AI-generated-content governance for marketing (Haast's own Series A framing), (c) cross-regime FCA+FINRA+FTC comparative content. All three are open and compound with the event white space above.
+
+### New threat surfaced during this research
+**Hadrius raised $27M (CRV) and explicitly plans "AI-first review & approval of marketing materials" by end of 2026** — a direct future collision in RIA/wealth-land; expect them at RIA compliance events. Add to the quarterly watch-list alongside the six.
+
+---
+
+*Sections 1 (strategy drift) and 7 (patents & legal) appended below from dedicated research agents.*
