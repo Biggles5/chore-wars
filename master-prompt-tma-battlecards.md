@@ -33,6 +33,13 @@ I sell using MEDDPICC and Challenger, with one house rule that shapes everything
 7. **Layer discipline:** every battlecard opens by declaring which of our four layers this competitor primarily collides with, and whether they're a point solution (one layer), a partial stack (two layers), or a platform claiming the whole stack. The "where they win / where we win" analysis must respect our one-layer-lead rule — the question is never "our four vs their one," it's "when THIS layer leads, how do we beat them, and how does the stack expand behind it."
 8. **Anchor discipline:** any client-facing proof point you suggest must come from our approved anchor list (TOPdesk 3→18 hires with better diversity; Atos EUR 200-300K saved via redeployment; Deloitte/IMC/STX combined approach with 1,500+ data points per candidate; DecisionWise 50M+ benchmark data points; 91% average participation; 80 competencies/320 behaviors; NeurOlympics 4 games ~45 min with ATS API integration; sports pedigree for talent-ID credibility only). Internal analysis can reference anything; suggested talk tracks only reference approved anchors. ROI frames (bad hire ≈ 3x salary; preventable senior exit 50–200% of salary; Gallup $8.8T disengagement; re-grading consultant fees; 90+ day time-to-fill) may frame urgency but never masquerade as client-specific numbers.
 
+## Phase 0 — Landscape sweep (run once, before competitor #1)
+
+Before deep-diving the first named competitor, run one broad discovery pass over the whole category so nothing new in the market gets missed:
+1. Sweep G2/Capterra category grids, analyst coverage (Bersin, RedThread, Fosway, Gartner), "alternatives to X" content for every vendor on the COMPETITORS line, recent funding announcements in the space, and each named competitor's own comparison pages (who THEY compare against reveals the set).
+2. Output a ranked list of vendors NOT on my COMPETITORS line, layer-tagged, with a one-line threat rating each (direct collision / adjacent / emerging) and the single strongest piece of evidence per vendor.
+3. Pause and show me the list. I'll promote any of them onto the run list (or note them as watch-items) before deep dives begin. Discovery is broad; battlecards stay scoped to the final approved list.
+
 ## Phase 1 — Research process (run per competitor)
 
 1. **Full site crawl**: homepage, product pages, solutions pages, pricing, about, customers/case studies. Map their site structure — what they lead with reveals their positioning strategy. Note which of our four layers their nav claims to cover.
@@ -110,6 +117,13 @@ Save one markdown file per competitor named `battlecard-<competitor>.md` (e.g., 
 4. The top 3 landmine questions that work against EVERY competitor in the run — these become my default discovery questions
 5. A layer-collision map: for each of our four layers, which competitors from this run threaten it most, and the lead-layer recommendation when each is in the deal.
 
+## Phase 4 — Branded deck
+
+After `summary.md`, build a branded PPTX (`tma-battlecards-<date>.pptx`) for sales enablement:
+- Title + methodology/provenance slide, layer-collision landscape overview (one slide: all competitors positioned against the four-layer stack), then a per-competitor section (3–4 slides each: TL;DR snapshot with layer tag · feature matrix highlights + top gaps · landmines + objection reframes), then the cross-competitor summary slides (takeaways, combined gap table, pricing comparison, universal landmines, layer-collision map).
+- Brand it: TMA Performance colors/fonts/logo if assets are provided; otherwise a clean professional palette with the consortium name, flagged for brand-team polish. Client-facing slide copy follows the TMA lexicon and the approved-anchor rule (ground rule 8); no em dashes in client-facing text.
+- Every slide footnotes its provenance level (documented / inference / cached-source) so nothing unverified gets presented as fact in front of a room.
+
 ## Execution order
 
-Work one competitor at a time. Before crawling the first competitor, show me your research plan for it and wait for my go. After each battlecard is complete, give me a 3-bullet preview before moving to the next. Build `summary.md` last.
+Run Phase 0 and wait for my approval of the final competitor list. Then work one competitor at a time. After each battlecard is complete, give me a 3-bullet preview before moving to the next. Build `summary.md` and the PPTX last.
