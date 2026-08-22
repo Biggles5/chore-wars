@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Algebra 2 Beast Academy</title>
-<!-- BUILD v10 — iOS audio unlock + arithmetic "5x2" support -->
-<script>var APP_VER="v10";</script>
+<!-- BUILD v11 — music search via fetch (JSONP fallback) + one-tap Popular Mix -->
+<script>var APP_VER="v11";</script>
 <style>
 :root{
   --bg:#0b1020; --bg2:#111832; --card:#161f3d; --card2:#1c2750; --line:#28345f;
@@ -456,27 +456,66 @@ var RADIO=(function(){
       if(!live){audio.src=silentWav();var p=audio.play();if(p&&p.catch)p.catch(function(){});}
     }catch(e){}
   }
+  function parseResults(data){
+    var res=[],i;
+    for(i=0;i<((data&&data.results)||[]).length;i++){
+      var r=data.results[i];
+      if(r.previewUrl)res.push({t:r.trackName||"?",a:r.artistName||"",u:r.previewUrl});
+    }
+    return res;
+  }
   function search(term,cb){
-    var cbName="itcb"+Math.floor(Math.random()*1e6);
-    var done=false;
-    window[cbName]=function(data){
-      done=true;
-      try{delete window[cbName];}catch(e){window[cbName]=undefined;}
-      var res=[],i;
-      for(i=0;i<((data&&data.results)||[]).length;i++){
-        var r=data.results[i];
-        if(r.previewUrl)res.push({t:r.trackName||"?",a:r.artistName||"",u:r.previewUrl});
-      }
-      cb(res);
-    };
-    var s=document.createElement("script");
-    s.src="https://itunes.apple.com/search?term="+encodeURIComponent(term)+"&media=music&entity=song&limit=25&callback="+cbName;
-    s.onerror=function(){if(!done){done=true;cb(null);}};
-    document.body.appendChild(s);
-    setTimeout(function(){
-      if(s.parentNode)s.parentNode.removeChild(s);
-      if(!done){done=true;cb(null);}
-    },8000);
+    // Primary: direct fetch (iTunes Search API supports CORS).
+    // Fallback: JSONP script tag, in case fetch is blocked.
+    var handled=false;
+    function finish(res){if(handled)return;handled=true;cb(res);}
+    var base="https://itunes.apple.com/search?term="+encodeURIComponent(term)+"&media=music&entity=song&limit=25";
+    function viaJsonp(){
+      var cbName="itcb"+Math.floor(Math.random()*1e6);
+      window[cbName]=function(data){
+        try{delete window[cbName];}catch(e){window[cbName]=undefined;}
+        finish(parseResults(data));
+      };
+      var s=document.createElement("script");
+      s.src=base+"&callback="+cbName;
+      s.onerror=function(){finish(null);};
+      document.body.appendChild(s);
+      setTimeout(function(){
+        if(s.parentNode)s.parentNode.removeChild(s);
+        finish(null);
+      },8000);
+    }
+    try{
+      fetch(base)
+        .then(function(r){if(!r.ok)throw 0;return r.json();})
+        .then(function(j){finish(parseResults(j));})
+        .catch(function(){viaJsonp();});
+      setTimeout(function(){if(!handled)viaJsonp();},6000);
+    }catch(e){viaJsonp();}
+  }
+  /* one-tap Popular Mix: pulls previews from artists teens actually play */
+  var POP_ARTISTS=["Morgan Wallen","Drake","Taylor Swift","SZA","Zach Bryan","Billie Eilish","Post Malone","Travis Scott","Olivia Rodrigo","Kendrick Lamar","The Weeknd","Sabrina Carpenter","Luke Combs","Doja Cat","21 Savage","Noah Kahan","Chappell Roan","Jelly Roll"];
+  function startMix(){
+    unlock();
+    toast("🎵 Loading the Popular Mix…");
+    var picks=shuffle(POP_ARTISTS).slice(0,6),all=[],doneN=0,i;
+    function one(artist){
+      search(artist,function(res){
+        if(res&&res.length)all=all.concat(res.slice(0,3));
+        doneN++;
+        if(doneN===picks.length){
+          if(all.length){
+            MUSIC.set(0,true);
+            queue=shuffle(all);idx=0;live=true;label="Popular Mix";
+            playCur();
+            toast("🎵 Popular Mix — "+all.length+" hot songs, 30s each");
+          }else{
+            toast("😕 Couldn't load songs. Check internet — and if you use a content blocker, allow itunes.apple.com");
+          }
+        }
+      });
+    }
+    for(i=0;i<picks.length;i++)one(picks[i]);
   }
   var curTr=null;
   function playCur(){
@@ -499,12 +538,13 @@ var RADIO=(function(){
   }
   return {
     unlock:unlock,
+    mix:startMix,
     start:function(term,name){
       label=name||term;
       unlock(); // grab the audio permission NOW, while we're still inside the tap
       toast("🎵 Finding "+label+"…");
       search(term,function(res){
-        if(!res||!res.length){toast("😕 No previews found — try an artist or song name (needs internet)");return;}
+        if(!res||!res.length){toast("😕 Couldn't load songs. Check internet — and if you use a content blocker, allow itunes.apple.com");return;}
         MUSIC.set(0,true);
         queue=shuffle(res);idx=0;live=true;
         playCur();
@@ -568,6 +608,7 @@ function togMusicMenu(){
   var d=document.createElement("div");
   d.id="mmenu";d.className="mmenu";
   var i,h='<div class="msec">🎵 Study Music</div>';
+  h+='<button class="btn wide" style="margin-bottom:8px" onclick="RADIO.mix();togMusicMenu()">▶ Popular Mix — 18 hot songs</button>';
   h+='<select id="musicSel" class="ansin" style="padding:10px;font-size:14px;width:100%" onchange="musicPick()">';
   h+='<option value="">— Pick a station —</option>';
   h+='<optgroup label="🔥 Popular · 30s previews (internet)">';
