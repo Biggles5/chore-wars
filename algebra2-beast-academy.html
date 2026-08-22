@@ -3609,6 +3609,7 @@ function buildSearch(){
   idx.push({l:"🐲 Beast Mode",s:"Multi-topic challenge problems",k:"beast mode challenge hard elite",act:"startBeast()"});
   idx.push({l:"🔁 Review Queue",s:"Spaced review of fading skills",k:"review spaced repetition due queue",act:"startReview()"});
   idx.push({l:"🤖 AI Tutor",s:"Ask anything, get unstuck",k:"tutor chat help ask question ai claude stuck",act:"go('chat')"});
+  idx.push({l:"🔑 Tutor Settings — API Key",s:"Connect the full AI tutor",k:"api key settings setup connect claude tutor model",act:"openTutorSettings()"});
   idx.push({l:"📚 Formula Vault",s:"Every formula + the curriculum map",k:"formula reference sheet curriculum standards missouri map",act:"go('ref')"});
   SIDX=idx;return idx;
 }
@@ -3747,6 +3748,7 @@ function chatSaveKey(){
 }
 function chatClear(){if(confirm("Clear the whole conversation?")){S.chat=[];save();renderChat();}}
 function togChatSettings(){chatShowSettings=!chatShowSettings;renderChat();}
+function openTutorSettings(){chatShowSettings=true;go("chat");}
 function askTutorWhy(){
   go("chat");
   chatSend("Why was my answer wrong on that last problem? Walk me through where my thinking broke, then give me one similar problem to try.");
@@ -3755,7 +3757,10 @@ function renderChat(){
   view="chat";
   var btns=document.querySelectorAll(".nbtn"),bi;
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
-  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 AI Tutor</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Offline coach mode — add a key in ⚙️ for the full AI tutor")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️</button></div>';
+  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 AI Tutor</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Offline coach mode")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️ Settings</button></div>';
+  if(!S.chatKey&&!chatShowSettings){
+    h+='<div class="card" style="border-color:var(--gold)"><div class="row"><div style="font-size:26px">🔑</div><div class="grow"><b>Unlock the full AI tutor</b><div class="sub" style="margin-top:2px">One-time setup (parent job): add a Claude API key from console.anthropic.com. Until then, the offline coach answers from the built-in lessons.</div></div></div><button class="btn wide" style="margin-top:10px" onclick="togChatSettings()">🔑 Add API Key</button></div>';
+  }
   if(chatShowSettings){
     h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).<br><br><b>No-typing shortcut:</b> open this file once with <b>#key=sk-ant-…</b> added to the end of the address — the key installs itself and is scrubbed from the address bar.</div>'+
       '<input id="keyIn" class="ansin" type="password" placeholder="sk-ant-…" value="'+esc(S.chatKey)+'">'+
