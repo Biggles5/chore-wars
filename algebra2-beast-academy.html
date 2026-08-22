@@ -458,9 +458,11 @@ var RADIO=(function(){
       if(!done){done=true;cb(null);}
     },8000);
   }
+  var curTr=null;
   function playCur(){
     if(!live||!queue.length){stop();return;}
     var tr=queue[idx%queue.length];
+    curTr=tr;
     ensure();
     audio.src=tr.u;
     var pr=audio.play();
@@ -471,7 +473,7 @@ var RADIO=(function(){
     var b=document.getElementById("musicBtn");
     if(b){b.textContent=live?"🎵":"🔇";b.className=live?"iconbtn on":"iconbtn";}
     var np=document.getElementById("npRow");
-    if(np)np.innerHTML=live&&tr?("▶ <b>"+esc(tr.t)+"</b><br><span class='sub'>"+esc(tr.a)+" · 30s preview</span>"):"";
+    if(np)np.innerHTML=live&&tr?("▶ <b>"+esc(tr.t)+"</b><br><span class='sub'>"+esc(tr.a)+" · 30s preview</span> <span class='qchip' onclick=\"RADIO.more()\">🔁 More like this</span>"):"";
   }
   return {
     start:function(term,name){
@@ -486,8 +488,14 @@ var RADIO=(function(){
       });
     },
     next:function(){if(live){idx++;playCur();}},
+    more:function(){
+      // re-seed the radio from whoever is playing right now
+      if(!curTr||!curTr.a){toast("Nothing playing yet — pick a station first");return;}
+      RADIO.start(curTr.a,"More "+curTr.a);
+    },
+    current:function(){return live?curTr:null;},
     stop:function(quiet){
-      live=false;queue=[];
+      live=false;queue=[];curTr=null;
       if(audio){audio.pause();try{audio.src="";}catch(e){}}
       paint(null);
       if(!quiet)toast("🔇 Music off");
@@ -547,12 +555,15 @@ function togMusicMenu(){
   h+='<div class="row" style="gap:6px;margin-bottom:6px"><input id="radioTerm" class="ansin" style="padding:9px 10px;font-size:13.5px" placeholder="e.g. Morgan Wallen…" onkeydown="if(event.key===\'Enter\')radioGo()"><button class="btn sm" onclick="radioGo()">▶</button></div>';
   h+='<div id="npRow" style="font-size:12.5px;padding:2px 2px 6px"></div>';
   if(RADIO.playing()||MUSIC.playing()){
-    h+='<div class="row" style="gap:6px;margin-bottom:6px">'+(RADIO.playing()?'<button class="btn sec sm grow" onclick="RADIO.next()">⏭ Next</button>':'')+'<button class="btn sec sm grow" onclick="musicOff()">🔇 Off</button></div>';
+    h+='<div class="row" style="gap:6px;margin-bottom:6px">'+(RADIO.playing()?'<button class="btn sec sm grow" onclick="RADIO.next()">⏭ Next</button><button class="btn sec sm grow" onclick="RADIO.more()">🔁 More like this</button>':'')+'<button class="btn sec sm grow" onclick="musicOff()">🔇 Off</button></div>';
   }
   h+='<div class="sub" style="font-size:10px">Song previews are official 30-second clips via iTunes Search (free). Synth beats work with no internet.</div>';
   d.innerHTML=h;
   document.body.appendChild(d);
-  if(RADIO.playing()){var np=document.getElementById("npRow");if(np)np.innerHTML="▶ <b>Radio playing…</b>";}
+  if(RADIO.playing()){
+    var np=document.getElementById("npRow"),ct=RADIO.current();
+    if(np)np.innerHTML=ct?("▶ <b>"+esc(ct.t)+"</b><br><span class='sub'>"+esc(ct.a)+" · 30s preview</span> <span class='qchip' onclick=\"RADIO.more()\">🔁 More like this</span>"):"▶ <b>Radio playing…</b>";
+  }
 }
 
 /* ---------- confetti ---------- */
