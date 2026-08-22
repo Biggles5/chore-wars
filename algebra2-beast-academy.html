@@ -132,7 +132,8 @@ table.rt th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spac
 .workimg{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#0a0f24}
 .workpre{white-space:pre-wrap;font-size:13.5px;background:#0a0f24;border-radius:10px;padding:10px;border:1px solid var(--line)}
 /* music picker */
-.mmenu{position:fixed;top:56px;right:10px;z-index:95;background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:10px;width:220px;box-shadow:0 12px 40px rgba(0,0,0,.6);animation:fadeIn .18s}
+.mmenu{position:fixed;top:56px;right:10px;z-index:95;background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:12px;width:268px;max-width:calc(100vw - 20px);max-height:calc(100vh - 150px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.6);animation:fadeIn .18s}
+.msec{font-weight:900;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin:6px 0}
 .mrow{padding:10px 8px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer}
 .mrow:hover{background:rgba(255,255,255,.05)}
 .mrow.on{color:var(--gold);background:rgba(255,184,48,.08)}
@@ -410,27 +411,120 @@ var MUSIC=(function(){
   return {
     list:ST,
     cur:function(){return cur;},
-    set:function(i){
+    set:function(i,quiet){
       cur=i;
+      if(i>0&&typeof RADIO!=="undefined")RADIO.stop(true);
       var b=document.getElementById("musicBtn");
-      if(i===0){stop();if(b){b.textContent="🔇";b.className="iconbtn";}toast("🔇 Beats off");}
-      else{start();if(b){b.textContent=ST[i].ic;b.className="iconbtn on";}toast(ST[i].ic+" "+ST[i].name+" — locked in");}
+      if(i===0){stop();if(b&&!(typeof RADIO!=="undefined"&&RADIO.playing())){b.textContent="🔇";b.className="iconbtn";}if(!quiet)toast("🔇 Beats off");}
+      else{start();if(b){b.textContent=ST[i].ic;b.className="iconbtn on";}if(!quiet)toast(ST[i].ic+" "+ST[i].name+" — locked in");}
     },
     playing:function(){return cur!==0;}
   };
 })();
+
+/* ---------- real music: 30-second official previews via the free
+   iTunes Search API (no key, no account). Plays clips back-to-back
+   like a radio. Needs internet; the synth stations stay offline. ---------- */
+var RADIO=(function(){
+  var audio=null,queue=[],idx=0,live=false,label="";
+  function ensure(){
+    if(!audio){
+      audio=new Audio();
+      audio.volume=.6;
+      audio.onended=function(){idx++;playCur();};
+      audio.onerror=function(){idx++;if(live)playCur();};
+    }
+    return audio;
+  }
+  function search(term,cb){
+    var cbName="itcb"+Math.floor(Math.random()*1e6);
+    var done=false;
+    window[cbName]=function(data){
+      done=true;
+      try{delete window[cbName];}catch(e){window[cbName]=undefined;}
+      var res=[],i;
+      for(i=0;i<((data&&data.results)||[]).length;i++){
+        var r=data.results[i];
+        if(r.previewUrl)res.push({t:r.trackName||"?",a:r.artistName||"",u:r.previewUrl});
+      }
+      cb(res);
+    };
+    var s=document.createElement("script");
+    s.src="https://itunes.apple.com/search?term="+encodeURIComponent(term)+"&media=music&entity=song&limit=25&callback="+cbName;
+    s.onerror=function(){if(!done){done=true;cb(null);}};
+    document.body.appendChild(s);
+    setTimeout(function(){
+      if(s.parentNode)s.parentNode.removeChild(s);
+      if(!done){done=true;cb(null);}
+    },8000);
+  }
+  function playCur(){
+    if(!live||!queue.length){stop();return;}
+    var tr=queue[idx%queue.length];
+    ensure();
+    audio.src=tr.u;
+    var pr=audio.play();
+    if(pr&&pr.catch)pr.catch(function(){});
+    paint(tr);
+  }
+  function paint(tr){
+    var b=document.getElementById("musicBtn");
+    if(b){b.textContent=live?"🎵":"🔇";b.className=live?"iconbtn on":"iconbtn";}
+    var np=document.getElementById("npRow");
+    if(np)np.innerHTML=live&&tr?("▶ <b>"+esc(tr.t)+"</b><br><span class='sub'>"+esc(tr.a)+" · 30s preview</span>"):"";
+  }
+  return {
+    start:function(term,name){
+      label=name||term;
+      toast("🎵 Finding "+label+"…");
+      search(term,function(res){
+        if(!res||!res.length){toast("😕 No previews found — try an artist or song name (needs internet)");return;}
+        MUSIC.set(0,true);
+        queue=shuffle(res);idx=0;live=true;
+        playCur();
+        toast("🎵 "+label+" — official 30s previews, back to back");
+      });
+    },
+    next:function(){if(live){idx++;playCur();}},
+    stop:function(quiet){
+      live=false;queue=[];
+      if(audio){audio.pause();try{audio.src="";}catch(e){}}
+      paint(null);
+      if(!quiet)toast("🔇 Music off");
+    },
+    playing:function(){return live;}
+  };
+})();
+function radioGo(){
+  var b=document.getElementById("radioTerm");
+  if(!b||!b.value.replace(/\s/g,""))return;
+  RADIO.start(b.value);
+  togMusicMenu();
+}
 function togMusicMenu(){
   var ex=document.getElementById("mmenu");
   if(ex){ex.parentNode.removeChild(ex);return;}
   var d=document.createElement("div");
   d.id="mmenu";d.className="mmenu";
-  var h='<div style="font-weight:900;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🎵 Study Beats</div>',i;
+  var h='<div class="msec">🎵 Real Music — 30s previews</div>',i;
+  var PRESETS=[["🔥","Hip-Hop","hip hop hits"],["😈","Phonk","phonk"],["🎧","Lo-fi","lofi beats"],["🤘","Rock","rock anthems"],["🤠","Country","country hits"],["🕹️","Gaming","video game music"]];
+  h+='<div style="margin-bottom:6px">';
+  for(i=0;i<PRESETS.length;i++)
+    h+='<span class="qchip" style="margin:2px 3px 2px 0" onclick="RADIO.start(\''+PRESETS[i][2]+'\',\''+PRESETS[i][1]+'\');togMusicMenu()">'+PRESETS[i][0]+' '+PRESETS[i][1]+'</span>';
+  h+='</div>';
+  h+='<div class="row" style="gap:6px;margin-bottom:4px"><input id="radioTerm" class="ansin" style="padding:8px 10px;font-size:13px" placeholder="Any artist or song…" onkeydown="if(event.key===\'Enter\')radioGo()"><button class="btn sm" onclick="radioGo()">▶</button></div>';
+  h+='<div id="npRow" style="font-size:12.5px;padding:2px 2px 6px"></div>';
+  if(RADIO.playing())h+='<div class="row" style="gap:6px;margin-bottom:4px"><button class="btn sec sm grow" onclick="RADIO.next();">⏭ Next song</button><button class="btn sec sm grow" onclick="RADIO.stop();togMusicMenu()">⏹ Stop</button></div>';
+  h+='<div class="sub" style="font-size:10px;margin-bottom:8px">Official previews via iTunes Search · needs internet</div>';
+  h+='<div class="msec">🎹 Synth Stations — work offline</div>';
   for(i=0;i<MUSIC.list.length;i++){
     var s=MUSIC.list[i];
-    h+='<div class="mrow'+(MUSIC.cur()===i?" on":"")+'" onclick="MUSIC.set('+i+');togMusicMenu()">'+s.ic+'  '+s.name+(MUSIC.cur()===i?' <span style="float:right">✓</span>':'')+'</div>';
+    h+='<div class="mrow'+(MUSIC.cur()===i&&!RADIO.playing()?" on":"")+'" onclick="MUSIC.set('+i+');togMusicMenu()">'+s.ic+'  '+s.name+(MUSIC.cur()===i&&!RADIO.playing()?' <span style="float:right">✓</span>':'')+'</div>';
   }
   d.innerHTML=h;
   document.body.appendChild(d);
+  // show now-playing immediately if the radio is live
+  if(RADIO.playing()){var np=document.getElementById("npRow");if(np)np.innerHTML="▶ <b>Radio playing…</b>";}
 }
 
 /* ---------- confetti ---------- */
@@ -4220,7 +4314,7 @@ function renderChat(){
   document.addEventListener("keydown",function(e){
     if(e.key!=="Enter")return;
     if(e.target&&e.target.tagName==="TEXTAREA")return; // typing steps in the work pad
-    if(e.target&&e.target.id==="chatIn")return;        // chat input has its own handler
+    if(e.target&&(e.target.id==="chatIn"||e.target.id==="radioTerm"))return; // inputs with their own handlers
     if(view==="train"&&sess){if(sess.locked)nextQ();else submitAns();}
     else if(view==="lab"&&lab&&!lab.finished){if(lab.fb)labNext();else labSubmit();}
     else if(view==="lesson"&&lessonCheck&&lessonCheck.qo&&!lessonCheck.done)lcSubmit();
