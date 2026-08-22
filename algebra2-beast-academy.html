@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Algebra 2 Beast Academy</title>
+<style>
+:root{
+  --bg:#0b1020; --bg2:#111832; --card:#161f3d; --card2:#1c2750; --line:#28345f;
+  --txt:#e8ecff; --dim:#8b96c9; --gold:#ffb830; --orange:#ff7a2f; --red:#ff4d6a;
+  --green:#3ddc84; --blue:#4d9fff; --purple:#a78bfa; --cyan:#2fd4d4; --pink:#ff6bcb;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100%}
+body{padding-bottom:76px}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select{font-family:inherit}
+.wrap{max-width:860px;margin:0 auto;padding:12px}
+/* top bar */
+.top{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0b1020 70%,rgba(11,16,32,.92));backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.topin{max-width:860px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 12px}
+.logo{font-weight:900;font-size:16px;letter-spacing:.5px;background:linear-gradient(90deg,var(--gold),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap}
+.pill{display:flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill .ic{font-size:13px}
+.spacer{flex:1}
+/* xp bar */
+.xpbar{height:5px;background:var(--card);border-radius:99px;overflow:hidden;margin:0 12px 0}
+.xpin{max-width:860px;margin:0 auto}
+.xpbar>div{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:99px;transition:width .5s}
+/* nav */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:60;background:#0d1328;border-top:1px solid var(--line)}
+.navin{max-width:860px;margin:0 auto;display:flex}
+.nbtn{flex:1;background:none;color:var(--dim);padding:9px 2px 10px;font-size:10.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nbtn .nic{font-size:20px;line-height:1}
+.nbtn.on{color:var(--gold)}
+/* cards */
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;animation:fadeIn .3s}
+.card.click{cursor:pointer;transition:transform .12s,border-color .12s}
+.card.click:hover{transform:translateY(-2px);border-color:var(--gold)}
+.card.click:active{transform:scale(.98)}
+h2{font-size:17px;margin-bottom:8px}
+h3{font-size:14px;margin-bottom:6px}
+.sub{color:var(--dim);font-size:12.5px;line-height:1.5}
+.row{display:flex;align-items:center;gap:10px}
+.grow{flex:1;min-width:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:520px){.grid3{grid-template-columns:1fr 1fr}}
+/* buttons */
+.btn{background:linear-gradient(90deg,var(--gold),var(--orange));color:#1a1200;font-weight:900;border-radius:12px;padding:12px 18px;font-size:14px;transition:transform .1s;box-shadow:0 4px 14px rgba(255,150,40,.25)}
+.btn:active{transform:scale(.97)}
+.btn.sec{background:var(--card2);color:var(--txt);border:1px solid var(--line);box-shadow:none}
+.btn.grn{background:linear-gradient(90deg,#2bc76f,#3ddc84);color:#04250f}
+.btn.red{background:linear-gradient(90deg,#e33f5c,#ff4d6a);color:#fff}
+.btn.blu{background:linear-gradient(90deg,#3a7fe0,#4d9fff);color:#eaf3ff}
+.btn.sm{padding:8px 12px;font-size:12.5px;border-radius:10px}
+.btn.wide{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+/* progress bars */
+.bar{height:9px;background:#0e1530;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.bar>div{height:100%;border-radius:99px;transition:width .6s}
+.m0{background:#454f7c}.m1{background:var(--red)}.m2{background:var(--orange)}.m3{background:var(--gold)}.m4{background:var(--green)}.m5{background:linear-gradient(90deg,var(--cyan),var(--purple))}
+.mtag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:99px;white-space:nowrap}
+.t0{background:#2a335e;color:#9aa5d6}.t1{background:#4a1626;color:#ff8ba0}.t2{background:#4a2c12;color:#ffb27a}.t3{background:#4a3a0e;color:#ffd97a}.t4{background:#0e3a22;color:#7dedae}.t5{background:#241b4a;color:#c9b8ff}
+/* skill tree */
+.unit{border-left:4px solid var(--gold)}
+.chev{color:var(--dim);font-size:13px;transition:transform .2s}
+.chev.open{transform:rotate(90deg)}
+.skrow{display:flex;align-items:center;gap:10px;padding:10px 8px;border-top:1px solid var(--line);cursor:pointer;border-radius:8px}
+.skrow:hover{background:rgba(255,255,255,.03)}
+.lock{opacity:.45}
+/* training */
+.qcard{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:12px;font-size:17px;line-height:1.65}
+.qmeta{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.ansin{width:100%;background:#0e1530;border:2px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 14px;font-size:17px;outline:none}
+.ansin:focus{border-color:var(--gold)}
+.ansin.ok{border-color:var(--green)}
+.ansin.bad{border-color:var(--red)}
+.mcbtn{display:block;width:100%;text-align:left;background:#0e1530;border:2px solid var(--line);color:var(--txt);border-radius:12px;padding:13px 14px;font-size:15.5px;margin-bottom:8px;transition:border-color .12s}
+.mcbtn:hover{border-color:var(--gold)}
+.mcbtn.pick{border-color:var(--blue);background:#12204a}
+.mcbtn.ok{border-color:var(--green);background:#0e2c1c}
+.mcbtn.bad{border-color:var(--red);background:#33121c}
+.fb{border-radius:14px;padding:14px;margin-bottom:12px;font-size:14px;line-height:1.6;animation:fadeIn .25s}
+.fb.ok{background:#0e2c1c;border:1px solid #1f5c3a}
+.fb.bad{background:#33121c;border:1px solid #6b2438}
+.fb.hint{background:#12204a;border:1px solid #27408f}
+.big{font-size:22px;font-weight:900}
+.center{text-align:center}
+sup{font-size:.68em}
+.math{font-family:"Cambria Math",Georgia,serif}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px;line-height:1.15}
+.frac>span:first-child{border-bottom:1.5px solid currentColor;padding:0 4px}
+.frac>span:last-child{padding:0 4px}
+/* misc */
+.chip{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-size:11.5px;font-weight:700;margin:2px 3px 2px 0;color:var(--dim)}
+.badge{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 6px;text-align:center}
+.badge .bic{font-size:26px;filter:grayscale(1);opacity:.35}
+.badge.got .bic{filter:none;opacity:1}
+.badge .bn{font-size:10.5px;font-weight:800}
+.badge .bd{font-size:9.5px;color:var(--dim)}
+.stat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat .sv{font-size:20px;font-weight:900}
+.stat .sl{font-size:10.5px;color:var(--dim);font-weight:700;margin-top:2px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;background:#1c2750;border:1px solid var(--gold);color:var(--txt);padding:11px 18px;border-radius:14px;font-weight:800;font-size:13.5px;z-index:99;animation:pop .3s;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+.timer{font-size:26px;font-weight:900;font-variant-numeric:tabular-nums}
+.flame{animation:float 2s ease-in-out infinite;display:inline-block}
+table.rt{width:100%;border-collapse:collapse;font-size:12.5px}
+table.rt td,table.rt th{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left;vertical-align:top}
+table.rt th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.hero{background:linear-gradient(135deg,#1a1030,#131f45 60%,#0e2c3a);border:1px solid #34406f;border-radius:18px;padding:18px;margin-bottom:12px;position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,184,48,.18),transparent 70%)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:translateX(-50%) scale(.8)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,122,47,.35)}50%{box-shadow:0 0 26px rgba(255,122,47,.7)}}
+.beastcard{border:1px solid #6b3a12;background:linear-gradient(135deg,#2a1408,#3a1c0a);animation:glow 2.4s infinite}
+.hidden{display:none!important}
+a{color:var(--blue)}
+@media(max-width:480px){.logo{font-size:12.5px}.pill{padding:3px 8px;font-size:10.5px;gap:3px}.topin{gap:5px;padding:8px 8px}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="topin">
+    <div class="logo">⚡ A2 BEAST ACADEMY</div>
+    <div class="spacer"></div>
+    <div class="pill" id="pillStreak"><span class="ic flame">🔥</span><span>0</span></div>
+    <div class="pill" id="pillLvl"><span class="ic">🏅</span><span>Lv 1</span></div>
+    <div class="pill" id="pillXp"><span class="ic">⭐</span><span>0 XP</span></div>
+  </div>
+  <div class="xpin"><div class="xpbar"><div id="xpFill" style="width:0%"></div></div></div>
+</div>
+
+<div class="wrap" id="main"></div>
+
+<div class="nav"><div class="navin">
+  <button class="nbtn" data-v="home"><span class="nic">🏠</span>Home</button>
+  <button class="nbtn" data-v="tree"><span class="nic">🌳</span>Skills</button>
+  <button class="nbtn" data-v="battle"><span class="nic">⚔️</span>Battle</button>
+  <button class="nbtn" data-v="stats"><span class="nic">📊</span>Stats</button>
+  <button class="nbtn" data-v="ref"><span class="nic">📚</span>Study</button>
+</div></div>
+
+<script>
+/* ============================================================
+   ALGEBRA 2 BEAST ACADEMY — single-file, no dependencies.
+   Vanilla ES5 (var / function / .then per repo conventions).
+   Progress persists in localStorage. Aligned to Missouri
+   Learning Standards Algebra II (Branson Public Schools
+   follows MLS; Algebra II EOC is the state assessment).
+   ============================================================ */
+
+/* ---------- utils ---------- */
+function ri(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(a){var i,j,t;a=a.slice();for(i=a.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function gcd(a,b){a=Math.abs(a);b=Math.abs(b);while(b){var t=b;b=a%b;a=t;}return a||1;}
+function nz(n){return n===0?0:n;} // normalize -0
+function sgn(n){return n<0?"−":"+";}
+function abs(n){return Math.abs(n);}
+function sup(s){return "<sup>"+s+"</sup>";}
+function xN(p){return p===1?"x":(p===0?"":"x"+sup(p));}
+// format a term like "+ 3x^2" with proper signs; first=true drops leading +
+function term(c,pow,first){
+  if(c===0)return "";
+  var s=(c<0?"−":(first?"":"+"))+" ";
+  if(first&&c>=0)s="";
+  var a=Math.abs(c);
+  var v=xN(pow);
+  var body=(pow>0&&a===1)?v:(a+v);
+  return (first?"":" ")+s.replace(/ $/,(first?"":" "))+body;
+}
+// build polynomial string from coeff array [c_n,...,c_0]
+function polyStr(coefs){
+  var deg=coefs.length-1,out="",first=true,i;
+  for(i=0;i<coefs.length;i++){
+    var c=coefs[i],p=deg-i;
+    if(c===0)continue;
+    var a=Math.abs(c),v=xN(p),body=(p>0&&a===1)?v:(a+v);
+    if(first){out+=(c<0?"−":"")+body;first=false;}
+    else{out+=" "+(c<0?"−":"+")+" "+body;}
+  }
+  return out===""?"0":out;
+}
+function frac(n,d){ // reduced fraction string
+  var g=gcd(n,d);n/=g;d/=g;
+  if(d<0){d=-d;n=-n;}
+  if(d===1)return ""+n;
+  return n+"/"+d;
+}
+function fracHtml(n,d){
+  var s=frac(n,d);
+  if(s.indexOf("/")<0)return s;
+  var p=s.split("/");
+  return '<span class="frac"><span>'+p[0]+'</span><span>'+p[1]+'</span></span>';
+}
+function plural(n,s){return n+" "+s+(n===1?"":"s");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function todayKey(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function daysBetween(a,b){return Math.floor(Math.abs(b-a)/86400000);}
+
+/* ---------- tiny sound engine ---------- */
+var SFX=(function(){
+  var ctx=null,on=true;
+  function c(){if(!ctx){try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){on=false;}}return ctx;}
+  function tone(f,t,dur,type,vol){
+    if(!on||!c())return;
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type||"sine";o.frequency.value=f;
+    g.gain.setValueAtTime(vol||.12,ctx.currentTime+t);
+    g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+t+dur);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(ctx.currentTime+t);o.stop(ctx.currentTime+t+dur+.02);
+  }
+  return {
+    ok:function(){tone(523,0,.12);tone(659,.09,.12);tone(784,.18,.2);},
+    bad:function(){tone(196,0,.2,"sawtooth",.07);tone(155,.14,.25,"sawtooth",.07);},
+    level:function(){tone(523,0,.1);tone(659,.08,.1);tone(784,.16,.1);tone(1047,.24,.3);},
+    badge:function(){tone(659,0,.1);tone(880,.09,.1);tone(1175,.18,.3);},
+    click:function(){tone(880,0,.05,"square",.04);},
+    tick:function(){tone(1200,0,.04,"square",.03);}
+  };
+})();
+
+/* ---------- persistent state ---------- */
+var SKEY="a2ba_v1";
+var S=null;
+function blankState(){
+  return {
+    xp:0, totalsAtt:0, totalsCor:0,
+    streak:{count:0,last:""},
+    badges:{},
+    skills:{},           // id -> {m, att, cor, hist:[], last:ts, wrongRow:0}
+    diagDone:false, diagDate:"", diagUnits:{},
+    journal:[],          // mistakes {t, sk, q, ur, ans}
+    tests:[],            // {date, pct, per:{unit:pct}}
+    daily:{date:"", xp:0, goal:100, quests:{}},
+    beastWins:0, blitzBest:0,
+    sessionCorrectRow:0
+  };
+}
+function load(){
+  try{
+    var raw=localStorage.getItem(SKEY);
+    S=raw?JSON.parse(raw):blankState();
+  }catch(e){S=blankState();}
+  var b=blankState(),k;
+  for(k in b){if(S[k]===undefined)S[k]=b[k];}
+  applyDecay();
+  touchStreak(false);
+  rollDaily();
+}
+function save(){try{localStorage.setItem(SKEY,JSON.stringify(S));}catch(e){}}
+function sk(id){
+  if(!S.skills[id])S.skills[id]={m:0,att:0,cor:0,hist:[],last:0,wrongRow:0};
+  return S.skills[id];
+}
+/* mastery slowly decays if a skill is neglected — retrieval practice matters */
+function applyDecay(){
+  var now=Date.now(),id;
+  for(id in S.skills){
+    var s=S.skills[id];
+    if(s.last&&s.m>40){
+      var d=daysBetween(s.last,now);
+      if(d>7){
+        var drop=Math.min(Math.floor((d-7)/3),Math.floor(s.m*.25));
+        if(drop>0)s.m=Math.max(40,s.m-drop);
+      }
+    }
+  }
+}
+function rollDaily(){
+  var t=todayKey();
+  if(S.daily.date!==t){
+    S.daily={date:t,xp:0,goal:S.daily.goal||100,quests:{}};
+    save();
+  }
+}
+function touchStreak(earned){
+  var t=todayKey();
+  if(earned){
+    if(S.streak.last===t)return;
+    var y=new Date();y.setDate(y.getDate()-1);
+    var yk=y.getFullYear()+"-"+(y.getMonth()+1)+"-"+y.getDate();
+    S.streak.count=(S.streak.last===yk)?S.streak.count+1:1;
+    S.streak.last=t;
+    save();
+  }else{
+    if(S.streak.last&&S.streak.last!==t){
+      var y2=new Date();y2.setDate(y2.getDate()-1);
+      var yk2=y2.getFullYear()+"-"+(y2.getMonth()+1)+"-"+y2.getDate();
+      if(S.streak.last!==yk2){S.streak.count=0;save();}
+    }
+  }
+}
+
+/* ---------- levels & XP ---------- */
+var LVS=[
+  {xp:0,name:"Rookie",ic:"🐣"},{xp:150,name:"Apprentice",ic:"📐"},{xp:400,name:"Solver",ic:"🧮"},
+  {xp:800,name:"Strategist",ic:"🧠"},{xp:1400,name:"Warrior",ic:"⚔️"},{xp:2200,name:"Gladiator",ic:"🛡️"},
+  {xp:3200,name:"Beast",ic:"🐲"},{xp:4600,name:"Elite Beast",ic:"👑"},{xp:6500,name:"Legend",ic:"🌟"},
+  {xp:9000,name:"Math Immortal",ic:"♾️"}
+];
+function lvlInfo(){
+  var i,cur=0;
+  for(i=0;i<LVS.length;i++){if(S.xp>=LVS[i].xp)cur=i;}
+  var next=LVS[cur+1]||null;
+  var pct=next?Math.round(100*(S.xp-LVS[cur].xp)/(next.xp-LVS[cur].xp)):100;
+  return {i:cur,def:LVS[cur],next:next,pct:pct};
+}
+function addXP(n){
+  var before=lvlInfo().i;
+  S.xp+=n;S.daily.xp+=n;
+  var after=lvlInfo().i;
+  save();paintTop();
+  if(after>before){SFX.level();toast("🎉 LEVEL UP — "+LVS[after].ic+" "+LVS[after].name+"!");}
+}
+
+/* ---------- mastery engine ---------- */
+function mTier(m){ if(m>=97)return 5; if(m>=90)return 4; if(m>=75)return 3; if(m>=60)return 2; if(m>=40)return 1; return 0; }
+var TIER_NAMES=["Weak","Developing","Functional","Strong","Mastered","Elite"];
+function tierTag(m,att){
+  if(!att)return '<span class="mtag t0">NEW</span>';
+  var t=mTier(m);
+  return '<span class="mtag t'+t+'">'+TIER_NAMES[t].toUpperCase()+" "+Math.round(m)+"%</span>";
+}
+function recordAnswer(skillId,level,ok){
+  var s=sk(skillId);
+  s.att++;S.totalsAtt++;
+  if(ok){
+    s.cor++;S.totalsCor++;s.wrongRow=0;
+    S.sessionCorrectRow++;
+    var gain=(3+2.6*level)*(1-s.m/115);
+    s.m=Math.min(100,s.m+gain);
+    // consistency gate: real mastery needs a body of work
+    if(s.att<6)s.m=Math.min(s.m,88);
+    else if(s.att<10)s.m=Math.min(s.m,96);
+  }else{
+    s.wrongRow++;S.sessionCorrectRow=0;
+    s.m=Math.max(0,s.m-(13-1.5*level));
+  }
+  s.hist.push({l:level,ok:ok?1:0,t:Date.now()});
+  if(s.hist.length>25)s.hist.shift();
+  s.last=Date.now();
+  touchStreak(true);
+  save();
+}
+function pickLevel(skillId){
+  var s=sk(skillId),m=s.m;
+  var L= m<40?1 : m<60?2 : m<75?3 : m<90?4 : 5;
+  if(s.wrongRow>=2)L=Math.max(1,L-1);         // struggling → step down
+  else if(S.sessionCorrectRow>=4&&L<5)L++;    // hot streak → push harder
+  return L;
+}
+function unitMastery(uid){
+  var u=unitById(uid),sum=0,n=0,i;
+  for(i=0;i<u.skills.length;i++){var s=sk(u.skills[i].id);sum+=s.m;n++;}
+  return n?sum/n:0;
+}
+function overallMastery(){
+  var sum=0,i;
+  for(i=0;i<UNITS.length;i++)sum+=unitMastery(UNITS[i].id);
+  return sum/UNITS.length;
+}
+/* spaced review: interval grows with mastery tier */
+function reviewDue(){
+  var due=[],now=Date.now(),i,j;
+  var iv=[1,2,4,7,14,21]; // days by tier
+  for(i=0;i<UNITS.length;i++)for(j=0;j<UNITS[i].skills.length;j++){
+    var d=UNITS[i].skills[j],s=S.skills[d.id];
+    if(s&&s.att>0&&s.last&&daysBetween(s.last,now)>=iv[mTier(s.m)]){
+      due.push(d);
+    }
+  }
+  return due;
+}
+function weakSkills(n){
+  var all=[],i,j;
+  for(i=0;i<UNITS.length;i++)for(j=0;j<UNITS[i].skills.length;j++){
+    var d=UNITS[i].skills[j],s=S.skills[d.id];
+    if(s&&s.att>0)all.push({d:d,m:s.m});
+  }
+  all.sort(function(a,b){return a.m-b.m;});
+  return all.slice(0,n||3);
+}
+
+/* ---------- curriculum: Missouri Learning Standards Algebra II ----------
+   Branson Public Schools (Branson, MO) follows the Missouri Learning
+   Standards; Algebra II is a Missouri EOC-assessed course. Units below map
+   to the public MLS Algebra II strands. */
+var UNITS=[
+ {id:"lin",name:"Linear & Absolute Value",ic:"📏",mls:"A2.REI.A.1 · A2.IF.A",
+  blurb:"Multi-step equations, literal equations, absolute value equations & inequalities, compound inequalities.",
+  skills:[
+   {id:"lin1",name:"Multi-Step Equations"},
+   {id:"lin2",name:"Literal Equations"},
+   {id:"lin3",name:"Absolute Value Equations"},
+   {id:"lin4",name:"Absolute Value Inequalities"},
+   {id:"lin5",name:"Compound Inequalities"}
+  ]},
+ {id:"fun",name:"Functions & Transformations",ic:"🧩",mls:"A2.IF.A · A2.BF.A",
+  blurb:"Function notation, domain & range, composition, inverses, transformations, piecewise functions.",
+  skills:[
+   {id:"fun1",name:"Function Notation & Evaluation"},
+   {id:"fun2",name:"Domain & Range"},
+   {id:"fun3",name:"Composition of Functions"},
+   {id:"fun4",name:"Inverse Functions"},
+   {id:"fun5",name:"Transformations"},
+   {id:"fun6",name:"Piecewise Functions"}
+  ]},
+ {id:"sys",name:"Systems of Equations",ic:"⚖️",mls:"A2.REI.B",
+  blurb:"Two- and three-variable linear systems, nonlinear systems, applications.",
+  skills:[
+   {id:"sys1",name:"2-Variable Systems"},
+   {id:"sys2",name:"3-Variable Systems"},
+   {id:"sys3",name:"Nonlinear Systems"},
+   {id:"sys4",name:"System Word Problems"}
+  ]},
+ {id:"quad",name:"Quadratic Functions",ic:"🎯",mls:"A2.SSE · A2.FM.A.1",
+  blurb:"Factoring, completing the square, vertex form, quadratic formula, discriminant, applications.",
+  skills:[
+   {id:"quad1",name:"Factoring: GCF & Special"},
+   {id:"quad2",name:"Factoring Trinomials"},
+   {id:"quad3",name:"Solve by Factoring"},
+   {id:"quad4",name:"Completing the Square"},
+   {id:"quad5",name:"Vertex Form & Graphs"},
+   {id:"quad6",name:"Quadratic Formula"},
+   {id:"quad7",name:"The Discriminant"},
+   {id:"quad8",name:"Quadratic Applications"}
+  ]},
+ {id:"cplx",name:"Complex Numbers",ic:"🌀",mls:"A2.NQ.B.5–7",
+  blurb:"Powers of i, operations, conjugates and division, complex roots of quadratics.",
+  skills:[
+   {id:"cplx1",name:"Powers of i"},
+   {id:"cplx2",name:"Add & Subtract"},
+   {id:"cplx3",name:"Multiply Complex Numbers"},
+   {id:"cplx4",name:"Divide (Conjugates)"},
+   {id:"cplx5",name:"Complex Roots of Quadratics"}
+  ]},
+ {id:"poly",name:"Polynomials",ic:"📈",mls:"A2.APR.A.1–5",
+  blurb:"Operations, synthetic division, Remainder Theorem, zeros, end behavior, multiplicity.",
+  skills:[
+   {id:"poly1",name:"Polynomial Operations"},
+   {id:"poly2",name:"Synthetic Division"},
+   {id:"poly3",name:"Remainder Theorem"},
+   {id:"poly4",name:"Zeros & Factoring"},
+   {id:"poly5",name:"End Behavior"},
+   {id:"poly6",name:"Build From Zeros & Multiplicity"}
+  ]},
+ {id:"rat",name:"Rational Expressions",ic:"➗",mls:"A2.APR.A.4 · A2.REI.A.2",
+  blurb:"Simplify, multiply/divide, add/subtract, solve rational equations, asymptotes.",
+  skills:[
+   {id:"rat1",name:"Simplify Rational Expressions"},
+   {id:"rat2",name:"Multiply & Divide"},
+   {id:"rat3",name:"Add & Subtract"},
+   {id:"rat4",name:"Rational Equations"},
+   {id:"rat5",name:"Asymptotes & Behavior"}
+  ]},
+ {id:"rad",name:"Radicals & Rational Exponents",ic:"🌱",mls:"A2.NQ.A.1–4",
+  blurb:"Simplify radicals, rational exponents, operations, radical equations & extraneous solutions.",
+  skills:[
+   {id:"rad1",name:"Simplify Radicals"},
+   {id:"rad2",name:"Rational Exponents"},
+   {id:"rad3",name:"Radical Operations"},
+   {id:"rad4",name:"Radical Equations"}
+  ]},
+ {id:"exp",name:"Exponentials & Logarithms",ic:"🚀",mls:"A2.SSE.A.1–4 · A2.BF.A",
+  blurb:"Exponent rules, growth & decay, log conversion, log properties, exponential & log equations.",
+  skills:[
+   {id:"exp1",name:"Exponent Rules"},
+   {id:"exp2",name:"Growth & Decay Models"},
+   {id:"exp3",name:"Convert Exponential ↔ Log"},
+   {id:"exp4",name:"Evaluate Logarithms"},
+   {id:"exp5",name:"Log Properties"},
+   {id:"exp6",name:"Exponential Equations"},
+   {id:"exp7",name:"Logarithmic Equations"}
+  ]},
+ {id:"seq",name:"Sequences & Series",ic:"🪜",mls:"A2.IF · A2.BF",
+  blurb:"Arithmetic & geometric sequences, recursion, series, infinite geometric sums.",
+  skills:[
+   {id:"seq1",name:"Arithmetic Sequences"},
+   {id:"seq2",name:"Geometric Sequences"},
+   {id:"seq3",name:"Recursive Sequences"},
+   {id:"seq4",name:"Arithmetic Series"},
+   {id:"seq5",name:"Geometric Series"}
+  ]},
+ {id:"data",name:"Probability & Statistics",ic:"🎲",mls:"A2.DS.A.1–7",
+  blurb:"Counting, probability, binomial probability, expected value, normal distribution.",
+  skills:[
+   {id:"data1",name:"Permutations & Combinations"},
+   {id:"data2",name:"Probability"},
+   {id:"data3",name:"Binomial Probability"},
+   {id:"data4",name:"Expected Value"},
+   {id:"data5",name:"Normal Distribution & z-Scores"}
+  ]}
+];
+function unitById(id){var i;for(i=0;i<UNITS.length;i++)if(UNITS[i].id===id)return UNITS[i];return null;}
+function skillDef(id){
+  var i,j;
+  for(i=0;i<UNITS.length;i++)for(j=0;j<UNITS[i].skills.length;j++)
+    if(UNITS[i].skills[j].id===id){var d=UNITS[i].skills[j];d.unit=UNITS[i].id;return d;}
+  return null;
+}
+/* ============================================================
+   QUESTION GENERATORS — every skill has a generator taking a
+   difficulty level L (1–5) and returning a fresh, checked
+   question. Answers are constructed backwards from chosen
+   solutions so they are always exact.
+   ============================================================ */
+var GEN={};
+function mc(correct,distractors){
+  var opts=[correct],i;
+  for(i=0;i<distractors.length&&opts.length<4;i++){
+    if(opts.indexOf(distractors[i])<0)opts.push(distractors[i]);
+  }
+  return {choices:shuffle(opts),ans:correct};
+}
+function nzr(a,b){var n=0;while(n===0)n=ri(a,b);return n;} // nonzero random
+function q(html,type,ans,extra){
+  var o={html:html,type:type,ans:String(ans)};
+  var k;for(k in (extra||{}))o[k]=extra[k];
+  return o;
+}
+function cpx(a,b){ // complex "a+bi" canonical + accepted variants
+  var s,alt=[];
+  if(b===0)return {s:String(a),alt:[]};
+  var bi=(b===1?"i":(b===-1?"-i":b+"i"));
+  if(a===0){s=bi;}
+  else{s=a+(b>0?"+":"")+bi;alt.push(bi+(a>0?"+":"")+a);}
+  return {s:s,alt:alt};
+}
+
+/* ----- UNIT: Linear & Absolute Value ----- */
+GEN.lin1=function(L){
+  var x,a,b,c,d,m;
+  if(L<=1){x=ri(-9,9);a=nzr(2,7);b=ri(-10,10);c=a*x+b;
+    return q("Solve for x:<br><span class='math big'>"+polyStr([a,b])+" = "+c+"</span>","num",x,
+      {hint:"Undo the +"+b+" first, then divide by "+a+".",
+       expl:"Subtract "+b+" from both sides: "+a+"x = "+(c-b)+". Divide by "+a+": x = "+x+"."});
+  }
+  if(L===2){x=ri(-8,8);a=nzr(2,8);c=nzr(-6,6);while(c===a)c=nzr(-6,6);b=ri(-9,9);d=a*x+b-c*x;
+    return q("Solve for x:<br><span class='math big'>"+polyStr([a,b])+" = "+polyStr([c,d])+"</span>","num",x,
+      {hint:"Move all x-terms to one side, constants to the other.",
+       expl:"Subtract "+c+"x from both sides: "+(a-c)+"x "+(b<0?"− "+(-b):"+ "+b)+" = "+d+", so "+(a-c)+"x = "+(d-b)+", giving x = "+x+"."});
+  }
+  if(L===3){x=ri(-7,7);a=nzr(2,5);b=ri(-6,6);c=ri(-9,9);d=a*(x+b)+c;
+    return q("Solve for x:<br><span class='math big'>"+a+"(x "+(b<0?"− "+(-b):"+ "+b)+") "+(c<0?"− "+(-c):"+ "+c)+" = "+d+"</span>","num",x,
+      {hint:"Distribute the "+a+" first.",
+       expl:"Distribute: "+a+"x + "+(a*b)+" + "+c+" = "+d+" → "+a+"x = "+(d-a*b-c)+" → x = "+x+"."});
+  }
+  if(L===4){x=ri(-6,6);a=nzr(2,5);c=ri(2,6);d=ri(-5,5);b=c*d-a*x;
+    return q("Solve for x:<br><span class='math big'><span class='frac'><span>"+polyStr([a,b])+"</span><span>"+c+"</span></span> = "+d+"</span>","num",x,
+      {hint:"Multiply both sides by "+c+" first.",
+       expl:"Multiply both sides by "+c+": "+a+"x "+(b<0?"− "+(-b):"+ "+b)+" = "+(c*d)+" → "+a+"x = "+(c*d-b)+" → x = "+x+"."});
+  }
+  a=ri(2,4);c=a+ri(1,3);m=nzr(-4,4);b=ri(-8,8);d=b+m*(c-a);x=a*c*m;
+  return q("Solve for x:<br><span class='math big'><span class='frac'><span>x</span><span>"+a+"</span></span> "+(b<0?"− "+(-b):"+ "+b)+" = <span class='frac'><span>x</span><span>"+c+"</span></span> "+(d<0?"− "+(-d):"+ "+d)+"</span>","num",x,
+    {hint:"Multiply everything by "+(a*c)+" (the LCD) to clear fractions.",
+     expl:"Multiply by "+(a*c)+": "+c+"x + "+(a*c*b)+" = "+a+"x + "+(a*c*d)+" → "+(c-a)+"x = "+(a*c*(d-b))+" → x = "+x+"."});
+};
+GEN.lin2=function(L){
+  var t=L<=2?pick([
+    {p:"d = vt. Solve for t.",c:"t = d/v",w:["t = v/d","t = dv","t = d − v"]},
+    {p:"A = ½bh. Solve for h.",c:"h = 2A/b",w:["h = A/(2b)","h = 2b/A","h = A − 2b"]},
+    {p:"P = 2ℓ + 2w. Solve for w.",c:"w = (P − 2ℓ)/2",w:["w = P − 2ℓ","w = P/2 + ℓ","w = 2(P − ℓ)"]},
+    {p:"y = mx + b. Solve for x.",c:"x = (y − b)/m",w:["x = y − b − m","x = (b − y)/m","x = y/m − b"]}
+  ]):pick([
+    {p:"A = P + Prt. Solve for t.",c:"t = (A − P)/(Pr)",w:["t = A/(Pr) − P","t = (A + P)/(Pr)","t = (A − P) − Pr"]},
+    {p:"C = ⁵⁄₉(F − 32). Solve for F.",c:"F = ⁹⁄₅C + 32",w:["F = ⁵⁄₉C + 32","F = ⁹⁄₅(C + 32)","F = ⁹⁄₅C − 32"]},
+    {p:"V = πr²h. Solve for h.",c:"h = V/(πr²)",w:["h = πr²/V","h = V − πr²","h = Vπr²"]},
+    {p:"S = a/(1 − r). Solve for r.",c:"r = 1 − a/S",w:["r = a/S − 1","r = S/a − 1","r = 1 − S/a"]},
+    {p:"ax + by = c. Solve for y.",c:"y = (c − ax)/b",w:["y = c − ax − b","y = (ax − c)/b","y = c/b − ax"]}
+  ]);
+  var m=mc(t.c,t.w);
+  return q("Literal equation — rearrange:<br><span class='math big'>"+t.p+"</span>","mc",m.ans,
+    {choices:m.choices,hint:"Treat every other letter like a number and isolate the target variable.",
+     expl:"Isolate the variable using inverse operations, exactly like a one-variable equation: "+t.c+"."});
+};
+GEN.lin3=function(L){
+  var a,b,c,x1,x2;
+  if(L<=2){a=ri(-8,8);b=ri(1,9);x1=a+b;x2=a-b;
+    return q("Solve:<br><span class='math big'>|x "+(a>0?"− "+a:"+ "+(-a))+"| = "+b+"</span><div class='sub'>Enter both solutions separated by a comma.</div>","set",x1+","+x2,
+      {hint:"The expression inside can equal "+b+" or −"+b+".",
+       expl:"x − ("+a+") = ±"+b+", so x = "+a+" ± "+b+" → x = "+x1+" or x = "+x2+"."});
+  }
+  if(L===3){a=ri(2,4);var u=ri(-4,4),v=u-ri(1,5);b=ri(-6,6);c=a*u+b;x1=u;x2=frac(-c*2/1,1);
+    // build |a x + b| = c with two rational sols
+    var s1=frac(c-b,a),s2=frac(-c-b,a);
+    return q("Solve:<br><span class='math big'>|"+polyStr([a,b])+"| = "+c+"</span><div class='sub'>Enter both solutions separated by a comma (fractions like 3/4 are fine).</div>","set",s1+","+s2,
+      {hint:"Split into "+a+"x "+(b<0?"− "+(-b):"+ "+b)+" = "+c+" and = −"+c+".",
+       expl:"Case 1: "+a+"x = "+(c-b)+" → x = "+s1+". Case 2: "+a+"x = "+(-c-b)+" → x = "+s2+"."});
+  }
+  if(L===4){a=ri(-6,6);b=ri(2,8);c=ri(1,6);x1=a+b;x2=a-b;
+    return q("Solve:<br><span class='math big'>|x "+(a>0?"− "+a:"+ "+(-a))+"| "+(c>0?"+ "+c:"")+" = "+(b+c)+"</span><div class='sub'>Enter both solutions separated by a comma.</div>","set",x1+","+x2,
+      {hint:"Isolate the absolute value BEFORE splitting into cases.",
+       expl:"Subtract "+c+": |x − ("+a+")| = "+b+". Then x = "+a+" ± "+b+" → "+x1+" or "+x2+"."});
+  }
+  a=ri(-5,5);b=ri(2,7);
+  return q("Solve:<br><span class='math big'>|x "+(a>0?"− "+a:"+ "+(-a))+"| = −"+b+"</span><div class='sub'>If there is no solution, type: no solution</div>","text","no solution",
+    {alt:["none","nosolution","∅","no solutions"],
+     hint:"Can an absolute value ever be negative?",
+     expl:"Absolute value is always ≥ 0, so it can never equal −"+b+". No solution."});
+};
+GEN.lin4=function(L){
+  var a=ri(-6,6),b=ri(1,8),lo=a-b,hi=a+b;
+  var inner="|x "+(a>0?"− "+a:(a<0?"+ "+(-a):""))+"|";
+  if(L<=2||L===3){
+    var lt=(L<=2)||Math.random()<.5;
+    if(lt){
+      var m1=mc(lo+" < x < "+hi,["x < "+lo+" or x > "+hi,hi+" < x < "+lo,(-hi)+" < x < "+(-lo)]);
+      return q("Solve:<br><span class='math big'>"+inner+" < "+b+"</span>","mc",m1.ans,
+        {choices:m1.choices,hint:"'Less than' absolute value = a sandwich (AND) between −"+b+" and "+b+".",
+         expl:"−"+b+" < x − ("+a+") < "+b+". Add "+a+" to all three parts: "+lo+" < x < "+hi+"."});
+    }
+    var m2=mc("x < "+lo+" or x > "+hi,[lo+" < x < "+hi,"x > "+lo+" or x < "+hi,"x < "+(-hi)+" or x > "+(-lo)]);
+    return q("Solve:<br><span class='math big'>"+inner+" > "+b+"</span>","mc",m2.ans,
+      {choices:m2.choices,hint:"'Greater than' absolute value splits into an OR statement.",
+       expl:"x − ("+a+") > "+b+" or x − ("+a+") < −"+b+" → x > "+hi+" or x < "+lo+"."});
+  }
+  var c=ri(1,5);
+  var m3=mc(lo+" ≤ x ≤ "+hi,["x ≤ "+lo+" or x ≥ "+hi,(lo-c)+" ≤ x ≤ "+(hi+c),lo+" < x < "+hi]);
+  return q("Solve:<br><span class='math big'>"+c+inner+" "+(c>0?"":"")+"≤ "+(b*c)+"</span>","mc",m3.ans,
+    {choices:m3.choices,hint:"Divide by "+c+" first to isolate the absolute value.",
+     expl:"Divide by "+c+": "+inner+" ≤ "+b+" → −"+b+" ≤ x − ("+a+") ≤ "+b+" → "+lo+" ≤ x ≤ "+hi+"."});
+};
+GEN.lin5=function(L){
+  var x,a,b,lo,hi,d;
+  a=nzr(2,4);b=ri(-5,5);lo=ri(-8,2);d=ri(2,8);hi=lo+d;
+  var L1=a*lo+b,L2=a*hi+b;
+  if(L<=3){
+    var m1=mc(lo+" < x ≤ "+hi,["x < "+lo+" or x ≥ "+hi,L1+" < x ≤ "+L2,(lo-1)+" < x ≤ "+(hi+1)]);
+    return q("Solve the compound inequality:<br><span class='math big'>"+L1+" < "+polyStr([a,b])+" ≤ "+L2+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Do the same steps to all three parts at once.",
+       expl:"Subtract "+b+" everywhere: "+(L1-b)+" < "+a+"x ≤ "+(L2-b)+". Divide by "+a+": "+lo+" < x ≤ "+hi+"."});
+  }
+  // OR compound with negative division (flip)
+  var c=-nzr(2,4);lo=ri(-6,0);hi=lo+ri(2,6);
+  var R1=c*hi,R2=c*lo; // c negative: x<lo → cx>R2 etc
+  var m2=mc("x ≤ "+lo+" or x > "+hi,["x ≥ "+lo+" or x < "+hi,lo+" ≤ x < "+hi,"x ≤ "+(-lo)+" or x > "+(-hi)]);
+  return q("Solve:<br><span class='math big'>"+c+"x ≥ "+R2+"  or  "+c+"x < "+R1+"</span>","mc",m2.ans,
+    {choices:m2.choices,hint:"Dividing by a NEGATIVE flips each inequality symbol.",
+     expl:"Divide both by "+c+" (negative → flip): x ≤ "+lo+" or x > "+hi+"."});
+};
+
+/* ----- UNIT: Functions & Transformations ----- */
+GEN.fun1=function(L){
+  var a,b,c,k,val;
+  if(L<=1){a=nzr(-5,5);b=ri(-9,9);k=ri(-5,5);val=a*k+b;
+    return q("Given f(x) = "+polyStr([a,b])+", find:<br><span class='math big'>f("+k+")</span>","num",val,
+      {hint:"Replace every x with "+k+".",expl:"f("+k+") = "+a+"("+k+") "+(b<0?"− "+(-b):"+ "+b)+" = "+val+"."});
+  }
+  if(L<=3){a=nzr(-3,3);b=ri(-5,5);c=ri(-6,6);k=ri(-4,4);val=a*k*k+b*k+c;
+    return q("Given f(x) = "+polyStr([a,b,c])+", find:<br><span class='math big'>f("+k+")</span>","num",val,
+      {hint:"Substitute carefully — squaring a negative gives a positive.",
+       expl:"f("+k+") = "+a+"("+k+")² "+(b<0?"− "+(-b)+"("+k+")":"+ "+b+"("+k+")")+" "+(c<0?"− "+(-c):"+ "+c)+" = "+(a*k*k)+" + "+(b*k)+" + "+c+" = "+val+"."});
+  }
+  if(L===4){a=nzr(2,5);b=ri(-8,8);val=ri(-5,5);k=a*val+b;
+    return q("Given f(x) = "+polyStr([a,b])+", solve:<br><span class='math big'>f(x) = "+k+"</span>","num",val,
+      {hint:"This asks for the INPUT that produces output "+k+".",
+       expl:"Set "+a+"x "+(b<0?"− "+(-b):"+ "+b)+" = "+k+" → "+a+"x = "+(k-b)+" → x = "+val+"."});
+  }
+  a=nzr(-3,3);b=ri(-4,4);c=ri(-5,5);k=ri(-3,3);var h=ri(1,3);
+  val=a*(k+h)*(k+h)+b*(k+h)+c;
+  return q("Given f(x) = "+polyStr([a,b,c])+", find:<br><span class='math big'>f("+k+" + "+h+")</span> <span class='sub'>(evaluate as a number)</span>","num",val,
+    {hint:"First add: the input is "+(k+h)+".",
+     expl:"The input is "+(k+h)+". f("+(k+h)+") = "+(a*(k+h)*(k+h))+" + "+(b*(k+h))+" + "+c+" = "+val+"."});
+};
+GEN.fun2=function(L){
+  var a=ri(-6,6),h=ri(-5,5),k=ri(-6,6);
+  if(L<=2){
+    var m1=mc("All real numbers except x = "+a,["All real numbers","x > "+a,"All real numbers except x = "+(-a)]);
+    return q("Find the domain:<br><span class='math big'>f(x) = <span class='frac'><span>1</span><span>x "+(a>0?"− "+a:"+ "+(-a))+"</span></span></span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Division by zero is forbidden — what x makes the bottom 0?",
+       expl:"The denominator can't be 0: x − ("+a+") ≠ 0, so x ≠ "+a+"."});
+  }
+  if(L===3){
+    var m2=mc("x ≥ "+a,["x > "+a,"x ≤ "+a,"All real numbers"]);
+    return q("Find the domain:<br><span class='math big'>f(x) = √(x "+(a>0?"− "+a:"+ "+(-a))+")</span>","mc",m2.ans,
+      {choices:m2.choices,hint:"Whatever is under a square root must be ≥ 0.",
+       expl:"Need x − ("+a+") ≥ 0 → x ≥ "+a+". (Equal to 0 is fine — √0 = 0.)"});
+  }
+  if(L===4){
+    var up=Math.random()<.5;var aa=up?ri(1,3):-ri(1,3);
+    var m3=mc(up?("y ≥ "+k):("y ≤ "+k),[up?("y ≤ "+k):("y ≥ "+k),"All real numbers","y ≥ "+h]);
+    return q("Find the RANGE:<br><span class='math big'>f(x) = "+(aa===1?"":(aa===-1?"−":aa))+"(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k)+"</span>","mc",m3.ans,
+      {choices:m3.choices,hint:"Vertex form: the vertex is ("+h+", "+k+"). Does the parabola open up or down?",
+       expl:"Vertex ("+h+", "+k+"), opens "+(up?"up":"down")+" since a = "+aa+" → range: y "+(up?"≥":"≤")+" "+k+"."});
+  }
+  var m4=mc("Domain: x ≠ "+a+"; Range: y ≠ 0",["Domain: x ≠ 0; Range: y ≠ "+a,"Domain: all reals; Range: all reals","Domain: x ≠ "+a+"; Range: all reals"]);
+  return q("Give the domain AND range:<br><span class='math big'>f(x) = <span class='frac'><span>1</span><span>x "+(a>0?"− "+a:"+ "+(-a))+"</span></span></span>","mc",m4.ans,
+    {choices:m4.choices,hint:"Think about the vertical AND horizontal asymptotes.",
+     expl:"Vertical asymptote x = "+a+" (excluded from domain); a reciprocal never reaches 0, so range excludes y = 0."});
+};
+GEN.fun3=function(L){
+  var a=nzr(-4,4),b=ri(-6,6),c=nzr(-3,3),d=ri(-5,5),k=ri(-3,3);
+  var g=c*k+d,val=a*g+b;
+  if(L<=2){
+    return q("f(x) = "+polyStr([a,b])+", g(x) = "+polyStr([c,d])+".<br>Find:<span class='math big'> f(g("+k+"))</span>","num",val,
+      {hint:"Work inside-out: find g("+k+") first.",
+       expl:"g("+k+") = "+g+". Then f("+g+") = "+a+"("+g+") "+(b<0?"− "+(-b):"+ "+b)+" = "+val+"."});
+  }
+  if(L<=4){
+    var p=nzr(-2,2),qq=ri(-4,4),r=ri(-4,4);
+    var gk=p*k*k+qq*k+r,v2=a*gk+b;
+    var which=Math.random()<.5;
+    if(which){
+      return q("f(x) = "+polyStr([a,b])+", g(x) = "+polyStr([p,qq,r])+".<br>Find:<span class='math big'> (f ∘ g)("+k+")</span>","num",v2,
+        {hint:"(f ∘ g)(x) means f(g(x)) — inside first.",
+         expl:"g("+k+") = "+gk+". Then f("+gk+") = "+v2+"."});
+    }
+    var fk=a*k+b,v3=p*fk*fk+qq*fk+r;
+    return q("f(x) = "+polyStr([a,b])+", g(x) = "+polyStr([p,qq,r])+".<br>Find:<span class='math big'> (g ∘ f)("+k+")</span>","num",v3,
+      {hint:"(g ∘ f) means g(f(x)) — apply f FIRST.",
+       expl:"f("+k+") = "+fk+". Then g("+fk+") = "+v3+"."});
+  }
+  // L5: composed expression MC
+  var A=nzr(2,3),B=ri(-4,4),C=nzr(2,3),D=ri(-4,4);
+  var cor=polyStr([A*C,A*D+B]),d1=polyStr([A*C,B*C+D]),d2=polyStr([A*C,B+D]),d3=polyStr([A+C,B+D]);
+  var m1=mc(cor,[d1,d2,d3]);
+  return q("f(x) = "+polyStr([A,B])+", g(x) = "+polyStr([C,D])+".<br>Find the EXPRESSION:<span class='math big'> f(g(x))</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"Substitute g(x) in place of x inside f, then simplify.",
+     expl:"f(g(x)) = "+A+"("+polyStr([C,D])+") "+(B<0?"− "+(-B):"+ "+B)+" = "+cor+"."});
+};
+GEN.fun4=function(L){
+  var a=nzr(2,5),b=ri(-8,8),k,x;
+  if(L<=2){
+    x=ri(-5,5);k=a*x+b;
+    return q("f(x) = "+polyStr([a,b])+". Find:<br><span class='math big'>f⁻¹("+k+")</span>","num",x,
+      {hint:"f⁻¹("+k+") asks: what input gives output "+k+"?",
+       expl:"Solve "+a+"x "+(b<0?"− "+(-b):"+ "+b)+" = "+k+" → x = "+x+". So f⁻¹("+k+") = "+x+"."});
+  }
+  if(L<=4){
+    var cor="f⁻¹(x) = (x "+(b>0?"− "+b:"+ "+(-b))+")/"+a;
+    var m1=mc(cor,["f⁻¹(x) = "+a+"x "+(b<0?"− "+(-b):"+ "+b),"f⁻¹(x) = (x "+(b<0?"− "+(-b):"+ "+b)+")/"+a,"f⁻¹(x) = 1/("+polyStr([a,b])+")"]);
+    return q("Find the inverse of:<br><span class='math big'>f(x) = "+polyStr([a,b])+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Swap x and y, then solve for y. (An inverse is NOT the reciprocal!)",
+       expl:"y = "+a+"x "+(b<0?"− "+(-b):"+ "+b)+" → swap: x = "+a+"y "+(b<0?"− "+(-b):"+ "+b)+" → y = (x "+(b>0?"− "+b:"+ "+(-b))+")/"+a+"."});
+  }
+  // L5 verify inverse via composition
+  x=ri(-4,4);k=a*x+b;
+  return q("f(x) = "+polyStr([a,b])+". Compute:<br><span class='math big'>f⁻¹(f("+x+"))</span><div class='sub'>Think before you grind.</div>","num",x,
+    {hint:"What does an inverse DO to a function's output?",
+     expl:"An inverse undoes the function: f⁻¹(f(x)) = x for any x, so the answer is just "+x+". (Check: f("+x+") = "+k+", and f⁻¹("+k+") = "+x+".)"});
+};
+GEN.fun5=function(L){
+  var h=nzr(-6,6),k=nzr(-6,6);
+  var hs=(h>0?"right "+h:"left "+(-h)),vs=(k>0?"up "+k:"down "+(-k));
+  if(L<=2){
+    var m1=mc("Shift "+hs+" and "+vs,["Shift "+(h>0?"left "+h:"right "+(-h))+" and "+vs,"Shift "+hs+" and "+(k>0?"down "+k:"up "+(-k)),"Shift "+(h>0?"left "+h:"right "+(-h))+" and "+(k>0?"down "+k:"up "+(-k))]);
+    return q("Compared to y = x², describe:<br><span class='math big'>y = (x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"(x − h) moves the graph toward the SAME sign as h: (x − 3)² goes right.",
+       expl:"(x − h)² + k has vertex (h, k) = ("+h+", "+k+"): shift "+hs+", "+vs+"."});
+  }
+  if(L<=4){
+    var a=pick([-1,2,3,-2]),base=pick(["x²","|x|","√x"]);
+    var stretch=Math.abs(a)>1?("vertical stretch ×"+Math.abs(a)):"";
+    var refl=a<0?"reflection over the x-axis":"";
+    var desc=[];if(refl)desc.push(refl);if(stretch)desc.push(stretch);desc.push("shift "+hs);desc.push("shift "+vs);
+    var cor=desc.join(", ");
+    var w1=desc.slice();w1[w1.length-2]="shift "+(h>0?"left "+h:"right "+(-h));
+    var w2=desc.slice();if(a<0)w2[0]="reflection over the y-axis";else w2[0]="horizontal stretch ×"+Math.abs(a);
+    var w3=desc.slice();w3[w3.length-1]="shift "+(k>0?"down "+k:"up "+(-k));
+    var m2=mc(cor,[w1.join(", "),w2.join(", "),w3.join(", ")]);
+    var inner=base==="x²"?("(x "+(h>0?"− "+h:"+ "+(-h))+")²"):base==="|x|"?("|x "+(h>0?"− "+h:"+ "+(-h))+"|"):("√(x "+(h>0?"− "+h:"+ "+(-h))+")");
+    return q("Describe ALL transformations of y = "+base+" in:<br><span class='math big'>y = "+(a===1?"":(a===-1?"−":a))+inner+" "+(k<0?"− "+(-k):"+ "+k)+"</span>","mc",m2.ans,
+      {choices:m2.choices,hint:"Check: reflection? stretch? horizontal shift? vertical shift?",
+       expl:"a = "+a+" gives "+(a<0?"an x-axis reflection":"")+(Math.abs(a)>1?" and a vertical stretch ×"+Math.abs(a):"")+"; then vertex/anchor moves "+hs+" and "+vs+"."});
+  }
+  // L5: write the equation from a description
+  var cor2="y = −(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k);
+  var m3=mc(cor2,["y = (x "+(h>0?"+ "+h:"− "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k),"y = −(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"+ "+(-k):"− "+k),"y = −x² "+(h>0?"− "+h:"+ "+(-h))+(k<0?" − "+(-k):" + "+k)]);
+  return q("Write the equation: y = x² reflected over the x-axis, shifted "+hs+" and "+vs+".","mc",m3.ans,
+    {choices:m3.choices,hint:"Reflection → negative out front. Right h → (x − h).",
+     expl:"Reflect: −x². Shift "+hs+": replace x with (x − "+h+"). Shift "+vs+": add "+k+". Result: "+cor2+"."});
+};
+GEN.fun6=function(L){
+  var a1=nzr(-3,3),b1=ri(-5,5),a2=nzr(-3,3),b2=ri(-5,5),cut=ri(-2,2);
+  var k=L<=2?cut+ri(1,4):(Math.random()<.5?cut-ri(1,4):cut+ri(0,4));
+  var useTop=k<cut;
+  var val=useTop?(a1*k+b1):(a2*k*k+b2);
+  var top=polyStr([a1,b1]),bot=polyStr([a2,0,b2]);
+  return q("Piecewise function:<br><span class='math'>f(x) = "+top+" if x &lt; "+cut+"<br>f(x) = "+bot+" if x ≥ "+cut+"</span><br><br>Find: <span class='big'>f("+k+")</span>","num",val,
+    {hint:"First decide which rule "+k+" belongs to: is "+k+" &lt; "+cut+" or ≥ "+cut+"?",
+     expl:"Since "+k+(useTop?" < ":" ≥ ")+cut+", use "+(useTop?top:bot)+": f("+k+") = "+val+"."});
+};
+
+/* ----- UNIT: Systems ----- */
+GEN.sys1=function(L){
+  var x=ri(-5,5),y=ri(-5,5),a1,b1,a2,b2;
+  if(L<=2){a1=1;b1=pick([1,-1]);a2=1;b2=-b1;}
+  else{a1=nzr(-4,4);b1=nzr(-4,4);a2=nzr(-4,4);b2=nzr(-4,4);
+    while(a1*b2-a2*b1===0){a2=nzr(-4,4);b2=nzr(-4,4);}}
+  var c1=a1*x+b1*y,c2=a2*x+b2*y;
+  return q("Solve the system:<br><span class='math big'>"+eqStr(a1,b1,c1)+"<br>"+eqStr(a2,b2,c2)+"</span><div class='sub'>Answer as an ordered pair: (x, y)</div>","pair",x+","+y,
+    {hint:L<=2?"Add the two equations — one variable cancels.":"Multiply one equation so a variable cancels when you add.",
+     expl:"Elimination (or substitution) gives x = "+x+", y = "+y+". Check: "+a1+"("+x+") + "+b1+"("+y+") = "+c1+" ✓"});
+  function eqStr(a,b,c){
+    var s=(a===1?"x":a===-1?"−x":a+"x");
+    s+=b>0?" + "+(b===1?"y":b+"y"):" − "+(b===-1?"y":(-b)+"y");
+    return s+" = "+c;
+  }
+};
+GEN.sys2=function(L){
+  var x=ri(-4,4),y=ri(-4,4),z=ri(-4,4);
+  var c1=x+y+z,c2=x-y+z*(L>=4?2:1),c3=(L>=4?2:1)*x+y-z;
+  var e2=L>=4?"x − y + 2z = "+c2:"x − y + z = "+c2;
+  var e3=L>=4?"2x + y − z = "+c3:"x + y − z = "+((L>=4?0:1)*0+x+y-z);
+  if(L<4)c3=x+y-z;
+  return q("Solve the 3-variable system:<br><span class='math big'>x + y + z = "+c1+"<br>"+e2+"<br>"+e3+"</span><div class='sub'>Answer as an ordered triple: (x, y, z)</div>","tuple",x+","+y+","+z,
+    {hint:"Add pairs of equations to eliminate one variable, reducing to a 2×2 system.",
+     expl:"Eliminating step by step gives x = "+x+", y = "+y+", z = "+z+"."});
+};
+GEN.sys3=function(L){
+  var p=ri(-3,3),qq=p+ri(1,4); // intersection x-values
+  var m=p+qq,c0=-p*qq; // x² = mx + c0 → x²−mx−c0=0=(x−p)(x−q)
+  var b=ri(-4,4); // parabola y=x²+b, line y=mx+c0+b
+  var c=c0+b;
+  if(L<=2){
+    return q("Where do these graphs intersect?<br><span class='math big'>y = x² "+(b<0?"− "+(-b):"+ "+b)+"<br>y = "+polyStr([m,c])+"</span><div class='sub'>Enter the x-values of the intersection points, comma-separated.</div>","set",p+","+qq,
+      {hint:"Set the two right-hand sides equal and solve.",
+       expl:"x² + "+b+" = "+m+"x + "+c+" → x² − "+m+"x − "+c0+" = 0 → (x − "+p+")(x − "+qq+") = 0 → x = "+p+", "+qq+"."});
+  }
+  if(L<=4){
+    var y1=p*p+b;
+    return q("Solve the nonlinear system:<br><span class='math big'>y = x² "+(b<0?"− "+(-b):"+ "+b)+"<br>y = "+polyStr([m,c])+"</span><div class='sub'>Enter the intersection point with the SMALLER x-value as (x, y).</div>","pair",Math.min(p,qq)+","+(Math.min(p,qq)*Math.min(p,qq)+b),
+      {hint:"Substitute, solve the quadratic, then plug x back in for y.",
+       expl:"x² − "+m+"x − "+c0+" = 0 gives x = "+p+" or "+qq+". The smaller is x = "+Math.min(p,qq)+", and y = x² + "+b+" = "+(Math.min(p,qq)*Math.min(p,qq)+b)+"."});
+  }
+  // L5: tangency via discriminant
+  var mm=ri(2,6);var kk=mm*mm/4;
+  var kInt=mm%2===0?kk:null;
+  if(kInt===null){mm=mm+1;kk=mm*mm/4;}
+  return q("For what value of c does the line y = "+mm+"x − c intersect the parabola y = x² at EXACTLY ONE point?","num",kk,
+    {hint:"Set x² = "+mm+"x − c and force the discriminant to be 0.",
+     expl:"x² − "+mm+"x + c = 0 needs D = "+(mm*mm)+" − 4c = 0 → c = "+kk+". One solution = tangent line."});
+};
+GEN.sys4=function(L){
+  var ap=ri(7,12),cp=ri(3,6),na=ri(20,60),nc=ri(20,80);
+  var tot=na+nc,rev=ap*na+cp*nc;
+  if(L<=3){
+    return q("🎟️ A Branson show sells adult tickets for $"+ap+" and child tickets for $"+cp+". They sold "+tot+" tickets for $"+rev+" total. How many ADULT tickets were sold?","num",na,
+      {hint:"Let a + c = "+tot+" and "+ap+"a + "+cp+"c = "+rev+".",
+       expl:"From a + c = "+tot+", c = "+tot+" − a. Substitute: "+ap+"a + "+cp+"("+tot+" − a) = "+rev+" → "+(ap-cp)+"a = "+(rev-cp*tot)+" → a = "+na+"."});
+  }
+  if(L===4){
+    var cur=ri(1,4),bt=5*cur,d=12*cur;
+    return q("🚤 A boat on Table Rock Lake's river inlet travels "+d+" miles downstream in 2 hours, then the same "+d+" miles back upstream in 3 hours. Find the speed of the CURRENT (mph).","num",cur,
+      {hint:"Downstream speed = boat + current = "+d+"/2. Upstream = boat − current = "+d+"/3.",
+       expl:"b + c = "+(d/2)+" and b − c = "+(d/3)+". Subtract: 2c = "+(d/2-d/3)+" → c = "+cur+" mph (boat speed b = "+bt+" mph)."});
+  }
+  var combo=pick([{a:20,b:50,m:1,t:35},{a:20,b:50,m:2,t:40},{a:10,b:40,m:1,t:25},{a:10,b:40,m:2,t:30},{a:30,b:60,m:1,t:45},{a:30,b:60,m:2,t:50}]);
+  var xL=ri(2,6),yL=combo.m*xL;
+  return q("🧪 A chemist has "+xL+" liters of a "+combo.a+"% acid solution. How many liters of a "+combo.b+"% solution must be added to create a "+combo.t+"% solution?","num",yL,
+    {hint:"Acid in + acid in = acid out: "+combo.a+"("+xL+") + "+combo.b+"y = "+combo.t+"("+xL+" + y).",
+     expl:"0."+combo.a+"("+xL+") + 0."+combo.b+"y = 0."+combo.t+"("+xL+" + y) → "+(combo.b-combo.t)+"y = "+((combo.t-combo.a)*xL)+" → y = "+yL+" liters."});
+};
+
+/* ----- UNIT: Quadratics ----- */
+GEN.quad1=function(L){
+  var a,k,c,m1;
+  if(L<=2){
+    if(Math.random()<.5){c=ri(2,5);k=ri(2,7);
+      m1=mc(c+"x(x + "+k+")",[c+"x(x + "+(c*k)+")","x("+c+"x + "+k+")",c+"(x² + "+k+"x)"]);
+      return q("Factor completely:<br><span class='math big'>"+(c)+"x² + "+(c*k)+"x</span>","mc",m1.ans,
+        {choices:m1.choices,hint:"Pull out the greatest common factor of BOTH terms first.",
+         expl:"GCF is "+c+"x: "+c+"x² + "+(c*k)+"x = "+c+"x(x + "+k+")."});
+    }
+    a=ri(2,9);
+    m1=mc("(x + "+a+")(x − "+a+")",["(x − "+a+")²","(x + "+a+")²","(x + "+a+")(x + "+a+")"]);
+    return q("Factor:<br><span class='math big'>x² − "+(a*a)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Difference of squares: a² − b² = (a + b)(a − b).",
+       expl:"x² − "+(a*a)+" = x² − "+a+"² = (x + "+a+")(x − "+a+")."});
+  }
+  if(L===3){var m=ri(2,3);a=ri(2,5);
+    m1=mc("("+m+"x + "+a+")("+m+"x − "+a+")",["("+m+"x − "+a+")²","("+(m*m)+"x + "+a+")(x − "+a+")","("+m+"x + "+a+")²"]);
+    return q("Factor:<br><span class='math big'>"+(m*m)+"x² − "+(a*a)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Both terms are perfect squares: ("+m+"x)² and "+a+"².",
+       expl:"("+m+"x)² − "+a+"² = ("+m+"x + "+a+")("+m+"x − "+a+")."});
+  }
+  if(L===4){a=ri(2,7);var s=pick([1,-1]);
+    m1=mc("(x "+(s>0?"+ ":"− ")+a+")²",["(x "+(s>0?"− ":"+ ")+a+")²","(x + "+a+")(x − "+a+")","(x "+(s>0?"+ ":"− ")+(2*a)+")²"]);
+    return q("Factor:<br><span class='math big'>x² "+(s>0?"+ ":"− ")+(2*a)+"x + "+(a*a)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Perfect square trinomial: is the middle term 2·(√first)·(√last)?",
+       expl:"x² "+(s>0?"+":"−")+" "+(2*a)+"x + "+a+"² = (x "+(s>0?"+":"−")+" "+a+")²."});
+  }
+  c=ri(2,4);a=ri(2,5);
+  m1=mc(c+"(x + "+a+")(x − "+a+")",[c+"(x − "+a+")²","("+c+"x + "+a+")("+c+"x − "+a+")",c+"(x² − "+a+")"]);
+  return q("Factor COMPLETELY:<br><span class='math big'>"+c+"x² − "+(c*a*a)+"</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"GCF first, then look again — is what's left a difference of squares?",
+     expl:"Pull out "+c+": "+c+"(x² − "+(a*a)+") = "+c+"(x + "+a+")(x − "+a+"). Always factor until nothing else factors."});
+};
+GEN.quad2=function(L){
+  var p,qv,m1;
+  if(L<=2){p=ri(1,6);qv=ri(1,6);
+    m1=mc("(x + "+p+")(x + "+qv+")",["(x + "+(p+qv)+")(x + "+(p*qv)+")","(x − "+p+")(x − "+qv+")","(x + "+p+")(x − "+qv+")"]);
+    return q("Factor:<br><span class='math big'>"+polyStr([1,p+qv,p*qv])+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Find two numbers that MULTIPLY to "+(p*qv)+" and ADD to "+(p+qv)+".",
+       expl:p+" × "+qv+" = "+(p*qv)+" and "+p+" + "+qv+" = "+(p+qv)+", so it factors as (x + "+p+")(x + "+qv+")."});
+  }
+  if(L===3){p=ri(1,7);qv=-ri(1,7);while(p+qv===0)qv=-ri(1,7);
+    var b=p+qv,c=p*qv;
+    m1=mc("(x "+(p>0?"+ "+p:"− "+(-p))+")(x "+(qv>0?"+ "+qv:"− "+(-qv))+")",
+      ["(x "+(p>0?"− "+p:"+ "+(-p))+")(x "+(qv>0?"− "+(-qv*-1):"+ "+(-qv))+")","(x + "+Math.abs(b)+")(x − "+Math.abs(c)+")","(x "+(p>0?"+ "+p:"− "+(-p))+")(x "+(qv>0?"− "+qv:"+ "+(-qv))+")"]);
+    return q("Factor:<br><span class='math big'>"+polyStr([1,b,c])+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Two numbers multiplying to "+c+" (negative → opposite signs) and adding to "+b+".",
+       expl:"("+p+")("+qv+") = "+c+" and "+p+" + ("+qv+") = "+b+" → (x "+(p>0?"+ "+p:"− "+(-p))+")(x "+(qv>0?"+ "+qv:"− "+(-qv))+")."});
+  }
+  var a=ri(2,3),n=1;p=nzr(-4,4);qv=nzr(-4,4);
+  var B=a*qv+n*p,C=p*qv,A=a*n;
+  var f1="("+a+"x "+(p>0?"+ "+p:"− "+(-p))+")(x "+(qv>0?"+ "+qv:"− "+(-qv))+")";
+  m1=mc(f1,["("+a+"x "+(qv>0?"+ "+qv:"− "+(-qv))+")(x "+(p>0?"+ "+p:"− "+(-p))+")","("+a+"x "+(p>0?"− "+p:"+ "+(-p))+")(x "+(qv>0?"− "+qv:"+ "+(-qv))+")","(x "+(p>0?"+ "+p:"− "+(-p))+")("+a+"x "+(qv<0?"+ "+(-qv):"− "+qv)+")"]);
+  return q("Factor:<br><span class='math big'>"+polyStr([A,B,C])+"</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"AC method: find two numbers multiplying to "+(A*C)+" that add to "+B+", then split the middle term.",
+     expl:"AC = "+(A*C)+". Split "+B+"x and factor by grouping → "+f1+". FOIL it back to check."});
+};
+GEN.quad3=function(L){
+  var p,qv;
+  if(L<=2){p=ri(-6,6);qv=ri(-6,6);while(qv===p)qv=ri(-6,6);
+    return q("Solve by factoring:<br><span class='math big'>"+polyStr([1,-(p+qv),p*qv])+" = 0</span><div class='sub'>Enter both solutions, comma-separated.</div>","set",p+","+qv,
+      {hint:"Factor, then set each factor equal to zero (Zero Product Property).",
+       expl:"Factors as (x − "+p+")(x − "+qv+") = 0 → x = "+p+" or x = "+qv+"."});
+  }
+  if(L===3){p=ri(1,5);
+    return q("Solve:<br><span class='math big'>x² = "+(p*p)+"</span><div class='sub'>Enter ALL solutions, comma-separated.</div>","set",p+","+(-p),
+      {hint:"There are TWO numbers whose square is "+(p*p)+".",
+       expl:"x² − "+(p*p)+" = 0 → (x + "+p+")(x − "+p+") = 0 → x = ±"+p+". Never forget the negative root."});
+  }
+  var a=ri(2,3);p=nzr(-5,5);while(p%a===0)p=nzr(-5,5);qv=nzr(-5,5);
+  var B=-(p+a*qv),C=p*qv,r1=frac(p,a);
+  return q("Solve by factoring:<br><span class='math big'>"+polyStr([a,B,C])+" = 0</span><div class='sub'>Enter both solutions, comma-separated (fractions like 2/3 are fine).</div>","set",r1+","+qv,
+    {hint:"Factors as ("+a+"x − p)(x − q). Try the AC method with AC = "+(a*C)+".",
+     expl:"("+a+"x − "+p+")(x − "+qv+") = 0 → "+a+"x = "+p+" or x = "+qv+" → x = "+r1+", "+qv+"."});
+};
+GEN.quad4=function(L){
+  var b,c,h,k;
+  if(L<=2){b=2*ri(1,7);
+    return q("What value of c makes this a perfect square trinomial?<br><span class='math big'>x² + "+b+"x + c</span>","num",b*b/4,
+      {hint:"Take half of "+b+", then square it.",
+       expl:"c = ("+b+"/2)² = "+(b/2)+"² = "+(b*b/4)+". Then x² + "+b+"x + "+(b*b/4)+" = (x + "+(b/2)+")²."});
+  }
+  if(L<=4){h=nzr(-5,5);k=ri(-8,8);b=-2*h;c=h*h+k;
+    var cor="(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k);
+    var m1=mc(cor,["(x "+(h>0?"+ "+h:"− "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k),"(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"+ "+(-k):"− "+k),"(x "+(b>0?"+ "+b:"− "+(-b))+")² "+(c<0?"− "+(-c):"+ "+c)]);
+    return q("Complete the square — write in vertex form:<br><span class='math big'>y = "+polyStr([1,b,c])+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Half of "+b+" is "+(b/2)+". Add AND subtract its square.",
+       expl:"y = x² + "+b+"x + "+(b*b/4)+" − "+(b*b/4)+" + "+c+" = "+cor+"."});
+  }
+  h=nzr(-4,4);var r=pick([2,3,5,6,7]);b=-2*h;c=h*h-r;
+  var cor2="x = "+h+" ± √"+r;
+  var m2=mc(cor2,["x = "+(-h)+" ± √"+r,"x = "+h+" ± "+r,"x = ± √"+(r+h*h)]);
+  return q("Solve by completing the square:<br><span class='math big'>"+polyStr([1,b,c])+" = 0</span>","mc",m2.ans,
+    {choices:m2.choices,hint:"Move "+c+" over, add ("+(b/2)+")² to both sides, then square-root both sides.",
+     expl:"(x "+(h>0?"− "+h:"+ "+(-h))+")² = "+r+" → x "+(h>0?"− "+h:"+ "+(-h))+" = ±√"+r+" → "+cor2+"."});
+};
+GEN.quad5=function(L){
+  var a,h,k,b,c;
+  if(L<=2){a=pick([1,-1,2,-2]);h=ri(-6,6);k=ri(-6,6);
+    return q("Find the vertex:<br><span class='math big'>y = "+(a===1?"":(a===-1?"−":a))+"(x "+(h>0?"− "+h:"+ "+(-h))+")² "+(k<0?"− "+(-k):"+ "+k)+"</span><div class='sub'>Answer as (h, k).</div>","pair",h+","+k,
+      {hint:"Vertex form y = a(x − h)² + k. Watch the sign on h!",
+       expl:"The vertex is (h, k) = ("+h+", "+k+"). The sign inside flips: (x − "+h+") means h = "+h+"."});
+  }
+  if(L<=4){h=nzr(-5,5);k=ri(-9,9);b=-2*h;c=h*h+k;
+    return q("Find the vertex of:<br><span class='math big'>y = "+polyStr([1,b,c])+"</span><div class='sub'>Answer as (h, k).</div>","pair",h+","+k,
+      {hint:"h = −b/(2a) = "+(-b)+"/2. Then plug h back in for k.",
+       expl:"h = −("+b+")/2 = "+h+". k = f("+h+") = "+(h*h)+" + "+(b*h)+" + "+c+" = "+k+". Vertex ("+h+", "+k+")."});
+  }
+  a=-ri(1,3);h=nzr(-4,4);k=ri(2,9);b=-2*a*h;c=a*h*h+k;
+  return q("What is the MAXIMUM value of:<br><span class='math big'>y = "+polyStr([a,b,c])+"</span>","num",k,
+    {hint:"a = "+a+" &lt; 0 → opens down → the max is the y-coordinate of the vertex.",
+     expl:"Vertex x = −b/2a = "+h+"; y = "+a+"("+h+")² + "+b+"("+h+") + "+c+" = "+k+". Maximum value: "+k+"."});
+};
+GEN.quad6=function(L){
+  var p,qv,a,b,c;
+  if(L<=2){p=ri(-6,6);qv=ri(-6,6);while(qv===p)qv=ri(-6,6);
+    b=-(p+qv);c=p*qv;
+    return q("Solve using the quadratic formula:<br><span class='math big'>"+polyStr([1,b,c])+" = 0</span><div class='sub'>Enter both solutions, comma-separated.</div>","set",p+","+qv,
+      {hint:"x = [−b ± √(b² − 4ac)] / 2a with a = 1, b = "+b+", c = "+c+".",
+       expl:"D = "+(b*b)+" − "+(4*c)+" = "+(b*b-4*c)+" = "+Math.sqrt(b*b-4*c)+"². x = ("+(-b)+" ± "+Math.sqrt(b*b-4*c)+")/2 → x = "+p+", "+qv+"."});
+  }
+  if(L===3){a=2;p=nzr(-5,5);while(p%2===0)p=nzr(-5,5);qv=ri(-4,4);
+    b=-(p+a*qv);c=p*qv;
+    return q("Solve:<br><span class='math big'>"+polyStr([a,b,c])+" = 0</span><div class='sub'>Enter both solutions, comma-separated (fractions like 3/2 are fine).</div>","set",frac(p,a)+","+qv,
+      {hint:"Quadratic formula with a = "+a+", b = "+b+", c = "+c+". Expect a fraction.",
+       expl:"Factors as ("+a+"x − "+p+")(x − "+qv+") = 0 → x = "+frac(p,a)+" or x = "+qv+"."});
+  }
+  b=pick([-2,2,4,-4,6,-6]);var D=pick([5,13,17,21,29,33]);c=(b*b-D)/4;
+  if((b*b-D)%4!==0){D=b*b-4*ri(-6,6);while(D<=0||Math.sqrt(D)%1===0)D=b*b-4*ri(-6,6);c=(b*b-D)/4;}
+  var cor="x = ("+(-b)+" ± √"+D+")/2";
+  var m1=mc(cor,["x = ("+b+" ± √"+D+")/2","x = "+(-b)+" ± √"+D,"x = ("+(-b)+" ± √"+(b*b+4*Math.abs(c))+")/2"]);
+  return q("Solve — exact form:<br><span class='math big'>"+polyStr([1,b,c])+" = 0</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"D = b² − 4ac = "+(b*b)+" − "+(4*c)+" = "+D+" (not a perfect square → leave the radical).",
+     expl:"x = [−("+b+") ± √"+D+"]/2 = "+cor+". Irrational roots always come in conjugate pairs."});
+};
+GEN.quad7=function(L){
+  var a,b,c,D;
+  if(L<=2){a=nzr(1,3);b=ri(-8,8);c=ri(-8,8);D=b*b-4*a*c;
+    return q("Compute the discriminant of:<br><span class='math big'>"+polyStr([a,b,c])+" = 0</span>","num",D,
+      {hint:"D = b² − 4ac. Careful with signs.",
+       expl:"D = ("+b+")² − 4("+a+")("+c+") = "+(b*b)+" − "+(4*a*c)+" = "+D+"."});
+  }
+  if(L<=4){
+    var kind=pick([0,1,2]);a=1;
+    if(kind===0){var p1=ri(-5,5),q1=ri(-5,5);while(q1===p1)q1=ri(-5,5);b=-(p1+q1);c=p1*q1;}
+    else if(kind===1){var h=nzr(-5,5);b=-2*h;c=h*h;}
+    else{b=2*ri(-3,3);c=b*b/4+ri(1,6);}
+    D=b*b-4*c;
+    var cor=D>0?"Two real solutions":(D===0?"Exactly one real solution":"Two complex (non-real) solutions");
+    var m1=mc(cor,shuffle(["Two real solutions","Exactly one real solution","Two complex (non-real) solutions","No solutions of any kind"]).filter(function(s){return s!==cor;}));
+    return q("How many and what type of solutions does this have?<br><span class='math big'>"+polyStr([a,b,c])+" = 0</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Compute D = b² − 4ac and check its sign.",
+       expl:"D = "+(b*b)+" − "+(4*c)+" = "+D+". "+(D>0?"D > 0 → two real roots.":(D===0?"D = 0 → one repeated real root.":"D < 0 → two complex conjugate roots."))+" Every quadratic has 2 roots counting complex/multiplicity (FTA)."});
+  }
+  b=2*nzr(1,6);
+  return q("For what value of k does this equation have EXACTLY ONE solution?<br><span class='math big'>x² "+(b<0?"− "+(-b):"+ "+b)+"x + k = 0</span>","num",b*b/4,
+    {hint:"One solution ⟺ discriminant = 0.",
+     expl:"b² − 4k = 0 → k = "+(b*b)+"/4 = "+(b*b/4)+"."});
+};
+GEN.quad8=function(L){
+  var r,s,v,h0;
+  if(L<=2){r=ri(2,6);v=16*r;
+    return q("🏀 A ball is launched straight up from the ground at "+v+" ft/s. Its height is h(t) = −16t² + "+v+"t. When does it hit the ground?","num",r,
+      {hint:"Hitting the ground means h(t) = 0. Factor out t.",
+       expl:"−16t² + "+v+"t = 0 → −16t(t − "+r+") = 0 → t = 0 (launch) or t = "+r+" s. Answer: "+r+" seconds."});
+  }
+  if(L===3){s=ri(1,3);r=s+2*ri(1,3);v=16*(r-s);h0=16*r*s;
+    return q("🎢 A ride at Silver Dollar City drops a ball from a tower. Its height is h(t) = −16t² + "+v+"t + "+h0+" (feet). When does it hit the ground?","num",r,
+      {hint:"Set h(t) = 0 and solve the quadratic. Time can't be negative.",
+       expl:"−16t² + "+v+"t + "+h0+" = −16(t − "+r+")(t + "+s+") = 0 → t = "+r+" or t = −"+s+". Time must be positive: t = "+r+" s."});
+  }
+  if(L===4){s=ri(1,3);r=s+2*ri(1,3);v=16*(r-s);h0=16*r*s;var tv=(r-s)/2,hm=-16*tv*tv+v*tv+h0;
+    return q("🚀 h(t) = −16t² + "+v+"t + "+h0+" gives a projectile's height in feet. What is its MAXIMUM height?","num",hm,
+      {hint:"Max height happens at the vertex: t = −b/(2a) = "+v+"/32.",
+       expl:"t = "+v+"/32 = "+tv+" s. h("+tv+") = −16("+tv+")² + "+v+"("+tv+") + "+h0+" = "+hm+" ft."});
+  }
+  var bb=ri(2,4),m=ri(3,8),aa=2*bb*m;
+  return q("🎪 A funnel cake stand in Branson finds daily profit follows P(p) = p("+aa+" − "+bb+"p), where p is the price in dollars. What PRICE maximizes profit?","num",m,
+    {hint:"Expand: P = "+aa+"p − "+bb+"p². The max is at the vertex.",
+     expl:"P = −"+bb+"p² + "+aa+"p → vertex at p = "+aa+"/(2·"+bb+") = "+m+". Charge $"+m+". (Zeros at p = 0 and p = "+(aa/bb)+"; the vertex sits halfway.)"});
+};
+
+/* ----- UNIT: Complex Numbers ----- */
+GEN.cplx1=function(L){
+  var n=L<=2?ri(1,12):(L<=4?ri(13,50):ri(51,203));
+  var mod=n%4,ansv=["1","i","-1","-i"][mod===0?0:mod];
+  return q("Simplify:<br><span class='math big'>i"+sup(n)+"</span>","text",ansv,
+    {alt:ansv==="-1"?["−1"]:(ansv==="-i"?["−i"]:[]),
+     hint:"Powers of i cycle every 4: i, −1, −i, 1. Find "+n+" mod 4.",
+     expl:n+" ÷ 4 leaves remainder "+mod+", so i"+sup(n)+" = i"+sup(mod===0?4:mod)+" = "+ansv+"."});
+};
+GEN.cplx2=function(L){
+  var a=ri(-8,8),b=nzr(-8,8),c=ri(-8,8),d=nzr(-8,8);
+  var addv=L>=3&&Math.random()<.5?false:true;
+  var ra=addv?a+c:a-c,rb=addv?b+d:b-d;
+  var res=cpx(ra,rb);
+  return q("Simplify:<br><span class='math big'>("+cpx(a,b).s+") "+(addv?"+":"−")+" ("+cpx(c,d).s+")</span>","text",res.s,
+    {alt:res.alt,hint:"Combine real parts together and imaginary parts together.",
+     expl:"Real: "+a+" "+(addv?"+":"−")+" "+c+" = "+ra+". Imaginary: "+b+"i "+(addv?"+":"−")+" "+d+"i = "+rb+"i. Answer: "+res.s+"."});
+};
+GEN.cplx3=function(L){
+  var a,b,c,d;
+  if(L<=2){a=nzr(-5,5);b=nzr(-5,5);c=nzr(2,5);
+    var r1=cpx(a*c,b*c);
+    return q("Simplify:<br><span class='math big'>"+c+"("+cpx(a,b).s+")</span>","text",r1.s,
+      {alt:r1.alt,hint:"Distribute the "+c+".",expl:c+"·"+a+" = "+(a*c)+" and "+c+"·"+b+"i = "+(b*c)+"i → "+r1.s+"."});
+  }
+  a=nzr(-4,4);b=nzr(-4,4);c=nzr(-4,4);d=nzr(-4,4);
+  var re=a*c-b*d,im=a*d+b*c,r2=cpx(re,im);
+  return q("Multiply:<br><span class='math big'>("+cpx(a,b).s+")("+cpx(c,d).s+")</span>","text",r2.s,
+    {alt:r2.alt,hint:"FOIL it — and remember i² = −1.",
+     expl:"FOIL: "+(a*c)+" + "+(a*d)+"i + "+(b*c)+"i + "+(b*d)+"i². Since i² = −1, that's ("+(a*c)+" − "+(b*d)+") + ("+(a*d)+" + "+(b*c)+")i = "+r2.s+"."});
+};
+GEN.cplx4=function(L){
+  var r=nzr(-4,4),s=nzr(-4,4),c=nzr(-3,3),d=nzr(-3,3);
+  if(L<=2){s=0;r=nzr(-5,5);}
+  var na=r*c-s*d,nb=r*d+s*c; // (r+si)(c+di) = numerator
+  var res=cpx(r,s);
+  return q("Divide — write in a + bi form:<br><span class='math big'><span class='frac'><span>"+cpx(na,nb).s+"</span><span>"+cpx(c,d).s+"</span></span></span>","text",res.s,
+    {alt:res.alt,hint:"Multiply top and bottom by the conjugate: "+cpx(c,-d).s+".",
+     expl:"Multiply by ("+cpx(c,-d).s+")/("+cpx(c,-d).s+"). The denominator becomes "+(c*c+d*d)+"; the numerator works out to "+(r*(c*c+d*d))+" "+(s*(c*c+d*d)>=0?"+":"−")+" "+Math.abs(s*(c*c+d*d))+"i. Result: "+res.s+"."});
+};
+GEN.cplx5=function(L){
+  var p=L<=2?0:nzr(-4,4),qv=ri(1,4);
+  var b=-2*p,c=p*p+qv*qv;
+  var r1=cpx(p,qv),r2=cpx(p,-qv);
+  return q("Solve:<br><span class='math big'>"+polyStr([1,b,c])+" = 0</span><div class='sub'>Enter both complex solutions, comma-separated (like 2+3i, 2-3i).</div>","set",r1.s+","+r2.s,
+    {hint:"The discriminant is negative — use the quadratic formula and pull out √(−1) = i.",
+     expl:"D = "+(b*b)+" − "+(4*c)+" = "+(b*b-4*c)+" = −("+(2*qv)+")². x = ("+(-b)+" ± "+(2*qv)+"i)/2 = "+r1.s+" and "+r2.s+". Complex roots always come as conjugate pairs (Fundamental Theorem of Algebra)."});
+};
+/* ----- UNIT: Polynomials ----- */
+GEN.poly1=function(L){
+  var a1,b1,c1,a2,b2,c2;
+  if(L<=2){a1=nzr(-4,4);b1=ri(-6,6);c1=ri(-6,6);a2=nzr(-4,4);b2=ri(-6,6);c2=ri(-6,6);
+    var sub=L===2,rb=sub?b1-b2:b1+b2;
+    return q("Simplify, then give the coefficient of x:<br><span class='math big'>("+polyStr([a1,b1,c1])+") "+(sub?"−":"+")+" ("+polyStr([a2,b2,c2])+")</span>","num",rb,
+      {hint:sub?"Distribute the minus sign to EVERY term of the second polynomial.":"Combine like terms.",
+       expl:"The x-terms: "+b1+"x "+(sub?"−":"+")+" ("+b2+"x) = "+rb+"x. Coefficient: "+rb+"."});
+  }
+  if(L<=4){var a=nzr(-3,3),b=ri(-4,4),c=ri(-4,4);
+    var k2=a+b,k1=a*b+c,k0=a*c;
+    var which=pick([["x²",k2],["x",k1]]);
+    return q("Expand, then give the coefficient of "+which[0]+":<br><span class='math big'>(x "+(a<0?"− "+(-a):"+ "+a)+")("+polyStr([1,b,c])+")</span>","num",which[1],
+      {hint:"Multiply every term of the first factor by every term of the second.",
+       expl:"(x + "+a+")(x² + "+b+"x + "+c+") = x³ + "+(a+b)+"x² + "+(a*b+c)+"x + "+(a*c)+". Coefficient of "+which[0]+": "+which[1]+"."});
+  }
+  var p=nzr(-3,3),qv=nzr(-3,3),r=nzr(-3,3);
+  var s2=p+qv+r,s1=p*qv+p*r+qv*r;
+  return q("Expand, then give the coefficient of x:<br><span class='math big'>(x "+(p<0?"− "+(-p):"+ "+p)+")(x "+(qv<0?"− "+(-qv):"+ "+qv)+")(x "+(r<0?"− "+(-r):"+ "+r)+")</span>","num",s1,
+    {hint:"For (x+a)(x+b)(x+c): the x-coefficient is ab + ac + bc.",
+     expl:"x³ + ("+s2+")x² + ("+s1+")x + "+(p*qv*r)+". The x-coefficient is "+p+"·"+qv+" + "+p+"·"+r+" + "+qv+"·"+r+" = "+s1+"."});
+};
+GEN.poly2=function(L){
+  var k=nzr(-4,4),p=ri(-4,4),qv=ri(-5,5),r=L<=2?0:nzr(-9,9);
+  // f(x) = (x−k)(x²+px+q) + r
+  var c3=1,c2=p-k,c1=qv-k*p,c0=r-k*qv;
+  if(L<=2){
+    var cor="x² "+(p<0?"− "+(-p)+"x":(p>0?"+ "+p+"x":""))+" "+(qv<0?"− "+(-qv):"+ "+qv);
+    var m1=mc(cor,["x² "+(p<0?"+ "+(-p)+"x":"− "+p+"x")+" "+(qv<0?"− "+(-qv):"+ "+qv),"x² "+(p<0?"− "+(-p)+"x":(p>0?"+ "+p+"x":""))+" "+(qv<0?"+ "+(-qv):"− "+qv),polyStr([1,c2,c1])]);
+    return q("Use synthetic division to divide:<br><span class='math big'>("+polyStr([c3,c2,c1,c0])+") ÷ (x "+(k>0?"− "+k:"+ "+(-k))+")</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Synthetic division with "+k+": bring down, multiply, add, repeat.",
+       expl:"Synthetic division by "+k+" on coefficients 1, "+c2+", "+c1+", "+c0+" gives quotient row 1, "+p+", "+qv+" with remainder 0 → "+cor+"."});
+  }
+  return q("Find the REMAINDER:<br><span class='math big'>("+polyStr([c3,c2,c1,c0])+") ÷ (x "+(k>0?"− "+k:"+ "+(-k))+")</span>","num",r,
+    {hint:"Synthetic division — or shortcut: the remainder equals f("+k+").",
+     expl:"Synthetic division by "+k+" gives quotient x² "+(p<0?"− "+(-p)+"x":"+ "+p+"x")+" "+(qv<0?"− "+(-qv):"+ "+qv)+" and remainder "+r+". (Remainder Theorem: f("+k+") = "+r+".)"});
+};
+GEN.poly3=function(L){
+  var k=nzr(-3,3),a=nzr(-3,3),b=ri(-5,5),c=ri(-6,6),d=ri(-6,6);
+  var f,val;
+  if(L<=2){f=polyStr([a,b,c]);val=a*k*k+b*k+c;
+    return q("f(x) = "+f+". Without dividing, find the remainder of f(x) ÷ (x "+(k>0?"− "+k:"+ "+(-k))+").","num",val,
+      {hint:"Remainder Theorem: the remainder is just f("+k+").",
+       expl:"f("+k+") = "+a+"("+k+")² + "+b+"("+k+") + "+c+" = "+val+". That IS the remainder — no long division needed."});
+  }
+  f=polyStr([a,b,c,d]);val=a*k*k*k+b*k*k+c*k+d;
+  if(L>=5){
+    var isF=val===0;
+    var m1=mc(isF?"Yes — because f("+k+") = 0":"No — because f("+k+") = "+val+" ≠ 0",
+      [isF?"No — because f("+k+") = 0":"Yes — because f("+k+") = "+val,"Yes — because the leading coefficient is "+a,"Cannot be determined without dividing"]);
+    return q("f(x) = "+f+". Is (x "+(k>0?"− "+k:"+ "+(-k))+") a FACTOR of f(x)?","mc",m1.ans,
+      {choices:m1.choices,hint:"Factor Theorem: (x − k) is a factor ⟺ f(k) = 0.",
+       expl:"f("+k+") = "+val+". "+(isF?"Zero remainder → it divides evenly → factor.":"Nonzero remainder → not a factor.")});
+  }
+  return q("f(x) = "+f+". Find the remainder when f(x) is divided by (x "+(k>0?"− "+k:"+ "+(-k))+").","num",val,
+    {hint:"Remainder Theorem: evaluate f("+k+").",
+     expl:"f("+k+") = "+(a*k*k*k)+" + "+(b*k*k)+" + "+(c*k)+" + "+d+" = "+val+"."});
+};
+GEN.poly4=function(L){
+  var p=nzr(-5,5),qv=nzr(-5,5),r=nzr(-5,5);
+  while(qv===p)qv=nzr(-5,5);while(r===p||r===qv)r=nzr(-5,5);
+  if(L<=2){
+    return q("Find all zeros:<br><span class='math big'>f(x) = (x "+(p>0?"− "+p:"+ "+(-p))+")(x "+(qv>0?"− "+qv:"+ "+(-qv))+")(x "+(r>0?"− "+r:"+ "+(-r))+")</span><div class='sub'>Comma-separated.</div>","set",p+","+qv+","+r,
+      {hint:"Set each factor to zero.",expl:"Each factor gives a zero: x = "+p+", "+qv+", "+r+"."});
+  }
+  if(L===3){
+    var s1=p+qv,pr=p*qv;
+    return q("Find all zeros:<br><span class='math big'>f(x) = "+polyStr([1,-s1,pr,0])+"</span><div class='sub'>Comma-separated (there are 3).</div>","set","0,"+p+","+qv,
+      {hint:"Factor out x first!",
+       expl:"f(x) = x(x² − "+s1+"x + "+pr+") = x(x − "+p+")(x − "+qv+") → zeros 0, "+p+", "+qv+"."});
+  }
+  var c3=1,c2=-(p+qv+r),c1=p*qv+p*r+qv*r,c0=-p*qv*r;
+  return q("x = "+p+" is one zero of<br><span class='math big'>f(x) = "+polyStr([c3,c2,c1,c0])+"</span><br>Find the OTHER two zeros. <span class='sub'>Comma-separated.</span>","set",qv+","+r,
+    {hint:"Synthetic-divide by "+p+", then solve the leftover quadratic.",
+     expl:"Dividing by (x − "+p+") leaves x² − "+(qv+r)+"x + "+(qv*r)+" = (x − "+qv+")(x − "+r+") → x = "+qv+", "+r+"."});
+};
+GEN.poly5=function(L){
+  var deg=L<=2?pick([2,3]):pick([3,4,5]);
+  var lead=nzr(-3,3);
+  var evenDeg=deg%2===0;
+  var up=lead>0;
+  var cor,alts;
+  if(evenDeg){cor=up?"Both ends rise (up–up)":"Both ends fall (down–down)";}
+  else{cor=up?"Falls left, rises right (down–up)":"Rises left, falls right (up–down)";}
+  alts=["Both ends rise (up–up)","Both ends fall (down–down)","Falls left, rises right (down–up)","Rises left, falls right (up–down)"];
+  var m1=mc(cor,alts.filter(function(s){return s!==cor;}));
+  var tail=[];var i;for(i=deg-1;i>=0;i--)tail.push(i===0?ri(-5,5):ri(-4,4));
+  var coefs=[lead].concat(tail);
+  return q("Describe the END BEHAVIOR:<br><span class='math big'>f(x) = "+polyStr(coefs)+"</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"Only the leading term "+lead+"x"+sup(deg)+" matters. Degree "+(evenDeg?"even":"odd")+", leading coefficient "+(up?"positive":"negative")+".",
+     expl:"Degree "+deg+" ("+(evenDeg?"even → ends match":"odd → ends oppose")+"), leading coefficient "+lead+" ("+(up?"positive":"negative")+") → "+cor.toLowerCase()+"."});
+};
+GEN.poly6=function(L){
+  var p=nzr(-4,4),qv=nzr(-4,4);while(qv===p)qv=nzr(-4,4);
+  if(L<=2){
+    var m2=ri(2,3);
+    return q("What is the MINIMUM degree of a polynomial with zeros x = "+p+" (multiplicity "+m2+") and x = "+qv+" (multiplicity 1)?","num",m2+1,
+      {hint:"Add up all the multiplicities.",
+       expl:"Multiplicities add: "+m2+" + 1 = "+(m2+1)+". Minimum degree "+(m2+1)+"."});
+  }
+  if(L<=4){
+    var v=(1-p)*(1-qv)*(1-qv);
+    return q("f(x) is the MONIC polynomial with a simple zero at x = "+p+" and a DOUBLE zero at x = "+qv+".<br>Compute f(1).","num",v,
+      {hint:"f(x) = (x − "+p+")(x − "+qv+")². Plug in x = 1.",
+       expl:"f(1) = (1 − "+p+")(1 − "+qv+")² = ("+(1-p)+")("+(1-qv)+")² = "+v+"."});
+  }
+  var cor="Crosses at x = "+p+", touches (bounces) at x = "+qv;
+  var m1=mc(cor,["Touches at x = "+p+", crosses at x = "+qv,"Crosses at both zeros","Touches at both zeros"]);
+  return q("f(x) = (x "+(p>0?"− "+p:"+ "+(-p))+")(x "+(qv>0?"− "+qv:"+ "+(-qv))+")² <br>How does the graph behave at each zero?","mc",m1.ans,
+    {choices:m1.choices,hint:"Odd multiplicity → crosses the x-axis. Even multiplicity → touches and turns around.",
+     expl:"x = "+p+" has multiplicity 1 (odd → crosses). x = "+qv+" has multiplicity 2 (even → touches/bounces)."});
+};
+
+/* ----- UNIT: Rational Expressions ----- */
+GEN.rat1=function(L){
+  var a=ri(1,6),b=ri(1,6),c=ri(1,6);while(c===b)c=ri(1,6);
+  if(L<=2){
+    var m1=mc("x − "+a,["x + "+a,"x² − "+a,"1/(x + "+a+")"]);
+    return q("Simplify:<br><span class='math big'><span class='frac'><span>x² − "+(a*a)+"</span><span>x + "+a+"</span></span></span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Factor the top: difference of squares.",
+       expl:"x² − "+(a*a)+" = (x + "+a+")(x − "+a+"). Cancel (x + "+a+") → x − "+a+" (for x ≠ −"+a+")."});
+  }
+  var m2=mc("(x + "+b+")/(x + "+c+")",["(x + "+c+")/(x + "+b+")",""+b+"/"+c,"(x + "+b+")(x + "+c+")"]);
+  return q("Simplify:<br><span class='math big'><span class='frac'><span>"+polyStr([1,a+b,a*b])+"</span><span>"+polyStr([1,a+c,a*c])+"</span></span></span>","mc",m2.ans,
+    {choices:m2.choices,hint:"Factor top and bottom, then cancel the COMMON FACTOR (never cancel terms!).",
+     expl:"Top: (x + "+a+")(x + "+b+"). Bottom: (x + "+a+")(x + "+c+"). Cancel (x + "+a+") → (x + "+b+")/(x + "+c+")."});
+};
+GEN.rat2=function(L){
+  var a=ri(1,5),b=ri(1,5),c=ri(1,5);while(b===a)b=ri(1,5);while(c===a||c===b)c=ri(1,5);
+  var divi=L>=3;
+  var cor="(x + "+b+")/(x + "+c+")";
+  var m1=mc(cor,["(x + "+c+")/(x + "+b+")","(x + "+a+")/(x + "+c+")","(x + "+b+")(x + "+c+")"]);
+  if(!divi){
+    return q("Multiply and simplify:<br><span class='math big'><span class='frac'><span>x + "+b+"</span><span>x + "+a+"</span></span> · <span class='frac'><span>x + "+a+"</span><span>x + "+c+"</span></span></span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Cancel the common factor (x + "+a+") diagonally.",
+       expl:"The (x + "+a+") factors cancel → "+cor+"."});
+  }
+  return q("Divide and simplify:<br><span class='math big'><span class='frac'><span>x + "+b+"</span><span>x + "+a+"</span></span> ÷ <span class='frac'><span>x + "+c+"</span><span>x + "+a+"</span></span></span>","mc",m1.ans,
+    {choices:m1.choices,hint:"Dividing = multiplying by the reciprocal (flip the second fraction).",
+     expl:"Flip: (x+"+b+")/(x+"+a+") · (x+"+a+")/(x+"+c+") → cancel (x + "+a+") → "+cor+"."});
+};
+GEN.rat3=function(L){
+  var a=ri(1,7),b=ri(1,7),c=ri(2,5);
+  if(L<=2){
+    var s=a+b;
+    var m1=mc("(2x + "+s+")/((x + "+a+")(x + "+b+"))",["(2x + "+s+")/(2x + "+s+")","2/("+(a+b)+"x)","(x + "+s+")/((x + "+a+")(x + "+b+"))"]);
+    return q("Add:<br><span class='math big'><span class='frac'><span>1</span><span>x + "+a+"</span></span> + <span class='frac'><span>1</span><span>x + "+b+"</span></span></span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Common denominator: (x + "+a+")(x + "+b+").",
+       expl:"[(x + "+b+") + (x + "+a+")] / [(x + "+a+")(x + "+b+")] = (2x + "+s+")/((x + "+a+")(x + "+b+"))."});
+  }
+  var n1=ri(1,5),n2=ri(1,5);
+  var num=n1*c+n2, g=gcd(num,c), rn=num/g, rd=c/g;
+  var cor=rn+"/("+(rd===1?"x":rd+"x")+")";
+  var m2=mc(cor,[(n1+n2)+"/("+c+"x)",(n1+n2)+"/x",num+"/x²"]);
+  return q("Combine:<br><span class='math big'><span class='frac'><span>"+n1+"</span><span>x</span></span> + <span class='frac'><span>"+n2+"</span><span>"+c+"x</span></span></span>","mc",m2.ans,
+    {choices:m2.choices,hint:"LCD is "+c+"x. Rewrite the first fraction over "+c+"x.",
+     expl:n1+"/x = "+(n1*c)+"/("+c+"x). Add: ("+(n1*c)+" + "+n2+")/("+c+"x) = "+num+"/("+c+"x)"+(g>1?" = "+cor+" after reducing":"")+"."});
+};
+GEN.rat4=function(L){
+  var a,b,c,x;
+  if(L<=2){b=ri(-5,5);c=nzr(-4,4);a=c*ri(1,6)*(c>0?1:1);x=b+a/c;
+    while(a%c!==0){a=c*ri(1,6);}x=b+a/c;
+    return q("Solve:<br><span class='math big'><span class='frac'><span>"+a+"</span><span>x "+(b>0?"− "+b:"+ "+(-b))+"</span></span> = "+c+"</span>","num",x,
+      {hint:"Multiply both sides by the denominator.",
+       expl:a+" = "+c+"(x − "+b+") → x − "+b+" = "+(a/c)+" → x = "+x+"."});
+  }
+  if(L===3){a=ri(1,6);x=2*a;
+    return q("Solve:<br><span class='math big'><span class='frac'><span>x</span><span>x − "+a+"</span></span> = 2</span>","num",x,
+      {hint:"Cross-multiply: x = 2(x − "+a+").",
+       expl:"x = 2x − "+(2*a)+" → x = "+(2*a)+". Check: "+(2*a)+"/"+a+" = 2 ✓ (and x ≠ "+a+", so it's valid)."});
+  }
+  if(L===4){var p=nzr(2,5),qv=nzr(2,5);while(qv===p)qv=nzr(2,5);
+    var s=p+qv,pr=p*qv;
+    return q("Solve:<br><span class='math big'><span class='frac'><span>"+s+"</span><span>x</span></span> − <span class='frac'><span>"+pr+"</span><span>x²</span></span> = 1</span><div class='sub'>Enter both solutions, comma-separated.</div>","set",p+","+qv,
+      {hint:"Multiply every term by x², then solve the quadratic.",
+       expl:"×x²: "+s+"x − "+pr+" = x² → x² − "+s+"x + "+pr+" = 0 → (x − "+p+")(x − "+qv+") = 0 → x = "+p+", "+qv+". Neither makes a denominator zero → both valid."});
+  }
+  a=ri(2,6);
+  return q("Solve:<br><span class='math big'><span class='frac'><span>x²</span><span>x − "+a+"</span></span> = <span class='frac'><span>"+(a*a)+"</span><span>x − "+a+"</span></span></span><div class='sub'>Careful — check for extraneous solutions. Enter the valid solution, or 'no solution'.</div>","num",-a,
+    {hint:"x² = "+(a*a)+" gives two candidates — but one of them breaks a denominator.",
+     expl:"x² = "+(a*a)+" → x = ±"+a+". But x = "+a+" makes the denominator 0 → EXTRANEOUS. Only x = −"+a+" is valid."});
+};
+GEN.rat5=function(L){
+  var c=nzr(2,4),k=nzr(-5,5),a=nzr(-6,6),d=-c*k;
+  if(L<=2){
+    return q("Find the VERTICAL asymptote:<br><span class='math big'>f(x) = <span class='frac'><span>"+polyStr([a,ri(-5,5)])+"</span><span>"+polyStr([c,d])+"</span></span></span><div class='sub'>Enter the x-value.</div>","num",k,
+      {hint:"Vertical asymptote = where the DENOMINATOR equals 0.",
+       expl:c+"x "+(d<0?"− "+(-d):"+ "+d)+" = 0 → x = "+k+". Vertical asymptote: x = "+k+"."});
+  }
+  if(L<=4){var b=ri(-6,6);
+    return q("Find the HORIZONTAL asymptote:<br><span class='math big'>f(x) = <span class='frac'><span>"+polyStr([a,b])+"</span><span>"+polyStr([c,d])+"</span></span></span><div class='sub'>Enter the y-value (fractions ok).</div>","num",frac(a,c),
+      {hint:"Same degree top and bottom → ratio of leading coefficients.",
+       expl:"Degrees are equal (both 1), so y = "+a+"/"+c+" = "+frac(a,c)+" as x → ±∞."});
+  }
+  var h=nzr(-4,4),m2=nzr(-4,4);while(m2===h)m2=nzr(-4,4);
+  return q("f(x) = <span class='math big'><span class='frac'><span>(x "+(h>0?"− "+h:"+ "+(-h))+")(x "+(m2>0?"− "+m2:"+ "+(-m2))+")</span><span>x "+(h>0?"− "+h:"+ "+(-h))+"</span></span></span><br>Where is the HOLE in this graph? <span class='sub'>Enter the x-value.</span>","num",h,
+    {hint:"A factor that cancels from top AND bottom makes a hole, not an asymptote.",
+     expl:"(x − "+h+") cancels → hole at x = "+h+". The graph is the line y = x − "+m2+" with a single missing point."});
+};
+
+/* ----- UNIT: Radicals & Rational Exponents ----- */
+GEN.rad1=function(L){
+  var a,b,m1;
+  if(L<=2){a=ri(2,6);b=pick([2,3,5,6,7]);
+    m1=mc(a+"√"+b,[""+(a*b>25?a:a+1)+"√"+b,""+b+"√"+a,"√"+(a*a*b)]);
+    return q("Simplify:<br><span class='math big'>√"+(a*a*b)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Find the largest perfect square inside "+(a*a*b)+": it's "+(a*a)+".",
+       expl:"√"+(a*a*b)+" = √("+(a*a)+" · "+b+") = "+a+"√"+b+"."});
+  }
+  if(L<=4){a=ri(2,4);b=pick([2,3,5]);var c=ri(2,5);
+    m1=mc((c*a)+"√"+b,[""+(c+a)+"√"+b,""+c+"√"+(a*a*b),""+(c*a*b)]);
+    return q("Simplify:<br><span class='math big'>"+c+"√"+(a*a*b)+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"Simplify the radical first, then multiply by "+c+".",
+       expl:c+"√"+(a*a*b)+" = "+c+" · "+a+"√"+b+" = "+(c*a)+"√"+b+"."});
+  }
+  a=ri(2,4);b=pick([2,3,5]);
+  m1=mc(a+"∛"+b,[""+b+"∛"+a,"√"+(a*a*a*b),""+(a*b)+"∛"+1]);
+  return q("Simplify:<br><span class='math big'>∛"+(a*a*a*b)+"</span>","mc",m1.ans,
+    {choices:m1.choices,hint:"Look for a perfect CUBE factor: "+(a*a*a)+" = "+a+"³.",
+     expl:"∛"+(a*a*a*b)+" = ∛("+a+"³ · "+b+") = "+a+"∛"+b+"."});
+};
+GEN.rad2=function(L){
+  var k,m,d,base,val;
+  if(L<=2){k=ri(2,5);d=2;base=k*k;val=k;
+    return q("Evaluate:<br><span class='math big'>"+base+sup("1/2")+"</span>","num",val,
+      {hint:"An exponent of 1/2 means square root.",expl:base+sup("1/2")+" = √"+base+" = "+val+"."});
+  }
+  if(L===3){k=ri(2,4);d=3;m=2;base=k*k*k;val=k*k;
+    return q("Evaluate:<br><span class='math big'>"+base+sup("2/3")+"</span>","num",val,
+      {hint:"b^(m/n) = (ⁿ√b)^m: cube root FIRST, then square.",
+       expl:base+sup("2/3")+" = (∛"+base+")² = "+k+"² = "+val+"."});
+  }
+  if(L===4){k=ri(2,3);base=k*k*k*k;val=k*k*k;
+    return q("Evaluate:<br><span class='math big'>"+base+sup("3/4")+"</span>","num",val,
+      {hint:"Fourth root of "+base+" is "+k+", then cube it.",
+       expl:base+sup("3/4")+" = (⁴√"+base+")³ = "+k+"³ = "+val+"."});
+  }
+  k=ri(2,4);base=k*k;
+  return q("Evaluate:<br><span class='math big'>"+base+sup("−1/2")+"</span><div class='sub'>Fractions like 1/4 are fine.</div>","num",frac(1,k),
+    {hint:"Negative exponent → reciprocal. Then the 1/2 → square root.",
+     expl:base+sup("−1/2")+" = 1/"+base+sup("1/2")+" = 1/√"+base+" = 1/"+k+"."});
+};
+GEN.rad3=function(L){
+  var b=pick([2,3,5,7]),a=ri(2,6),c=ri(2,6);
+  if(L<=2){
+    return q("Simplify — enter the coefficient:<br><span class='math big'>"+a+"√"+b+" + "+c+"√"+b+" = ?√"+b+"</span>","num",a+c,
+      {hint:"Like radicals add just like like terms: 3x + 5x = 8x.",
+       expl:a+"√"+b+" + "+c+"√"+b+" = "+(a+c)+"√"+b+". Coefficient: "+(a+c)+"."});
+  }
+  if(L<=4){var m=ri(2,3);
+    return q("Simplify — enter the coefficient:<br><span class='math big'>"+a+"√"+b+" + "+c+"√"+(m*m*b)+" = ?√"+b+"</span>","num",a+c*m,
+      {hint:"First simplify √"+(m*m*b)+" = "+m+"√"+b+", THEN combine.",
+       expl:c+"√"+(m*m*b)+" = "+(c*m)+"√"+b+". Total: ("+a+" + "+(c*m)+")√"+b+" = "+(a+c*m)+"√"+b+"."});
+  }
+  var x=ri(2,5),y=ri(2,5);
+  return q("Multiply:<br><span class='math big'>(√"+(x*x*y)+")(√"+y+")</span>","num",x*y,
+    {hint:"√a · √b = √(ab). What is √("+(x*x*y*y)+")?",
+     expl:"√"+(x*x*y)+" · √"+y+" = √"+(x*x*y*y)+" = "+(x*y)+"."});
+};
+GEN.rad4=function(L){
+  var a,b,c,x;
+  if(L<=2){b=ri(2,7);a=ri(-8,8);x=b*b-a;
+    return q("Solve:<br><span class='math big'>√(x "+(a<0?"− "+(-a):"+ "+a)+") = "+b+"</span>","num",x,
+      {hint:"Square both sides.",expl:"x + "+a+" = "+(b*b)+" → x = "+x+". Check: √"+(b*b)+" = "+b+" ✓."});
+  }
+  if(L===3){a=ri(2,4);c=ri(2,5);b=c*c-a*ri(1,4)*0;var xx=ri(1,6);b=c*c-a*xx;x=xx;
+    return q("Solve:<br><span class='math big'>√("+a+"x "+(b<0?"− "+(-b):"+ "+b)+") = "+c+"</span>","num",x,
+      {hint:"Square both sides, then solve the linear equation.",
+       expl:a+"x + "+b+" = "+(c*c)+" → "+a+"x = "+(c*c-b)+" → x = "+x+"."});
+  }
+  if(L===4){var bb=ri(2,4),r=bb+2*ri(1,3),s=2*bb+1-r,aa=bb*bb-r*s;
+    return q("Solve:<br><span class='math big'>√(x "+(aa<0?"− "+(-aa):"+ "+aa)+") = x − "+bb+"</span><div class='sub'>Watch for extraneous solutions! Enter only valid solution(s).</div>","num",r,
+      {hint:"Square both sides → quadratic → TWO candidates. Test both in the ORIGINAL equation.",
+       expl:"Squaring: x + "+aa+" = x² − "+(2*bb)+"x + "+(bb*bb)+" → x² − "+(2*bb+1)+"x + "+(bb*bb-aa)+" = 0 → x = "+r+" or x = "+s+". Testing x = "+s+": right side is "+(s-bb)+" (negative) but a square root can't be negative → extraneous. Answer: x = "+r+"."});
+  }
+  a=ri(1,9);b=ri(2,6);
+  return q("Solve:<br><span class='math big'>√(x + "+a+") + "+b+" = 0</span><div class='sub'>If no solution exists, type: no solution</div>","text","no solution",
+    {alt:["none","nosolution","∅"],
+     hint:"Isolate the radical: √(x + "+a+") = −"+b+". Possible?",
+     expl:"A principal square root is never negative, so √(x + "+a+") = −"+b+" is impossible. No solution."});
+};
+
+/* ----- UNIT: Exponentials & Logarithms ----- */
+GEN.exp1=function(L){
+  var a=ri(2,6),b=ri(2,6),c=ri(1,4);
+  if(L<=2){
+    return q("Simplify — the result is x"+sup("k")+". Enter k:<br><span class='math big'>x"+sup(a)+" · x"+sup(b)+"</span>","num",a+b,
+      {hint:"Same base multiplied → ADD exponents.",expl:"x"+sup(a)+" · x"+sup(b)+" = x"+sup(a+b)+". k = "+(a+b)+"."});
+  }
+  if(L===3){
+    return q("Simplify — the result is x"+sup("k")+". Enter k:<br><span class='math big'>(x"+sup(a)+")"+sup(b)+" ÷ x"+sup(c)+"</span>","num",a*b-c,
+      {hint:"Power to a power → multiply. Division → subtract.",
+       expl:"(x"+sup(a)+")"+sup(b)+" = x"+sup(a*b)+". Dividing by x"+sup(c)+" subtracts: k = "+(a*b)+" − "+c+" = "+(a*b-c)+"."});
+  }
+  if(L===4){var n=ri(2,4);
+    return q("Evaluate:<br><span class='math big'>2"+sup("−"+n)+"</span><div class='sub'>Fraction form like 1/8.</div>","num",frac(1,Math.pow(2,n)),
+      {hint:"Negative exponent = reciprocal: 2⁻ⁿ = 1/2ⁿ.",
+       expl:"2"+sup("−"+n)+" = 1/2"+sup(n)+" = 1/"+Math.pow(2,n)+"."});
+  }
+  var k=ri(2,5);
+  return q("Evaluate:<br><span class='math big'>("+(k*k)+"/"+(k*k*k*k)+")"+sup("−1/2")+"</span> <span class='sub'>Hint: simplify inside first.</span>","num",k,
+    {hint:"Inside simplifies to 1/"+(k*k)+". Then flip (negative exp) and square-root.",
+     expl:"("+(k*k)+"/"+(k*k*k*k)+") = 1/"+(k*k)+". Reciprocal: "+(k*k)+". Square root: "+k+"."});
+};
+GEN.exp2=function(L){
+  var a,t;
+  if(L<=2){a=pick([50,100,200,300]);t=ri(2,4);
+    return q("📈 A colony starts at "+a+" bacteria and DOUBLES every hour: P(t) = "+a+" · 2"+sup("t")+". How many after "+t+" hours?","num",a*Math.pow(2,t),
+      {hint:"Plug t = "+t+" into the formula.",expl:"P("+t+") = "+a+" · 2"+sup(t)+" = "+a+" · "+Math.pow(2,t)+" = "+(a*Math.pow(2,t))+"."});
+  }
+  if(L===3){var r=pick([3,5,8,12]);
+    return q("A quantity grows "+r+"% per year. What number do you MULTIPLY by each year?<div class='sub'>Enter a decimal, like 1.07</div>","num",1+r/100,
+      {hint:"Growth factor = 1 + rate as a decimal.",
+       expl:"Growth of "+r+"% → multiply by 1 + 0."+(r<10?"0"+r:r)+" = "+(1+r/100)+". (Decay of "+r+"% would be "+(1-r/100)+".)"});
+  }
+  if(L===4){a=pick([400,800,1600]);var h=pick([2,3,5]);t=h*ri(2,3);
+    var v=a/Math.pow(2,t/h);
+    return q("☢️ A "+a+" g sample has a half-life of "+h+" days: A(t) = "+a+" · (1/2)"+sup("t/"+h)+". How many grams remain after "+t+" days?","num",v,
+      {hint:t+" days = "+(t/h)+" half-lives.",
+       expl:"That's "+(t/h)+" halvings: "+a+" → "+(t/h===2?a/2+" → "+a/4:a/2+" → "+a/4+" → "+a/8)+". A("+t+") = "+v+" g."});
+  }
+  var p=pick([10000,20000,40000]);var d=pick([10,20,25]);var yrs=ri(2,3);
+  var v2=p*Math.pow(1-d/100,yrs);
+  return q("🚗 A used truck bought in Branson for $"+p+" loses "+d+"% of its value each year. What is it worth after "+yrs+" years?<div class='sub'>Nearest dollar.</div>","num",Math.round(v2),
+    {hint:"Multiply by "+(1-d/100)+" once per year — "+yrs+" times.",
+     expl:"V = "+p+" · ("+(1-d/100)+")"+sup(yrs)+" = $"+Math.round(v2)+". Depreciation is exponential DECAY."});
+};
+GEN.exp3=function(L){
+  var b=pick([2,3,5,10]),y=ri(2,4),x=Math.pow(b,y);
+  if(L<=3||Math.random()<.5){
+    var m1=mc("log"+sub2(b)+"("+x+") = "+y,["log"+sub2(y)+"("+x+") = "+b,"log"+sub2(b)+"("+y+") = "+x,"log"+sub2(x)+"("+b+") = "+y]);
+    return q("Rewrite in LOG form:<br><span class='math big'>"+b+sup(y)+" = "+x+"</span>","mc",m1.ans,
+      {choices:m1.choices,hint:"log_base(result) = exponent. The base stays the base.",
+       expl:b+sup(y)+" = "+x+" ⟺ log"+sub2(b)+"("+x+") = "+y+". A log IS an exponent."});
+  }
+  var m2=mc(b+sup(y)+" = "+x,[y+sup(b)+" = "+x,b+sup(x)+" = "+y,x+sup(y)+" = "+b]);
+  return q("Rewrite in EXPONENTIAL form:<br><span class='math big'>log"+sub2(b)+"("+x+") = "+y+"</span>","mc",m2.ans,
+    {choices:m2.choices,hint:"base^(the log's value) = the argument.",
+     expl:"log"+sub2(b)+"("+x+") = "+y+" ⟺ "+b+sup(y)+" = "+x+"."});
+};
+GEN.exp4=function(L){
+  var b,k;
+  if(L<=2){b=pick([2,3,5,10]);k=ri(1,4);
+    return q("Evaluate:<br><span class='math big'>log"+sub2(b)+"("+Math.pow(b,k)+")</span>","num",k,
+      {hint:"Ask: "+b+" to WHAT power gives "+Math.pow(b,k)+"?",
+       expl:b+sup(k)+" = "+Math.pow(b,k)+", so the log is "+k+"."});
+  }
+  if(L<=4){b=pick([2,3,5]);k=ri(1,3);
+    return q("Evaluate:<br><span class='math big'>log"+sub2(b)+"(1/"+Math.pow(b,k)+")</span>","num",-k,
+      {hint:"1/"+Math.pow(b,k)+" = "+b+"⁻"+k+".",
+       expl:"1/"+Math.pow(b,k)+" = "+b+sup("−"+k)+", so the answer is −"+k+". Logs of numbers between 0 and 1 are negative."});
+  }
+  b=pick([4,9,25,8,27]);var pr=(b===4||b===9||b===25)?{r:Math.sqrt(b),e:"1/2"}:{r:Math.cbrt?Math.round(Math.pow(b,1/3)):2,e:"1/3"};
+  return q("Evaluate:<br><span class='math big'>log"+sub2(b)+"("+pr.r+")</span><div class='sub'>Fractions like 1/2 are fine.</div>","num",pr.e,
+    {hint:pr.r+" is a ROOT of "+b+" — so the exponent is a fraction.",
+     expl:b+sup(pr.e)+" = "+pr.r+", so log"+sub2(b)+"("+pr.r+") = "+pr.e+"."});
+};
+GEN.exp5=function(L){
+  if(L<=2){
+    var m1=mc("log(x) + log(y)",["log(x) · log(y)","log(x + y)","log(x) − log(y)"]);
+    return q("Which expression equals <span class='math big'>log(xy)</span>?","mc",m1.ans,
+      {choices:m1.choices,hint:"Product inside → SUM outside.",
+       expl:"Product rule: log(xy) = log x + log y. (Because multiplying powers adds exponents — a log IS an exponent.)"});
+  }
+  if(L<=4){var a=ri(2,5),b=ri(2,5);
+    var m2=mc(a+"log(x) + "+b+"log(y)",[""+(a+b)+"log(xy)","log("+a+"x) + log("+b+"y)",a+"log(x) − "+b+"log(y)"]);
+    return q("Expand:<br><span class='math big'>log(x"+sup(a)+"y"+sup(b)+")</span>","mc",m2.ans,
+      {choices:m2.choices,hint:"Product rule first, then power rule pulls exponents out front.",
+       expl:"log(x"+sup(a)+"y"+sup(b)+") = log x"+sup(a)+" + log y"+sup(b)+" = "+a+"log x + "+b+"log y."});
+  }
+  var c=ri(2,4),d=ri(2,4);
+  var m3=mc("log(x"+sup(c)+"/y"+sup(d)+")",["log(x"+sup(c)+"y"+sup(d)+")","log("+c+"x/"+d+"y)","log(x"+sup(c)+") · log(y"+sup(d)+")"]);
+  return q("Condense to a SINGLE log:<br><span class='math big'>"+c+"log(x) − "+d+"log(y)</span>","mc",m3.ans,
+    {choices:m3.choices,hint:"Coefficients become exponents; subtraction becomes division.",
+     expl:c+"log x − "+d+"log y = log(x"+sup(c)+") − log(y"+sup(d)+") = log(x"+sup(c)+"/y"+sup(d)+")."});
+};
+GEN.exp6=function(L){
+  var b,x,c;
+  if(L<=2){b=pick([2,3,5]);x=ri(2,5);
+    return q("Solve:<br><span class='math big'>"+b+sup("x")+" = "+Math.pow(b,x)+"</span>","num",x,
+      {hint:"Rewrite "+Math.pow(b,x)+" as a power of "+b+".",
+       expl:Math.pow(b,x)+" = "+b+sup(x)+", so x = "+x+"."});
+  }
+  if(L===3){b=pick([2,3]);c=ri(1,3);x=ri(1,4);
+    return q("Solve:<br><span class='math big'>"+b+sup("x + "+c)+" = "+Math.pow(b,x+c)+"</span>","num",x,
+      {hint:"Match the bases, then set the EXPONENTS equal.",
+       expl:Math.pow(b,x+c)+" = "+b+sup(x+c)+" → x + "+c+" = "+(x+c)+" → x = "+x+"."});
+  }
+  if(L===4){c=ri(1,3);x=3*c;
+    return q("Solve:<br><span class='math big'>4"+sup("x")+" = 8"+sup("x − "+c)+"</span>","num",x,
+      {hint:"Both are powers of 2: 4 = 2², 8 = 2³.",
+       expl:"2"+sup("2x")+" = 2"+sup("3(x − "+c+")")+" → 2x = 3x − "+(3*c)+" → x = "+(3*c)+"."});
+  }
+  var a=pick([3,5,7]);x=ri(2,5);var rhs=a*Math.pow(2,x+1);
+  return q("Solve:<br><span class='math big'>"+a+" · 2"+sup("x + 1")+" = "+rhs+"</span>","num",x,
+    {hint:"Divide both sides by "+a+" FIRST.",
+     expl:"2"+sup("x + 1")+" = "+(rhs/a)+" = 2"+sup(x+1)+" → x + 1 = "+(x+1)+" → x = "+x+"."});
+};
+GEN.exp7=function(L){
+  var b,c,a,x;
+  if(L<=2){b=pick([2,3,5]);c=ri(2,4);x=Math.pow(b,c);
+    return q("Solve:<br><span class='math big'>log"+sub2(b)+"(x) = "+c+"</span>","num",x,
+      {hint:"Rewrite in exponential form: x = "+b+sup(c)+".",
+       expl:"log"+sub2(b)+"(x) = "+c+" ⟺ x = "+b+sup(c)+" = "+x+"."});
+  }
+  if(L===3){b=2;c=ri(2,4);a=ri(1,6);x=Math.pow(2,c)+a;
+    return q("Solve:<br><span class='math big'>log₂(x − "+a+") = "+c+"</span>","num",x,
+      {hint:"x − "+a+" = 2"+sup(c)+".",
+       expl:"x − "+a+" = "+Math.pow(2,c)+" → x = "+x+". Check the argument is positive: "+x+" − "+a+" = "+Math.pow(2,c)+" > 0 ✓."});
+  }
+  if(L===4){var t=pick([{r:4,a:2,c:3},{r:8,a:6,c:4},{r:4,a:3,c:2},{r:8,a:4,c:5},{r:8,a:7,c:3},{r:2,a:1,c:1}]);
+    return q("Solve:<br><span class='math big'>log₂(x) + log₂(x − "+t.a+") = "+t.c+"</span><div class='sub'>Reject any extraneous solution.</div>","num",t.r,
+      {hint:"Condense: log₂[x(x − "+t.a+")] = "+t.c+" → x(x − "+t.a+") = "+Math.pow(2,t.c)+".",
+       expl:"x² − "+t.a+"x − "+Math.pow(2,t.c)+" = 0 → (x − "+t.r+")(x + "+(Math.pow(2,t.c)/t.r)+") = 0. The negative root makes log₂(x) undefined → extraneous. x = "+t.r+"."});
+  }
+  var bpick=3;x=ri(3,8);var bnum=ri(1,x-1);while(2*x<=3*bnum)bnum=ri(1,Math.max(1,x-2));
+  a=2*x-3*bnum;
+  return q("Solve:<br><span class='math big'>log₃(x + "+a+") − log₃(x − "+bnum+") = 1</span>","num",x,
+    {hint:"Condense to log₃ of a quotient, then set the quotient equal to 3¹.",
+     expl:"(x + "+a+")/(x − "+bnum+") = 3 → x + "+a+" = 3x − "+(3*bnum)+" → 2x = "+(a+3*bnum)+" → x = "+x+". Both arguments positive ✓."});
+};
+function sub2(n){return "<sub style='font-size:.68em'>"+n+"</sub>";}
+
+/* ----- UNIT: Sequences & Series ----- */
+GEN.seq1=function(L){
+  var a1=ri(-9,9),d=nzr(-6,6),n;
+  if(L<=2){n=ri(5,12);
+    return q("Arithmetic sequence: a₁ = "+a1+", common difference d = "+d+".<br>Find <span class='big'>a"+sub2(n)+"</span>.","num",a1+(n-1)*d,
+      {hint:"aₙ = a₁ + (n − 1)d.",expl:"a"+sub2(n)+" = "+a1+" + "+(n-1)+"("+d+") = "+(a1+(n-1)*d)+"."});
+  }
+  if(L===3){var a3=a1+2*d,a7=a1+6*d;
+    return q("In an arithmetic sequence, a₃ = "+a3+" and a₇ = "+a7+".<br>Find the common difference d.","num",d,
+      {hint:"From a₃ to a₇ is 4 steps of d.",
+       expl:"a₇ − a₃ = 4d → "+(a7-a3)+" = 4d → d = "+d+"."});
+  }
+  if(L===4){var a5=a1+4*d;
+    return q("In an arithmetic sequence, a₅ = "+a5+" and d = "+d+".<br>Find a₁.","num",a1,
+      {hint:"Walk BACKWARD 4 steps from a₅.",
+       expl:"a₁ = a₅ − 4d = "+a5+" − "+(4*d)+" = "+a1+"."});
+  }
+  n=ri(8,20);var v=a1+(n-1)*d;
+  return q("Arithmetic sequence: "+a1+", "+(a1+d)+", "+(a1+2*d)+", …<br>WHICH TERM equals "+v+"? <span class='sub'>Enter n.</span>","num",n,
+    {hint:"Solve "+a1+" + (n − 1)("+d+") = "+v+" for n.",
+     expl:"(n − 1)·"+d+" = "+(v-a1)+" → n − 1 = "+(n-1)+" → n = "+n+"."});
+};
+GEN.seq2=function(L){
+  var a1,r,n;
+  if(L<=2){a1=pick([1,2,3,4]);r=pick([2,3]);n=ri(4,6);
+    return q("Geometric sequence: a₁ = "+a1+", common ratio r = "+r+".<br>Find a"+sub2(n)+".","num",a1*Math.pow(r,n-1),
+      {hint:"aₙ = a₁ · rⁿ⁻¹.",expl:"a"+sub2(n)+" = "+a1+" · "+r+sup(n-1)+" = "+(a1*Math.pow(r,n-1))+"."});
+  }
+  if(L===3){a1=pick([2,3,5]);r=pick([2,3]);var a2v=a1*r,a5v=a1*Math.pow(r,4);
+    return q("In a geometric sequence, a₂ = "+a2v+" and a₅ = "+a5v+".<br>Find the common ratio r.","num",r,
+      {hint:"a₅/a₂ = r³.",
+       expl:a5v+"/"+a2v+" = "+(a5v/a2v)+" = r³ → r = "+r+"."});
+  }
+  a1=pick([64,96,128,160])*(L>=5?2:1);r=.5;n=ri(4,7);
+  var v=a1*Math.pow(.5,n-1);
+  return q("Geometric sequence: a₁ = "+a1+", r = 1/2.<br>Find a"+sub2(n)+".","num",v,
+    {hint:"Halve it "+(n-1)+" times.",
+     expl:"a"+sub2(n)+" = "+a1+" · (1/2)"+sup(n-1)+" = "+a1+"/"+Math.pow(2,n-1)+" = "+v+"."});
+};
+GEN.seq3=function(L){
+  var a1=ri(1,6),r=L<=2?1:pick([2,3]),b=nzr(-5,5),n=L>=4?5:4;
+  var seq=[a1],i;
+  for(i=1;i<n;i++)seq.push(r*seq[i-1]+b);
+  return q("Recursive sequence:<br><span class='math big'>a₁ = "+a1+",  aₙ₊₁ = "+(r===1?"aₙ":r+"aₙ")+" "+(b<0?"− "+(-b):"+ "+b)+"</span><br>Find a"+sub2(n)+".","num",seq[n-1],
+    {hint:"Build term by term: a₂, then a₃, …",
+     expl:"a₂ = "+seq[1]+", a₃ = "+seq[2]+(n>3?", a₄ = "+seq[3]:"")+(n>4?", a₅ = "+seq[4]:"")+"."});
+};
+GEN.seq4=function(L){
+  var a1=ri(1,8),d=ri(1,5),n=L<=2?ri(5,8):ri(10,20);
+  var an=a1+(n-1)*d,s=n*(a1+an)/2;
+  if(L<=4){
+    return q("Find the sum of the first "+n+" terms:<br><span class='math big'>"+a1+" + "+(a1+d)+" + "+(a1+2*d)+" + …</span>","num",s,
+      {hint:"Sₙ = n(a₁ + aₙ)/2. First find a"+sub2(n)+" = "+an+".",
+       expl:"a"+sub2(n)+" = "+a1+" + "+(n-1)+"("+d+") = "+an+". S = "+n+"("+a1+" + "+an+")/2 = "+s+"."});
+  }
+  var rows=ri(10,16),top=ri(4,10),bot=top+rows-1,tot=rows*(top+bot)/2;
+  return q("🎭 A Branson theater has "+rows+" rows. The front row has "+top+" seats and each row behind adds one more seat. How many seats total?","num",tot,
+    {hint:"That's an arithmetic series: "+top+" + "+(top+1)+" + … + "+bot+".",
+     expl:"Last row: "+bot+" seats. Total = "+rows+"("+top+" + "+bot+")/2 = "+tot+" seats."});
+};
+GEN.seq5=function(L){
+  var a1,r,n;
+  if(L<=3){a1=pick([1,2,3]);r=2;n=ri(4,6);
+    var s=a1*(Math.pow(2,n)-1);
+    return q("Find the sum of the first "+n+" terms:<br><span class='math big'>"+a1+" + "+(a1*2)+" + "+(a1*4)+" + …</span>","num",s,
+      {hint:"Sₙ = a₁(rⁿ − 1)/(r − 1) with r = 2.",
+       expl:"S = "+a1+"(2"+sup(n)+" − 1)/(2 − 1) = "+a1+"·"+(Math.pow(2,n)-1)+" = "+s+"."});
+  }
+  var t=pick([{a:1,rs:"1/2",S:2},{a:3,rs:"1/2",S:6},{a:2,rs:"1/2",S:4},{a:2,rs:"1/3",S:3},{a:4,rs:"1/3",S:6},{a:3,rs:"1/4",S:4},{a:1,rs:"2/3",S:3}]);
+  return q("Find the sum of the INFINITE geometric series:<br><span class='math big'>a₁ = "+t.a+",  r = "+t.rs+"</span>","num",t.S,
+    {hint:"S = a₁/(1 − r). It converges because |r| &lt; 1.",
+     expl:"S = "+t.a+"/(1 − "+t.rs+") = "+t.S+". An infinite sum can be finite when each term shrinks fast enough."});
+};
+
+/* ----- UNIT: Probability & Statistics ----- */
+GEN.data1=function(L){
+  var n,k;
+  function fact(x){var f=1,i;for(i=2;i<=x;i++)f*=i;return f;}
+  function nCr(n,k){return fact(n)/(fact(k)*fact(n-k));}
+  function nPr(n,k){return fact(n)/fact(n-k);}
+  if(L<=2){n=ri(4,7);
+    return q("How many ways can "+n+" trophies be arranged in a row on a shelf?","num",fact(n),
+      {hint:"That's "+n+"! (factorial).",expl:n+"! = "+fact(n)+" arrangements."});
+  }
+  if(L===3){n=ri(5,8);k=ri(2,3);
+    return q("A club with "+n+" members elects a president and a vice-president (different people). How many ways?","num",nPr(n,2),
+      {hint:"Order MATTERS here → permutation: "+n+" choices, then "+(n-1)+".",
+       expl:"P("+n+",2) = "+n+" × "+(n-1)+" = "+nPr(n,2)+"."});
+  }
+  if(L===4){n=ri(5,9);k=ri(2,3);
+    return q("From "+n+" students, choose a committee of "+k+" (order doesn't matter). How many ways?","num",nCr(n,k),
+      {hint:"Order doesn't matter → combination: C("+n+","+k+").",
+       expl:"C("+n+","+k+") = "+n+"!/("+k+"!·"+(n-k)+"!) = "+nCr(n,k)+"."});
+  }
+  n=ri(6,9);k=3;
+  var perm=nPr(n,k),comb=nCr(n,k);
+  var m1=mc("Medals: "+perm+";  Committee: "+comb,["Medals: "+comb+";  Committee: "+perm,"Both: "+perm,"Both: "+comb]);
+  return q("From "+n+" runners: (a) how many ways to award gold/silver/bronze, and (b) how many ways to pick 3 for a relay team?","mc",m1.ans,
+    {choices:m1.choices,hint:"Medals are ordered (permutation); the team is unordered (combination).",
+     expl:"Medals: P("+n+",3) = "+perm+". Team: C("+n+",3) = "+comb+". Order matters ⟺ permutation."});
+};
+GEN.data2=function(L){
+  var r=ri(2,6),b=ri(2,6),g=ri(2,6),T=r+b+g;
+  if(L<=2){
+    return q("🎒 A bag has "+r+" red, "+b+" blue, and "+g+" green marbles. One is drawn at random. P(red)?<div class='sub'>Enter a fraction like 3/10.</div>","num",frac(r,T),
+      {hint:"Favorable over total: "+r+" out of "+T+".",
+       expl:"P(red) = "+r+"/"+T+" = "+frac(r,T)+"."});
+  }
+  if(L===3){
+    return q("🎒 A bag has "+r+" red, "+b+" blue, and "+g+" green marbles. One draw. P(NOT green)?<div class='sub'>Fraction.</div>","num",frac(T-g,T),
+      {hint:"P(not A) = 1 − P(A).",
+       expl:"P(green) = "+g+"/"+T+", so P(not green) = "+(T-g)+"/"+T+" = "+frac(T-g,T)+"."});
+  }
+  if(L===4){
+    return q("🎒 A bag has "+r+" red and "+b+" blue marbles. TWO are drawn WITHOUT replacement. P(both red)?<div class='sub'>Fraction.</div>","num",frac(r*(r-1),(r+b)*(r+b-1)),
+      {hint:"First draw: "+r+"/"+(r+b)+". Second: one fewer red AND one fewer total.",
+       expl:"P = ("+r+"/"+(r+b)+") · ("+(r-1)+"/"+(r+b-1)+") = "+frac(r*(r-1),(r+b)*(r+b-1))+"."});
+  }
+  var n=ri(3,5);
+  return q("🪙 A fair coin is flipped "+n+" times. P(AT LEAST one head)?<div class='sub'>Fraction.</div>","num",frac(Math.pow(2,n)-1,Math.pow(2,n)),
+    {hint:"Use the complement: 1 − P(all tails).",
+     expl:"P(all tails) = (1/2)"+sup(n)+" = 1/"+Math.pow(2,n)+". So P(≥1 head) = "+frac(Math.pow(2,n)-1,Math.pow(2,n))+"."});
+};
+GEN.data3=function(L){
+  function fact(x){var f=1,i;for(i=2;i<=x;i++)f*=i;return f;}
+  function nCr(n,k){return fact(n)/(fact(k)*fact(n-k));}
+  var n=L<=2?ri(3,4):ri(4,6),k=ri(1,n-1);
+  if(L<=4){
+    return q("🪙 A fair coin is flipped "+n+" times. P(EXACTLY "+k+" heads)?<div class='sub'>Fraction.</div>","num",frac(nCr(n,k),Math.pow(2,n)),
+      {hint:"Binomial: C("+n+","+k+") ways × (1/2)"+sup(n)+".",
+       expl:"C("+n+","+k+") = "+nCr(n,k)+" outcomes with "+k+" heads, out of 2"+sup(n)+" = "+Math.pow(2,n)+" total → "+frac(nCr(n,k),Math.pow(2,n))+"."});
+  }
+  n=3;k=ri(1,2);
+  var num=nCr(3,k)*Math.pow(1,k)*Math.pow(2,3-k); // p=1/3: C·1^k·2^(n-k)/3^n
+  return q("🎯 A spinner lands on 'win' with probability 1/3. It is spun 3 times. P(EXACTLY "+k+" wins)?<div class='sub'>Fraction.</div>","num",frac(num,27),
+    {hint:"Binomial with p = 1/3, q = 2/3: C(3,"+k+")·(1/3)"+sup(k)+"·(2/3)"+sup(3-k)+".",
+     expl:"C(3,"+k+") = "+nCr(3,k)+". P = "+nCr(3,k)+" · 1"+sup(k)+"·2"+sup(3-k)+"/3³ = "+frac(num,27)+"."});
+};
+GEN.data4=function(L){
+  if(L<=3){
+    var n=pick([10,20,25,50]),m=ri(2,5),c=ri(1,m+2),W=n*m;
+    return q("🎟️ A raffle sells "+n+" tickets at $"+c+" each. One winner gets $"+W+". What is the EXPECTED VALUE of buying one ticket?<div class='sub'>In dollars — negative if you expect to lose. Decimals ok.</div>","num",m-c,
+      {hint:"EV = (1/"+n+")("+W+") − "+c+".",
+       expl:"Expected winnings: "+W+"/"+n+" = $"+m+". Minus the $"+c+" ticket → EV = $"+(m-c)+". "+(m-c<0?"On average you LOSE "+Math.abs(m-c)+" dollars per ticket.":(m-c===0?"A fair game.":"A profitable game!"))});
+  }
+  var a=ri(1,4),b=a+ri(1,4);
+  var ev=(a+b)/2;
+  return q("🎲 A game: roll a fair die. If it shows 1–3 you win $"+a+"; if it shows 4–6 you win $"+b+". Expected value?<div class='sub'>Decimals ok.</div>","num",ev,
+    {hint:"Each half has probability 1/2.",
+     expl:"EV = ½("+a+") + ½("+b+") = "+ev+" dollars."});
+};
+GEN.data5=function(L){
+  var mu=pick([70,80,100,500]),sd=pick([5,10,15]),z=nzr(-3,3),x=mu+z*sd;
+  if(L<=2){
+    return q("Test scores are normal with mean μ = "+mu+" and standard deviation σ = "+sd+".<br>Find the z-score of x = "+x+".","num",z,
+      {hint:"z = (x − μ)/σ.",expl:"z = ("+x+" − "+mu+")/"+sd+" = "+z+". That's "+Math.abs(z)+" standard deviation"+(Math.abs(z)>1?"s":"")+" "+(z>0?"above":"below")+" the mean."});
+  }
+  if(L<=4){
+    var t=pick([{q:"within 1 standard deviation of the mean",a:"68%"},{q:"within 2 standard deviations of the mean",a:"95%"},{q:"within 3 standard deviations of the mean",a:"99.7%"},{q:"between the mean and one standard deviation above it",a:"34%"}]);
+    var m1=mc(t.a,["50%","68%","95%","99.7%","34%","13.5%"].filter(function(s){return s!==t.a;}).slice(0,3));
+    return q("For a NORMAL distribution, about what percent of data falls "+t.q+"?","mc",m1.ans,
+      {choices:m1.choices,hint:"Empirical rule: 68 – 95 – 99.7.",
+       expl:"The empirical rule: 68% within 1σ, 95% within 2σ, 99.7% within 3σ (34% in each half of the middle band). Answer: "+t.a+"."});
+  }
+  var s1=ri(80,90),m1v=75,sd1=5,s2=ri(60,70),m2v=50,sd2=10;
+  var z1=(s1-m1v)/sd1,z2=(s2-m2v)/sd2;
+  var cor=z1>z2?"Test A (z = "+z1+" vs z = "+z2+")":(z2>z1?"Test B (z = "+z2+" vs z = "+z1+")":"They are equally impressive (equal z-scores)");
+  var m2=mc(cor,["Test A — because "+s1+" is a higher score","Test B — because its class average was lower",z1>z2?"Test B (z = "+z2+" vs z = "+z1+")":"Test A (z = "+z1+" vs z = "+z2+")"]);
+  return q("You scored "+s1+" on Test A (mean 75, σ = 5) and "+s2+" on Test B (mean 50, σ = 10). Which score is MORE impressive relative to the class?","mc",m2.ans,
+    {choices:m2.choices,hint:"Convert both to z-scores and compare.",
+     expl:"z_A = ("+s1+"−75)/5 = "+z1+"; z_B = ("+s2+"−50)/10 = "+z2+". Higher z = more impressive: "+cor+"."});
+};
+/* ============================================================
+   BEAST MODE — multi-topic, non-routine challenge problems.
+   Each returns a question tagged with the skills it exercises.
+   ============================================================ */
+var BEAST=[
+ function(){var r1=nzr(-5,5),r2=nzr(-5,5);while(r2===r1)r2=nzr(-5,5);
+   var Sv=r1+r2,P=r1*r2;
+   return q("🐲 A quadratic x² + bx + c = 0 has roots whose SUM is "+Sv+" and whose PRODUCT is "+P+".<br>Find b and c. <span class='sub'>Answer as (b, c).</span>","pair",(-Sv)+","+P,
+     {sk:"quad6",hint:"Vieta's formulas: sum of roots = −b, product = c.",
+      expl:"For x² + bx + c: roots sum to −b and multiply to c. So b = −("+Sv+") = "+(-Sv)+", c = "+P+". (Check: (x − "+r1+")(x − "+r2+") expands to x² "+(Sv>0?"− "+Sv:"+ "+(-Sv))+"x "+(P<0?"− "+(-P):"+ "+P)+".)"});},
+ function(){var a=nzr(2,4),b=ri(-6,6),y=ri(-5,5),fy=a*y+b;
+   return q("🐲 f(x) = "+polyStr([a,b])+" and g is the INVERSE of f.<br>Without finding a formula for g, evaluate:<br><span class='math big'>g(f(g(f("+y+"))))</span>","num",y,
+     {sk:"fun4",hint:"g undoes f: g(f(anything)) = anything. Collapse from the inside out.",
+      expl:"Inside out: f("+y+") = "+fy+"; g("+fy+") = "+y+" (inverse undoes); f("+y+") = "+fy+"; g("+fy+") = "+y+". Every g∘f pair cancels, so the whole tower is just "+y+". Elite move: see the structure, skip the arithmetic."});},
+ function(){var N=pick([100,250,500]),h=pick([2,3,4]),k=ri(3,5);
+   return q("🐲 A bacteria culture in a Branson lab starts at "+N+" cells and DOUBLES every "+h+" hours. How many HOURS until it reaches "+(N*Math.pow(2,k))+" cells?","num",h*k,
+     {sk:"exp6",hint:"How many doublings turn "+N+" into "+(N*Math.pow(2,k))+"? Then convert doublings to hours.",
+      expl:(N*Math.pow(2,k))+"/"+N+" = "+Math.pow(2,k)+" = 2"+sup(k)+" → "+k+" doublings × "+h+" h each = "+(h*k)+" hours. (Same as solving "+N+"·2"+sup("t/"+h)+" = "+(N*Math.pow(2,k))+".)"});},
+ function(){var r=nzr(-3,3),p=nzr(-3,3),qv=ri(1,3);
+   var c2=-(r+2*p);
+   return q("🐲 A MONIC cubic with REAL coefficients has zeros x = "+r+" and x = "+cpx(p,qv).s+".<br>Find the coefficient of x².","num",c2,
+     {sk:"cplx5",hint:"Complex zeros come in conjugate pairs — so the third zero is "+cpx(p,-qv).s+". The x² coefficient is −(sum of zeros).",
+      expl:"Zeros: "+r+", "+cpx(p,qv).s+", "+cpx(p,-qv).s+". Sum = "+r+" + "+(2*p)+" = "+(r+2*p)+" (imaginary parts cancel). Coefficient of x² = −(sum) = "+c2+"."});},
+ function(){var p=ri(2,6);
+   return q("🐲 Solve:<br><span class='math big'><span class='frac'><span>x² − "+(p*p)+"</span><span>x − "+p+"</span></span> = "+(2*p)+"</span><div class='sub'>Think carefully. If no valid solution exists, type: no solution</div>","text","no solution",
+     {sk:"rat4",alt:["none","nosolution","∅"],hint:"Simplify the left side — then ask what x-value you just created a problem for.",
+      expl:"Left side simplifies to x + "+p+" (for x ≠ "+p+"). Setting x + "+p+" = "+(2*p)+" gives x = "+p+" — but that's exactly the excluded value! Extraneous → NO solution. Beast-level lesson: always compare answers against the domain."});},
+ function(){var m=ri(-4,4),b=nzr(-4,4),k=ri(-5,5),c1=ri(-5,5);
+   while(m===b)m=ri(-4,4);
+   var B=b-m,C=c1-k,D=B*B-4*C;
+   var cor=D>0?"Two points":(D===0?"Exactly one point (tangent)":"No points");
+   var m1=mc(cor,["Two points","Exactly one point (tangent)","No points","Cannot tell without graphing"].filter(function(s){return s!==cor;}));
+   return q("🐲 WITHOUT graphing, determine how many points these graphs share:<br><span class='math big'>y = "+polyStr([1,b,c1])+"<br>y = "+polyStr([m,k])+"</span>","mc",m1.ans,
+     {sk:"quad7",choices:m1.choices,hint:"Set the right-hand sides equal → a quadratic. Its discriminant decides: D&gt;0 two, D=0 one, D&lt;0 none.",
+      expl:"Setting equal: x² + "+B+"x + "+C+" = 0. D = "+(B*B)+" − "+(4*C)+" = "+D+" → "+cor.toLowerCase()+". Intersections of graphs = real solutions of the combined equation."});},
+ function(){var a=pick([2,3]),k=ri(4,8);
+   return q("🐲 Geometric sequence: aₙ = "+a+" · 3"+sup("n−1")+".<br>What is the FIRST term number n for which aₙ &gt; "+a+" · 3"+sup(k)+"?","num",k+2,
+     {sk:"seq2",hint:"Compare exponents: 3"+sup("n−1")+" &gt; 3"+sup(k)+" means n − 1 &gt; "+k+".",
+      expl:"n − 1 &gt; "+k+" → n &gt; "+(k+1)+" → first whole term: n = "+(k+2)+". This is exactly the logic behind logarithms."});},
+ function(){var d=ri(2,6),x0=ri(2,8),v=2*(x0-0)+0;var V=2*x0+ -2*d + 2*d;
+   var wrong=(2*x0)-d+ (0);var rv=2*x0-2*d;var shown=rv+d;
+   return q("🐲 ERROR ANALYSIS — Jordan solves 2(x − "+d+") = "+rv+" like this:<br><span class='math'>Step 1: 2x − "+d+" = "+rv+"<br>Step 2: 2x = "+(rv+d)+"<br>Step 3: x = "+frac(rv+d,2)+"</span><br>What went wrong?","mc","Step 1 — the 2 wasn't distributed to −"+d,
+     {sk:"lin1",choices:shuffle(["Step 1 — the 2 wasn't distributed to −"+d,"Step 2 — should have subtracted "+d,"Step 3 — divided incorrectly","Nothing — the solution is correct"]),
+      hint:"Check Step 1 against the distributive property.",
+      expl:"2(x − "+d+") = 2x − "+(2*d)+", not 2x − "+d+". Correct path: 2x = "+(rv+2*d)+" → x = "+((rv+2*d)/2)+". Error-spotting builds the #1 skill of elite students: self-checking."});},
+ function(){var m=ri(2,5);
+   return q("🐲 Solve:<br><span class='math big'>|2x − "+(3*m)+"| = x</span><div class='sub'>Enter ALL valid solutions, comma-separated. Check every candidate!</div>","set",(3*m)+","+m,
+     {sk:"lin3",hint:"Two cases — and remember the right side x must be ≥ 0 for a solution to survive.",
+      expl:"Case 1: 2x − "+(3*m)+" = x → x = "+(3*m)+" (check: |"+(3*m)+"| = "+(3*m)+" ✓). Case 2: 2x − "+(3*m)+" = −x → 3x = "+(3*m)+" → x = "+m+" (check: |"+(2*m-3*m)+"| = "+m+" ✓). Both valid: x = "+m+", "+(3*m)+"."});},
+ function(){var m=ri(2,6),P=8*m;
+   return q("🐲 You have "+P+" ft of fencing to enclose a rectangular pen along Lake Taneycomo — the lake side needs NO fence. What is the MAXIMUM possible area (sq ft)?","num",P*P/8,
+     {sk:"quad8",hint:"Area A(x) = x("+P+" − 2x) where x is the depth. Maximize the quadratic.",
+      expl:"A = "+P+"x − 2x² → vertex at x = "+P+"/4 = "+(P/4)+". Width = "+(P/2)+". Max area = "+(P/4)+" × "+(P/2)+" = "+(P*P/8)+" sq ft. Quadratics ARE optimization."});}
+];
+
+/* ---------- diagnostic blueprint: 2 questions per unit ---------- */
+var DIAG_SPEC=[
+ {sk:"lin1",L:2},{sk:"lin3",L:3},
+ {sk:"fun1",L:2},{sk:"fun4",L:3},
+ {sk:"sys1",L:2},{sk:"sys3",L:2},
+ {sk:"quad2",L:2},{sk:"quad6",L:3},
+ {sk:"cplx1",L:2},{sk:"cplx3",L:3},
+ {sk:"poly3",L:2},{sk:"poly5",L:3},
+ {sk:"rat1",L:2},{sk:"rat4",L:3},
+ {sk:"rad1",L:2},{sk:"rad4",L:3},
+ {sk:"exp4",L:2},{sk:"exp6",L:3},
+ {sk:"seq1",L:2},{sk:"seq2",L:3},
+ {sk:"data2",L:2},{sk:"data1",L:3}
+];
+
+/* ---------- lessons (Study Mode content) ---------- */
+var LESSONS={
+ lin1:"Undo operations in reverse order: clear parentheses (distribute), collect like terms, move variable terms to one side and constants to the other, then divide. <b>Example:</b> 3(x−2)+4 = 13 → 3x−6+4 = 13 → 3x = 15 → x = 5. Always check by substituting back.",
+ lin2:"A literal equation has several letters — solve for one by treating the rest as numbers. <b>Example:</b> solve A = P + Prt for t: subtract P (A−P = Prt), divide by Pr → t = (A−P)/(Pr). The moves are identical to normal equations.",
+ lin3:"|expression| = c (c &gt; 0) splits into TWO equations: expression = c and expression = −c. Isolate the absolute value FIRST. If c &lt; 0 there is no solution — absolute value can't be negative. <b>Example:</b> |x−3| = 7 → x = 10 or x = −4.",
+ lin4:"|x| &lt; c is a SANDWICH: −c &lt; x &lt; c (AND). |x| &gt; c SPLITS: x &lt; −c or x &gt; c (OR). Memory hook: <i>less-thAND, great-OR</i>. <b>Example:</b> |x−2| ≤ 5 → −3 ≤ x ≤ 7.",
+ lin5:"A compound inequality like 1 &lt; 2x+3 ≤ 9 gets the same operation applied to ALL THREE parts: subtract 3 (−2 &lt; 2x ≤ 6), divide by 2 (−1 &lt; x ≤ 3). Dividing by a negative flips every symbol.",
+ fun1:"f(x) is the OUTPUT when the input is x — it is not multiplication. To evaluate f(−2) for f(x) = x²−3x, substitute with parentheses: (−2)²−3(−2) = 4+6 = 10. Parentheses prevent 90% of sign errors.",
+ fun2:"Domain = allowed inputs; range = possible outputs. Two classic restrictions: denominators can't be 0, and even-root insides must be ≥ 0. For ranges, think about the graph: a parabola opening up from vertex (h,k) has range y ≥ k.",
+ fun3:"(f∘g)(x) = f(g(x)): apply g FIRST, feed its output into f. Order matters — f(g(x)) ≠ g(f(x)) in general. <b>Example:</b> f(x)=2x+1, g(x)=x²: f(g(3)) = f(9) = 19, but g(f(3)) = g(7) = 49.",
+ fun4:"An inverse UNDOES a function: f⁻¹(f(x)) = x. To find it, swap x and y, then solve for y. f⁻¹ is NOT 1/f! Graphically the inverse reflects over y = x. <b>Example:</b> f(x)=3x−6 → x=3y−6 → f⁻¹(x)=(x+6)/3.",
+ fun5:"y = a·f(x−h)+k: h shifts horizontally (toward the sign of h!), k shifts vertically, |a|&gt;1 stretches vertically, a&lt;0 reflects over the x-axis. Inside changes act horizontally and 'backwards'; outside changes act vertically and intuitively.",
+ fun6:"A piecewise function uses different rules on different x-intervals. To evaluate: FIRST find which interval the input belongs to, THEN apply only that rule. Boundary inputs go to the piece whose inequality includes equality.",
+ sys1:"Two equations, two unknowns. Elimination: scale equations so one variable's coefficients are opposites, then add. Substitution: solve one equation for a variable, substitute into the other. The solution is where the lines intersect.",
+ sys2:"For 3 variables: eliminate the SAME variable from two different pairs of equations → a 2×2 system → solve → back-substitute. Stay organized; label your equations ①②③.",
+ sys3:"Line meets parabola/circle: substitute one equation into the other, solve the resulting quadratic. 2, 1, or 0 solutions = 2, 1, or 0 intersection points — the discriminant tells you which without solving.",
+ sys4:"Translate words to equations: define variables with units, write one equation per fact. Classics: ticket totals (count + revenue), mixtures (amount + concentration), rates (d = rt, with/against current).",
+ quad1:"Always pull the GCF first. Then check special patterns: a²−b² = (a+b)(a−b) (difference of squares) and a²±2ab+b² = (a±b)² (perfect square trinomial). 'Factor completely' means keep going until nothing factors.",
+ quad2:"x²+bx+c: find two numbers multiplying to c, adding to b. For ax²+bx+c use the AC method: find two numbers multiplying to a·c adding to b, split the middle term, factor by grouping. Always FOIL back to verify.",
+ quad3:"Zero Product Property: if A·B = 0, then A = 0 or B = 0. Get everything on one side (= 0!), factor, set each factor to zero. Quadratics have up to 2 real roots.",
+ quad4:"To complete the square on x²+bx: add (b/2)². So x²+bx+c = (x+b/2)² + c − b²/4. It converts to vertex form, proves the quadratic formula, and solves any quadratic: isolate the square, then square-root both sides (±!).",
+ quad5:"Vertex form y = a(x−h)²+k has vertex (h,k) and axis x = h. From standard form, h = −b/(2a) and k = f(h). If a &gt; 0 the vertex is a minimum; if a &lt; 0, a maximum.",
+ quad6:"x = [−b ± √(b²−4ac)]/(2a) solves ANY quadratic in the form ax²+bx+c = 0. Write out a, b, c first, watch signs, and simplify the radical. Two roots share the '±'.",
+ quad7:"The discriminant D = b²−4ac lives under the radical: D &gt; 0 → two real roots; D = 0 → one repeated root; D &lt; 0 → two complex conjugate roots. It answers 'how many solutions' without solving.",
+ quad8:"Projectiles: h(t) = −16t² + v₀t + h₀ (feet). Hits ground → set h = 0. Max height → vertex, t = v₀/32. Revenue/area problems: build the quadratic, maximize at the vertex. The vertex sits midway between the zeros.",
+ cplx1:"i = √(−1), so i² = −1. Powers cycle every 4: i, −1, −i, 1. For iⁿ, use n mod 4. <b>Example:</b> i²³: 23 mod 4 = 3 → i³ = −i.",
+ cplx2:"Treat i like a variable when adding: combine real parts, combine imaginary parts. (3+2i) − (5−4i) = −2 + 6i. Nothing fancier than combining like terms.",
+ cplx3:"FOIL, then replace i² with −1. (2+3i)(4−i) = 8 −2i +12i −3i² = 8 +10i +3 = 11+10i.",
+ cplx4:"To divide, multiply top and bottom by the CONJUGATE of the denominator (flip the sign of the imaginary part). The denominator becomes real: (c+di)(c−di) = c²+d². Then write as a+bi.",
+ cplx5:"When D &lt; 0, the quadratic formula gives √(negative) = i√(positive). Roots come in conjugate pairs a±bi. The Fundamental Theorem of Algebra: degree n → exactly n roots, counting complex and repeats.",
+ poly1:"Add/subtract: combine like terms (watch the minus distributing over EVERY term). Multiply: every term times every term, then merge. Stay organized by degree.",
+ poly2:"Synthetic division divides by (x−k) fast: write k, bring down the lead coefficient, multiply-add across. The last number is the remainder; the others are the quotient's coefficients (one degree lower). Missing terms need 0 placeholders.",
+ poly3:"Remainder Theorem: f(x) ÷ (x−k) leaves remainder f(k) — evaluate instead of divide! Factor Theorem: f(k) = 0 ⟺ (x−k) is a factor. These two ideas unlock polynomial factoring.",
+ poly4:"To find zeros: factor out GCF, try grouping/special patterns, use a known root with synthetic division to drop the degree, finish with the quadratic formula. n-th degree → n zeros (counting multiplicity, complex included).",
+ poly5:"End behavior = what the leading term does. Even degree: ends match (up-up if a&gt;0, down-down if a&lt;0). Odd degree: ends oppose (down-up if a&gt;0, up-down if a&lt;0). Everything else is temporary wiggle.",
+ poly6:"A zero of multiplicity m contributes factor (x−r)ᵐ. Odd multiplicity → graph CROSSES at r; even → it TOUCHES and turns. Degree = sum of multiplicities. To build a polynomial from zeros, multiply the factors.",
+ rat1:"Factor top and bottom completely, then cancel common FACTORS (never terms!). Note excluded values — anything making the original denominator zero stays excluded even after canceling.",
+ rat2:"Multiply straight across after factoring; cancel diagonally. To divide, flip the second fraction (multiply by reciprocal) — then it's a multiplication problem.",
+ rat3:"Find the LCD (each factor at its highest power), rewrite every fraction over it, combine numerators carefully (distribute minus signs!), then simplify.",
+ rat4:"Multiply BOTH sides by the LCD to clear fractions, solve, then CHECK: any solution that zeroes an original denominator is extraneous and gets thrown out.",
+ rat5:"For f = P/Q: vertical asymptotes where Q = 0 (after canceling); canceled factors give HOLES instead. Horizontal: compare degrees — bottom bigger → y = 0; equal → ratio of leading coefficients; top bigger → none (slant).",
+ rad1:"Factor out the largest perfect square (or cube): √72 = √(36·2) = 6√2. For nth roots, look for perfect nth-power factors. Rationalize denominators by multiplying by a clever form of 1.",
+ rad2:"b^(m/n) = (ⁿ√b)ᵐ — the denominator is the root, the numerator is the power. Take the root FIRST to keep numbers small: 27^(2/3) = (∛27)² = 9. Negative exponent = reciprocal.",
+ rad3:"Only LIKE radicals combine: 3√2 + 5√2 = 8√2. Simplify each radical first — unlike-looking radicals often become like. Multiply with √a·√b = √(ab).",
+ rad4:"Isolate the radical, raise both sides to the matching power, solve — then CHECK every answer in the ORIGINAL equation. Squaring can create extraneous solutions (Missouri EOC loves this trap: A2.NQ.A.4).",
+ exp1:"Product → add exponents; quotient → subtract; power to power → multiply; negative exponent → reciprocal; zero exponent → 1. These rules are the foundation logs are built on.",
+ exp2:"Exponential change multiplies by a fixed factor each period: y = a·bᵗ. Growth r% → b = 1+r; decay r% → b = 1−r. Half-life h: y = a·(1/2)^(t/h). Compound interest: A = P(1+r/n)^(nt).",
+ exp3:"log_b(x) = y means b^y = x — a logarithm IS an exponent. log_b(1) = 0, log_b(b) = 1. 'log' = base 10, 'ln' = base e.",
+ exp4:"To evaluate log_b(n), ask: b to what power gives n? Fractions between 0 and 1 give negative logs; roots give fractional logs: log₉3 = 1/2.",
+ exp5:"log(xy) = log x + log y; log(x/y) = log x − log y; log(xᵏ) = k·log x. Expanding pulls things apart; condensing packs them into one log. These mirror the exponent rules exactly.",
+ exp6:"Same-base method: rewrite both sides as powers of one base, set exponents equal. Different bases: isolate the exponential, take a log of both sides, pull the exponent down with the power rule.",
+ exp7:"Rewrite log equations in exponential form to unlock x. If multiple logs: condense to one first. ALWAYS check that every argument ends up positive — negative arguments mean extraneous solutions.",
+ seq1:"Arithmetic = add a constant d each step: aₙ = a₁ + (n−1)d. Given two terms, the difference over the number of steps gives d. Graphs as points on a line.",
+ seq2:"Geometric = multiply by a constant r each step: aₙ = a₁·rⁿ⁻¹. Given two terms, divide them: the ratio is r raised to the gap. Graphs as points on an exponential.",
+ seq3:"Recursive formulas define each term from the previous: a₁ given, aₙ₊₁ = f(aₙ). To evaluate, march forward term by term. Explicit formulas jump straight to term n.",
+ seq4:"Arithmetic series: Sₙ = n(a₁+aₙ)/2 — 'number of terms times the average of first and last'. Gauss's trick: pair first with last.",
+ seq5:"Geometric series: Sₙ = a₁(rⁿ−1)/(r−1). If |r| &lt; 1, the infinite sum converges to S = a₁/(1−r) — the terms shrink fast enough to add to a finite number.",
+ data1:"Fundamental counting: multiply choices. Order matters → permutation P(n,k) = n!/(n−k)!. Order doesn't → combination C(n,k) = n!/(k!(n−k)!). Ask 'does swapping two picks change the outcome?'",
+ data2:"P(event) = favorable/total for equally likely outcomes. P(not A) = 1 − P(A) (complements are often the fast lane). Without replacement, both the numerator and total shrink on the next draw.",
+ data3:"Exactly k successes in n independent trials: C(n,k)·pᵏ·(1−p)ⁿ⁻ᵏ. The C(n,k) counts WHICH trials succeed; the powers give each arrangement's probability.",
+ data4:"Expected value = Σ(value × probability) — the long-run average per play. A negative EV game loses money on average no matter how lucky one night looks.",
+ data5:"z = (x−μ)/σ counts standard deviations from the mean — it lets you compare scores from different scales. Empirical rule for normal data: 68% within 1σ, 95% within 2σ, 99.7% within 3σ."
+};
+
+/* ---------- formula reference ---------- */
+var REFS=[
+ {u:"quad",items:["Quadratic formula: x = [−b ± √(b²−4ac)] / 2a","Discriminant: D = b²−4ac (D&gt;0 two real; D=0 one; D&lt;0 two complex)","Vertex: x = −b/2a; vertex form y = a(x−h)²+k","Complete the square: add (b/2)²"]},
+ {u:"lin",items:["|x| &lt; c ⟺ −c &lt; x &lt; c (AND)","|x| &gt; c ⟺ x &lt; −c or x &gt; c (OR)","Slope: m = (y₂−y₁)/(x₂−x₁); point-slope: y − y₁ = m(x − x₁)"]},
+ {u:"fun",items:["(f∘g)(x) = f(g(x)) — g first","Inverse: swap x and y, solve for y; f⁻¹(f(x)) = x","y = a·f(x−h)+k: shift h right, k up; |a|&gt;1 stretch; a&lt;0 flip"]},
+ {u:"cplx",items:["i² = −1; powers of i cycle: i, −1, −i, 1","(a+bi)(a−bi) = a²+b²","Divide by multiplying by the conjugate"]},
+ {u:"poly",items:["Remainder Theorem: f(x)÷(x−k) leaves f(k)","Factor Theorem: f(k)=0 ⟺ (x−k) is a factor","End behavior = leading term; degree = number of zeros (FTA)","Odd multiplicity crosses; even touches"]},
+ {u:"rat",items:["Vertical asymptote: denominator = 0 (uncanceled)","Horizontal: deg bottom &gt; top → y=0; equal → lead ratio","Solve by multiplying by LCD; check for extraneous"]},
+ {u:"rad",items:["b^(m/n) = (ⁿ√b)ᵐ","√a·√b = √(ab); a√c + b√c = (a+b)√c","Square both sides → MUST check for extraneous"]},
+ {u:"exp",items:["y = a·bᵗ; growth b = 1+r, decay b = 1−r","Half-life: y = a(1/2)^(t/h)","Compound interest: A = P(1+r/n)^(nt)","log_b x = y ⟺ bʸ = x","log xy = log x + log y; log x/y = log x − log y; log xᵏ = k log x"]},
+ {u:"seq",items:["Arithmetic: aₙ = a₁+(n−1)d; Sₙ = n(a₁+aₙ)/2","Geometric: aₙ = a₁rⁿ⁻¹; Sₙ = a₁(rⁿ−1)/(r−1)","Infinite (|r|&lt;1): S = a₁/(1−r)"]},
+ {u:"data",items:["P(n,k) = n!/(n−k)!; C(n,k) = n!/(k!(n−k)!)","Binomial: C(n,k)pᵏ(1−p)ⁿ⁻ᵏ","EV = Σ value·probability","z = (x−μ)/σ; empirical rule 68–95–99.7"]},
+ {u:"sys",items:["Elimination: scale then add to kill a variable","3-var: reduce to 2×2, back-substitute","Line vs. parabola: substitute, count solutions via discriminant"]}
+];
+//<<GEN4>>
+/* ============================================================
+   ANSWER CHECKING
+   ============================================================ */
+function normTxt(s){
+  return String(s).toLowerCase()
+    .replace(/−|–|—/g,"-")
+    .replace(/\s+/g,"")
+    .replace(/×/g,"*")
+    .replace(/^x=|^y=|^t=|^n=|^k=|^c=/,"")
+    .replace(/\.$/,"");
+}
+function parseNum(s){
+  s=normTxt(s);
+  if(s==="")return null;
+  var m=s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  if(m){var d=parseFloat(m[2]);if(d===0)return null;return parseFloat(m[1])/d;}
+  if(/^-?\d*\.?\d+$/.test(s))return parseFloat(s);
+  return null;
+}
+function numEq(u,a){
+  var pu=parseNum(u),pa=parseNum(a);
+  if(pu===null||pa===null)return false;
+  return Math.abs(pu-pa)<=1e-6*Math.max(1,Math.abs(pa));
+}
+function elemEq(u,a){ // one element: numeric if possible, else text (handles 2+3i)
+  if(numEq(u,a))return true;
+  return normTxt(u)===normTxt(a);
+}
+function splitList(s){
+  s=String(s).replace(/−/g,"-").replace(/\bor\b|\band\b|;/gi,",");
+  s=s.replace(/[()\[\]{}]/g,"");
+  // expand "±5" into "5,-5"
+  if(s.indexOf("±")>=0){
+    var core=s.replace(/±/g,"").replace(/\s+/g,"");
+    return [core,"-"+core.replace(/^-/,"")];
+  }
+  var parts=s.split(","),out=[],i;
+  for(i=0;i<parts.length;i++){if(normTxt(parts[i])!=="")out.push(parts[i]);}
+  return out;
+}
+function checkAnswer(qo,input){
+  var i,j;
+  if(qo.type==="num"){
+    if(numEq(input,qo.ans))return true;
+    if(qo.alt){for(i=0;i<qo.alt.length;i++)if(elemEq(input,qo.alt[i]))return true;}
+    return elemEq(input,qo.ans);
+  }
+  if(qo.type==="text"){
+    if(elemEq(input,qo.ans))return true;
+    if(qo.alt){for(i=0;i<qo.alt.length;i++)if(elemEq(input,qo.alt[i]))return true;}
+    return false;
+  }
+  if(qo.type==="set"){
+    var want=splitList(qo.ans),got=splitList(input);
+    if(want.length!==got.length)return false;
+    var used=[];
+    for(i=0;i<want.length;i++){
+      var found=false;
+      for(j=0;j<got.length;j++){
+        if(used.indexOf(j)>=0)continue;
+        if(elemEq(got[j],want[i])){used.push(j);found=true;break;}
+      }
+      if(!found)return false;
+    }
+    return true;
+  }
+  if(qo.type==="pair"||qo.type==="tuple"){
+    var w2=splitList(qo.ans),g2=splitList(input);
+    if(w2.length!==g2.length)return false;
+    for(i=0;i<w2.length;i++)if(!elemEq(g2[i],w2[i]))return false;
+    return true;
+  }
+  return false;
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+var BADGES=[
+ {id:"first",n:"First Blood",d:"First correct answer",ic:"🩸",c:function(){return S.totalsCor>=1;}},
+ {id:"ten",n:"Warmed Up",d:"10 correct answers",ic:"🔥",c:function(){return S.totalsCor>=10;}},
+ {id:"fifty",n:"Grinder",d:"50 correct answers",ic:"⚒️",c:function(){return S.totalsCor>=50;}},
+ {id:"hundo",n:"Century",d:"100 correct answers",ic:"💯",c:function(){return S.totalsCor>=100;}},
+ {id:"diagb",n:"Know Thyself",d:"Finish the diagnostic",ic:"🔬",c:function(){return S.diagDone;}},
+ {id:"streak3",n:"Locked In",d:"3-day streak",ic:"📆",c:function(){return S.streak.count>=3;}},
+ {id:"streak7",n:"Relentless",d:"7-day streak",ic:"🗓️",c:function(){return S.streak.count>=7;}},
+ {id:"master1",n:"First Mastery",d:"Any skill to 90%+",ic:"🎓",c:function(){var k;for(k in S.skills)if(S.skills[k].m>=90)return true;return false;}},
+ {id:"unit75",n:"Domain Boss",d:"A whole unit to Strong (75%+)",ic:"🏰",c:function(){var i;for(i=0;i<UNITS.length;i++)if(unitMastery(UNITS[i].id)>=75&&sk(UNITS[i].skills[0].id).att>0)return true;return false;}},
+ {id:"mockb",n:"Test Pilot",d:"Complete a mock exam",ic:"✈️",c:function(){return S.tests.length>=1;}},
+ {id:"mock90",n:"EOC Slayer",d:"90%+ on a mock exam",ic:"🏆",c:function(){var i;for(i=0;i<S.tests.length;i++)if(S.tests[i].pct>=90)return true;return false;}},
+ {id:"beast1",n:"Beast Blooded",d:"Solve a Beast problem",ic:"🐲",c:function(){return S.beastWins>=1;}},
+ {id:"beast10",n:"Beast Slayer",d:"10 Beast problems",ic:"⚔️",c:function(){return S.beastWins>=10;}},
+ {id:"blitz10",n:"Speed Demon",d:"10+ in one Blitz",ic:"⚡",c:function(){return S.blitzBest>=10;}},
+ {id:"elite",n:"Top 1%",d:"Overall mastery 90%+",ic:"👑",c:function(){return overallMastery()>=90;}}
+];
+function checkBadges(){
+  var i;
+  for(i=0;i<BADGES.length;i++){
+    if(!S.badges[BADGES[i].id]&&BADGES[i].c()){
+      S.badges[BADGES[i].id]=Date.now();save();
+      SFX.badge();
+      toast(BADGES[i].ic+" Badge earned: "+BADGES[i].n+"!");
+    }
+  }
+}
+
+/* ---------- daily quests ---------- */
+function questDefs(){
+  var qd=S.daily.quests;
+  return [
+    {id:"ans",label:"Answer 12 questions",cur:qd.ans||0,target:12},
+    {id:"cor",label:"Get 8 correct",cur:qd.cor||0,target:8},
+    {id:"xp",label:"Earn "+(S.daily.goal||100)+" XP",cur:S.daily.xp,target:S.daily.goal||100}
+  ];
+}
+function questTick(ok){
+  rollDaily();
+  S.daily.quests.ans=(S.daily.quests.ans||0)+1;
+  if(ok)S.daily.quests.cor=(S.daily.quests.cor||0)+1;
+  var defs=questDefs(),done=true,i;
+  for(i=0;i<defs.length;i++)if(defs[i].cur<defs[i].target)done=false;
+  if(done&&!S.daily.quests.rewarded){
+    S.daily.quests.rewarded=true;save();
+    addXP(50);toast("🌟 Daily quest complete! +50 XP");
+  }
+  save();
+}
+
+/* ---------- mistake journal ---------- */
+function logMistake(skillId,qo,userAns){
+  S.journal.unshift({t:Date.now(),sk:skillId,q:qo.html,ur:String(userAns).slice(0,60),ans:qo.type==="mc"?qo.ans:qo.ans});
+  if(S.journal.length>40)S.journal.length=40;
+  save();
+}
+
+/* ============================================================
+   SESSION CONTROLLER (practice / quiz / review / diag / mock /
+   beast / blitz all run through one training loop)
+   ============================================================ */
+var sess=null;
+function unlockBeast(){
+  var n=0,i;
+  for(i=0;i<UNITS.length;i++)if(unitMastery(UNITS[i].id)>=60)n++;
+  return n>=3;
+}
+function startPractice(skillId){
+  sess={mode:"practice",skillId:skillId,idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startQuiz(unitId){
+  var u=unitById(unitId),items=[],i;
+  var pool=shuffle(u.skills);
+  for(i=0;i<8;i++)items.push(pool[i%pool.length].id);
+  sess={mode:"quiz",unitId:unitId,items:items,idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startReview(){
+  var due=shuffle(reviewDue()).slice(0,8);
+  if(!due.length){toast("✅ Nothing due for review — go learn something new!");return;}
+  sess={mode:"review",items:due.map(function(d){return d.id;}),idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startDiag(){
+  sess={mode:"diag",idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startMock(){
+  var items=[],i,j;
+  var us=shuffle(UNITS.slice());
+  for(i=0;i<us.length;i++){
+    var ss=shuffle(us[i].skills.slice());
+    for(j=0;j<2&&j<ss.length;j++)items.push(ss[j].id);
+  }
+  items=shuffle(items).slice(0,20);
+  sess={mode:"mock",items:items,idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startBeast(){
+  if(!unlockBeast()){toast("🔒 Beast Mode unlocks when 3 units reach 60%+ mastery. Keep training!");return;}
+  sess={mode:"beast",idx:0,cor:0,wrong:0,results:[],hintUsed:false};
+  nextQ();
+}
+function startBlitz(){
+  sess={mode:"blitz",idx:0,cor:0,wrong:0,results:[],hintUsed:false,timeLeft:60};
+  var mySess=sess;
+  mySess.timerId=setInterval(function(){
+    if(sess!==mySess){clearInterval(mySess.timerId);return;}
+    sess.timeLeft--;
+    var t=document.getElementById("blitzT");
+    if(t)t.textContent=sess.timeLeft+"s";
+    if(sess.timeLeft<=5&&sess.timeLeft>0)SFX.tick();
+    if(sess.timeLeft<=0)endSess();
+  },1000);
+  nextQ();
+}
+function sessionSkill(){
+  if(sess.mode==="practice")return sess.skillId;
+  if(sess.mode==="diag")return DIAG_SPEC[sess.idx].sk;
+  if(sess.mode==="beast")return sess.qo&&sess.qo.sk?sess.qo.sk:"quad6";
+  if(sess.mode==="blitz")return sess.blitzSk;
+  return sess.items[sess.idx];
+}
+function makeQ(){
+  var skid,L;
+  if(sess.mode==="diag"){
+    var spec=DIAG_SPEC[sess.idx];
+    return {sk:spec.sk,L:spec.L,qo:GEN[spec.sk](spec.L)};
+  }
+  if(sess.mode==="beast"){
+    var qo=pick(BEAST)();
+    return {sk:qo.sk||"quad6",L:5,qo:qo};
+  }
+  if(sess.mode==="blitz"){
+    var all=[],i,jx;
+    for(i=0;i<UNITS.length;i++)for(jx=0;jx<UNITS[i].skills.length;jx++)all.push(UNITS[i].skills[jx].id);
+    skid=pick(all);sess.blitzSk=skid;
+    return {sk:skid,L:ri(1,2),qo:GEN[skid](ri(1,2))};
+  }
+  skid=sess.mode==="practice"?sess.skillId:sess.items[sess.idx];
+  L=pickLevel(skid);
+  if(sess.mode==="mock")L=Math.max(2,Math.min(4,L));
+  return {sk:skid,L:L,qo:GEN[skid](L)};
+}
+function sessLen(){
+  if(sess.mode==="diag")return DIAG_SPEC.length;
+  if(sess.mode==="quiz"||sess.mode==="review"||sess.mode==="mock")return sess.items.length;
+  return 0; // endless
+}
+function nextQ(){
+  var total=sessLen();
+  if(total&&sess.idx>=total){endSess();return;}
+  var made=makeQ();
+  sess.cur=made;sess.qo=made.qo;sess.locked=false;sess.mcPick=-1;sess.hintUsed=false;
+  renderTrain();
+}
+function submitAns(){
+  if(!sess||sess.locked)return;
+  var qo=sess.qo,input;
+  if(qo.type==="mc"){
+    if(sess.mcPick<0){toast("Pick an answer first!");return;}
+    input=qo.choices[sess.mcPick];
+  }else{
+    var box=document.getElementById("ansBox");
+    input=box?box.value:"";
+    if(normTxt(input)===""){toast("Type an answer first!");return;}
+  }
+  var ok=checkAnswer(qo,input);
+  sess.locked=true;sess.lastOk=ok;sess.lastInput=input;
+  var skid=sess.cur.sk,L=sess.cur.L;
+  var deferred=(sess.mode==="diag"||sess.mode==="mock");
+  if(sess.mode!=="diag"){recordAnswer(skid,L,ok);}
+  if(ok){sess.cor++;}else{sess.wrong++;if(!deferred)logMistake(skid,qo,input);}
+  sess.results.push({sk:skid,L:L,ok:ok,q:qo,input:input});
+  questTick(ok);
+  if(ok){
+    if(sess.mode==="beast"){S.beastWins++;save();addXP(60);}
+    else if(sess.mode==="blitz"){addXP(6);}
+    else if(sess.mode==="diag"){addXP(5);}
+    else addXP(10*L+(sess.hintUsed?-3:0));
+  }else{addXP(2);}
+  if(!deferred){SFX[ok?"ok":"bad"]();}
+  else{SFX.click();}
+  checkBadges();
+  sess.idx++;
+  if(deferred){nextQ();return;}
+  if(sess.mode==="blitz"){nextQ();return;}
+  renderTrain(); // show feedback + next button
+}
+function pickMC(i){
+  if(!sess||sess.locked)return;
+  sess.mcPick=i;SFX.click();
+  var btns=document.querySelectorAll(".mcbtn"),j;
+  for(j=0;j<btns.length;j++)btns[j].className="mcbtn"+(j===i?" pick":"");
+}
+function showHint(){
+  if(!sess||sess.locked)return;
+  sess.hintUsed=true;
+  var h=document.getElementById("hintBox");
+  if(h){h.classList.remove("hidden");}
+}
+function endSess(){
+  if(!sess)return;
+  if(sess.timerId)clearInterval(sess.timerId);
+  var m=sess.mode,res=sess.results;
+  if(m==="diag"&&res.length>=DIAG_SPEC.length){
+    // seed mastery from diagnostic
+    var byUnit={},i;
+    for(i=0;i<res.length;i++){
+      var ud=skillDef(res[i].sk).unit;
+      if(!byUnit[ud])byUnit[ud]={c:0,n:0};
+      byUnit[ud].n++;if(res[i].ok)byUnit[ud].c++;
+    }
+    var uid;
+    for(uid in byUnit){
+      var seed=byUnit[uid].c===byUnit[uid].n?76:(byUnit[uid].c>0?54:26);
+      var u=unitById(uid),j2;
+      for(j2=0;j2<u.skills.length;j2++){
+        var st=sk(u.skills[j2].id);
+        if(st.att===0||st.m<seed){st.m=seed;}
+      }
+      S.diagUnits[uid]=Math.round(100*byUnit[uid].c/byUnit[uid].n);
+    }
+    // direct hits adjust their own skill
+    for(i=0;i<res.length;i++){
+      var st2=sk(res[i].sk);
+      st2.att++;if(res[i].ok){st2.cor++;st2.m=Math.min(88,st2.m+8);}else{st2.m=Math.max(10,st2.m-10);st2.hist.push({l:res[i].L,ok:0,t:Date.now()});}
+      st2.last=Date.now();
+    }
+    S.diagDone=true;S.diagDate=todayKey();
+    addXP(50);save();checkBadges();
+  }
+  if(m==="mock"&&res.length>0){
+    var per={},k;
+    for(k=0;k<res.length;k++){
+      var uu=skillDef(res[k].sk).unit;
+      if(!per[uu])per[uu]={c:0,n:0};
+      per[uu].n++;if(res[k].ok)per[uu].c++;
+    }
+    var perPct={},kk;
+    for(kk in per)perPct[kk]=Math.round(100*per[kk].c/per[kk].n);
+    var pct=Math.round(100*sess.cor/res.length);
+    S.tests.push({date:todayKey(),pct:pct,per:perPct});
+    addXP(40+pct);save();checkBadges();
+    // log mock mistakes now
+    for(k=0;k<res.length;k++)if(!res[k].ok)logMistake(res[k].sk,res[k].q,res[k].input);
+  }
+  if(m==="blitz"){
+    if(sess.cor>S.blitzBest){S.blitzBest=sess.cor;save();}
+    checkBadges();
+  }
+  sess.done=true;
+  renderSummary();
+}
+function quitSess(){
+  if(sess&&sess.timerId)clearInterval(sess.timerId);
+  sess=null;
+  go(view==="train"?"home":view);
+}
+//<<ENGINE>>
+/* ============================================================
+   VIEWS & RENDERING
+   ============================================================ */
+var view="home",curSkill=null,openU={};
+function el(id){return document.getElementById(id);}
+function toast(msg){
+  var t=document.createElement("div");
+  t.className="toast";t.innerHTML=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},2600);
+}
+function paintTop(){
+  var li=lvlInfo();
+  el("pillStreak").innerHTML='<span class="ic flame">🔥</span><span>'+S.streak.count+'</span>';
+  el("pillLvl").innerHTML='<span class="ic">'+li.def.ic+'</span><span>'+li.def.name+'</span>';
+  el("pillXp").innerHTML='<span class="ic">⭐</span><span>'+S.xp+' XP</span>';
+  el("xpFill").style.width=li.pct+"%";
+}
+function mbar(m,att){
+  var t=att?mTier(m):0;
+  return '<div class="bar"><div class="m'+(att?t:0)+'" style="width:'+Math.max(2,Math.round(m))+'%"></div></div>';
+}
+function go(v){
+  view=v;
+  var btns=document.querySelectorAll(".nbtn"),i;
+  for(i=0;i<btns.length;i++)btns[i].className="nbtn"+(btns[i].getAttribute("data-v")===v?" on":"");
+  if(v==="home")renderHome();
+  else if(v==="tree")renderTree();
+  else if(v==="battle")renderBattle();
+  else if(v==="stats")renderStats();
+  else if(v==="ref")renderRef();
+  paintTop();
+  window.scrollTo(0,0);
+}
+function recommend(){
+  if(!S.diagDone)return {label:"🔬 Take the Diagnostic",act:"startDiag()",why:"Map your strengths first — then training gets personal."};
+  var due=reviewDue();
+  if(due.length>=3)return {label:"🔁 Review "+due.length+" due skills",act:"startReview()",why:"Spaced review locks in what you learned."};
+  var w=weakSkills(1);
+  if(w.length&&w[0].m<75){
+    var d=skillDef(w[0].d.id);
+    return {label:"🎯 Train: "+d.name,act:"startPractice('"+d.id+"')",why:"Your weakest skill right now ("+Math.round(w[0].m)+"%). Attack weaknesses first."};
+  }
+  if(unlockBeast())return {label:"🐲 Beast Mode",act:"startBeast()",why:"You're strong — time for non-routine problems."};
+  var u=UNITS[ri(0,UNITS.length-1)];
+  return {label:"📚 Quiz: "+u.name,act:"startQuiz('"+u.id+"')",why:"Mixed practice across a unit."};
+}
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  var li=lvlInfo(),om=Math.round(overallMastery()),rec=recommend(),due=reviewDue();
+  var h='';
+  h+='<div class="hero">';
+  h+='<div class="row"><div style="font-size:34px">'+li.def.ic+'</div><div class="grow"><div style="font-weight:900;font-size:18px">'+li.def.name+'</div><div class="sub">'+(li.next?(li.next.xp-S.xp)+' XP to '+li.next.name:'Max level!')+'</div></div>'+
+     '<div class="stat" style="min-width:86px"><div class="sv">'+om+'%</div><div class="sl">ALGEBRA 2<br>MASTERY</div></div></div>';
+  h+='<div style="margin-top:10px">'+mbar(om,1)+'</div>';
+  h+='</div>';
+  // recommendation
+  h+='<div class="card" style="border-color:var(--gold)"><h3>⚡ Next up</h3><div class="sub" style="margin-bottom:10px">'+rec.why+'</div><button class="btn wide" onclick="'+rec.act+'">'+rec.label+'</button></div>';
+  // daily quests
+  var defs=questDefs();
+  h+='<div class="card"><h3>🗡️ Daily Quests</h3>';
+  var i;
+  for(i=0;i<defs.length;i++){
+    var d=defs[i],doneQ=d.cur>=d.target;
+    h+='<div class="row" style="padding:6px 0"><div style="width:22px">'+(doneQ?"✅":"⬜")+'</div><div class="grow"><div style="font-size:13px;font-weight:700">'+d.label+'</div>'+mbar(Math.min(100,100*d.cur/d.target),1)+'</div><div class="sub">'+Math.min(d.cur,d.target)+'/'+d.target+'</div></div>';
+  }
+  h+='<div class="sub" style="margin-top:6px">Finish all three → +50 XP bonus. Streak: 🔥 '+S.streak.count+' day'+(S.streak.count===1?'':'s')+'</div></div>';
+  // review due
+  if(due.length){
+    h+='<div class="card click" onclick="startReview()"><div class="row"><div style="font-size:24px">🔁</div><div class="grow"><h3>Review Queue</h3><div class="sub">'+plural(due.length,"skill")+' due for spaced review — keep them from fading.</div></div><span class="mtag t2">'+due.length+' DUE</span></div></div>';
+  }
+  // weakest
+  var wk=weakSkills(4);
+  if(wk.length){
+    h+='<div class="card"><h3>🚨 Weakness Radar</h3><div class="sub" style="margin-bottom:6px">Tap a skill to drill it.</div>';
+    for(i=0;i<wk.length;i++){
+      var dd=skillDef(wk[i].d.id);
+      h+='<span class="chip" style="cursor:pointer" onclick="openSkill(\''+dd.id+'\')">'+unitById(dd.unit).ic+' '+dd.name+' · '+Math.round(wk[i].m)+'%</span>';
+    }
+    h+='</div>';
+  }
+  // mode grid
+  h+='<div class="grid2">';
+  h+='<div class="card click" style="margin:0" onclick="startDiag()"><div style="font-size:22px">🔬</div><h3>'+(S.diagDone?'Re-Diagnose':'Diagnostic')+'</h3><div class="sub">'+DIAG_SPEC.length+' questions across all domains</div></div>';
+  h+='<div class="card click" style="margin:0" onclick="startMock()"><div style="font-size:22px">📝</div><h3>Mock EOC Test</h3><div class="sub">20 questions, graded at the end</div></div>';
+  h+='<div class="card click '+(unlockBeast()?'beastcard':'')+'" style="margin:0" onclick="startBeast()"><div style="font-size:22px">'+(unlockBeast()?'🐲':'🔒')+'</div><h3>Beast Mode</h3><div class="sub">'+(unlockBeast()?'Multi-topic monsters. +60 XP each':'Unlock: 3 units at 60%+')+'</div></div>';
+  h+='<div class="card click" style="margin:0" onclick="startBlitz()"><div style="font-size:22px">⚡</div><h3>Blitz</h3><div class="sub">60 seconds. Best: '+S.blitzBest+'</div></div>';
+  h+='</div>';
+  h+='<div class="sub center" style="margin-top:10px">Aligned to Missouri Learning Standards · Algebra II EOC · Branson, MO 🎸</div>';
+  el("main").innerHTML=h;
+}
+
+/* ---------- SKILL TREE ---------- */
+function renderTree(){
+  var h='<div class="card" style="background:none;border:none;padding:0"><h2>🌳 Skill Tree</h2><div class="sub">Tap a unit to expand. Tap a skill to study, drill, and master it. Every tile goes deeper.</div></div>';
+  var i,j;
+  for(i=0;i<UNITS.length;i++){
+    var u=UNITS[i],um=Math.round(unitMastery(u.id)),open=!!openU[u.id];
+    var anyAtt=false;
+    for(j=0;j<u.skills.length;j++)if(sk(u.skills[j].id).att>0)anyAtt=true;
+    h+='<div class="card unit">';
+    h+='<div class="row" style="cursor:pointer" onclick="togUnit(\''+u.id+'\')"><div style="font-size:22px">'+u.ic+'</div><div class="grow"><h3>'+u.name+'</h3><div class="sub">'+u.mls+'</div></div><div style="min-width:64px;text-align:right"><div style="font-weight:900">'+(anyAtt?um+'%':'—')+'</div>'+mbar(um,anyAtt?1:0)+'</div><span class="chev'+(open?' open':'')+'">▶</span></div>';
+    if(open){
+      h+='<div class="sub" style="margin:8px 0 4px">'+u.blurb+'</div>';
+      for(j=0;j<u.skills.length;j++){
+        var d=u.skills[j],st=sk(d.id);
+        h+='<div class="skrow" onclick="openSkill(\''+d.id+'\')"><div class="grow"><div style="font-weight:700;font-size:13.5px">'+d.name+'</div>'+mbar(st.m,st.att)+'</div>'+tierTag(st.m,st.att)+'<span class="chev">▶</span></div>';
+      }
+      h+='<div class="row" style="margin-top:10px"><button class="btn sm grow" onclick="startQuiz(\''+u.id+'\')">📚 Unit Quiz (8 Qs)</button></div>';
+    }
+    h+='</div>';
+  }
+  el("main").innerHTML=h;
+}
+function togUnit(uid){openU[uid]=!openU[uid];SFX.click();renderTree();}
+
+/* ---------- SKILL PANEL ---------- */
+function openSkill(id){
+  curSkill=id;view="skill";
+  var d=skillDef(id),u=unitById(d.unit),st=sk(id);
+  var acc=st.att?Math.round(100*st.cor/st.att):0;
+  var h='<div class="card" style="background:none;border:none;padding:0"><div class="row"><button class="btn sec sm" onclick="go(\'tree\')">← Back</button><div class="grow"></div><span class="chip">'+u.ic+' '+u.name+'</span></div></div>';
+  h+='<div class="card"><h2>'+d.name+'</h2><div class="row" style="margin:8px 0">'+tierTag(st.m,st.att)+'<div class="grow">'+mbar(st.m,st.att)+'</div></div>';
+  h+='<div class="grid3" style="margin-top:10px"><div class="stat"><div class="sv">'+st.att+'</div><div class="sl">ATTEMPTS</div></div><div class="stat"><div class="sv">'+acc+'%</div><div class="sl">ACCURACY</div></div><div class="stat"><div class="sv">L'+(st.att?pickLevel(id):1)+'</div><div class="sl">NEXT LEVEL</div></div></div></div>';
+  h+='<div class="card"><h3>📖 Study Notes</h3><div class="sub" style="font-size:13.5px;color:var(--txt);line-height:1.7">'+(LESSONS[id]||"Practice makes the lesson.")+'</div></div>';
+  h+='<div class="card"><h3>🎚️ Difficulty Ladder</h3><div class="sub">L1 Foundation → L2 Fluency → L3 Advanced → L4 Beast → L5 Elite. The engine adapts automatically: hot streaks push you up, struggles step you down and re-teach.</div></div>';
+  h+='<button class="btn wide" onclick="startPractice(\''+id+'\')">🥊 Practice This Skill</button>';
+  el("main").innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+/* ---------- BATTLE ---------- */
+function renderBattle(){
+  var h='<div class="card" style="background:none;border:none;padding:0"><h2>⚔️ Battle Modes</h2><div class="sub">Where mastery gets tested under pressure.</div></div>';
+  h+='<div class="card '+(unlockBeast()?'beastcard':'')+'"><div class="row"><div style="font-size:28px">'+(unlockBeast()?'🐲':'🔒')+'</div><div class="grow"><h3>Beast Mode</h3><div class="sub">Multi-topic, non-routine problems: Vieta\'s formulas, error analysis, extraneous traps, optimization. '+(unlockBeast()?'Slain: '+S.beastWins:'Unlocks at 3 units ≥ 60% mastery.')+'</div></div></div>'+(unlockBeast()?'<button class="btn wide red" style="margin-top:10px" onclick="startBeast()">Enter the Arena (+60 XP per kill)</button>':'')+'</div>';
+  h+='<div class="card"><div class="row"><div style="font-size:28px">⚡</div><div class="grow"><h3>Blitz — 60 seconds</h3><div class="sub">Rapid-fire fundamentals. Speed + accuracy = fluency. Personal best: <b>'+S.blitzBest+'</b></div></div></div><button class="btn wide blu" style="margin-top:10px" onclick="startBlitz()">Start Blitz</button></div>';
+  var lastT=S.tests.length?S.tests[S.tests.length-1]:null;
+  h+='<div class="card"><div class="row"><div style="font-size:28px">📝</div><div class="grow"><h3>Mock EOC Exam</h3><div class="sub">20 mixed questions, no feedback until the end — just like test day. '+(lastT?'Last score: <b>'+lastT.pct+'%</b> ('+lastT.date+')':'Missouri gives an Algebra II EOC — train for it.')+'</div></div></div><button class="btn wide grn" style="margin-top:10px" onclick="startMock()">Take a Mock Exam</button></div>';
+  h+='<div class="card"><div class="row"><div style="font-size:28px">🔬</div><div class="grow"><h3>Diagnostic</h3><div class="sub">'+(S.diagDone?'Last taken '+S.diagDate+'. Re-take anytime to re-map your levels.':DIAG_SPEC.length+' questions across all 11 domains. Builds your personal training path.')+'</div></div></div><button class="btn wide sec" style="margin-top:10px" onclick="startDiag()">'+(S.diagDone?'Re-take Diagnostic':'Start Diagnostic')+'</button></div>';
+  el("main").innerHTML=h;
+}
+
+/* ---------- STATS ---------- */
+function renderStats(){
+  var li=lvlInfo(),om=Math.round(overallMastery());
+  var acc=S.totalsAtt?Math.round(100*S.totalsCor/S.totalsAtt):0;
+  var h='<div class="card" style="background:none;border:none;padding:0"><h2>📊 War Room</h2></div>';
+  h+='<div class="grid3">'+
+    '<div class="stat"><div class="sv">'+om+'%</div><div class="sl">OVERALL MASTERY</div></div>'+
+    '<div class="stat"><div class="sv">'+S.totalsAtt+'</div><div class="sl">QUESTIONS</div></div>'+
+    '<div class="stat"><div class="sv">'+acc+'%</div><div class="sl">ACCURACY</div></div>'+
+    '<div class="stat"><div class="sv">'+S.xp+'</div><div class="sl">TOTAL XP</div></div>'+
+    '<div class="stat"><div class="sv">🔥'+S.streak.count+'</div><div class="sl">DAY STREAK</div></div>'+
+    '<div class="stat"><div class="sv">'+S.beastWins+'</div><div class="sl">BEASTS SLAIN</div></div></div>';
+  // unit bars
+  h+='<div class="card" style="margin-top:12px"><h3>Domain Mastery</h3>';
+  var i,j;
+  for(i=0;i<UNITS.length;i++){
+    var u=UNITS[i],um=Math.round(unitMastery(u.id));
+    var anyAtt=false;for(j=0;j<u.skills.length;j++)if(sk(u.skills[j].id).att>0)anyAtt=true;
+    h+='<div class="row" style="padding:5px 0"><div style="width:26px">'+u.ic+'</div><div class="grow"><div style="font-size:12.5px;font-weight:700">'+u.name+'</div>'+mbar(um,anyAtt?1:0)+'</div><div style="width:40px;text-align:right;font-weight:800;font-size:12.5px">'+(anyAtt?um+'%':'—')+'</div></div>';
+  }
+  h+='</div>';
+  // badges
+  h+='<div class="card"><h3>🏅 Badges</h3><div class="grid3" style="grid-template-columns:repeat(auto-fill,minmax(96px,1fr))">';
+  for(i=0;i<BADGES.length;i++){
+    var b=BADGES[i],got=!!S.badges[b.id];
+    h+='<div class="badge'+(got?' got':'')+'"><div class="bic">'+b.ic+'</div><div class="bn">'+b.n+'</div><div class="bd">'+b.d+'</div></div>';
+  }
+  h+='</div></div>';
+  // test history
+  if(S.tests.length){
+    h+='<div class="card"><h3>📝 Mock Exam History</h3><table class="rt"><tr><th>Date</th><th>Score</th><th>Weakest area</th></tr>';
+    for(i=S.tests.length-1;i>=0&&i>=S.tests.length-6;i--){
+      var t=S.tests[i],worst=null,wv=101,k;
+      for(k in t.per)if(t.per[k]<wv){wv=t.per[k];worst=k;}
+      h+='<tr><td>'+t.date+'</td><td><b>'+t.pct+'%</b></td><td>'+(worst?unitById(worst).name+' ('+wv+'%)':'—')+'</td></tr>';
+    }
+    h+='</table></div>';
+  }
+  // mistake journal
+  h+='<div class="card"><h3>📓 Mistake Journal</h3><div class="sub" style="margin-bottom:8px">Your most recent misses — mistakes are training data.</div>';
+  if(!S.journal.length)h+='<div class="sub">No mistakes logged yet. Go make some — that\'s how you grow. 😄</div>';
+  for(i=0;i<S.journal.length&&i<8;i++){
+    var m=S.journal[i],dj=skillDef(m.sk);
+    h+='<div style="border-top:1px solid var(--line);padding:8px 0"><div class="sub" style="font-size:11px">'+(dj?unitById(dj.unit).ic+' '+dj.name:m.sk)+'</div><div style="font-size:13px;margin:4px 0">'+m.q+'</div><div class="sub">You said: <span style="color:var(--red)">'+esc(m.ur)+'</span> · Correct: <span style="color:var(--green)">'+esc(m.ans)+'</span> <span style="cursor:pointer;color:var(--blue)" onclick="startPractice(\''+m.sk+'\')">Drill this →</span></div></div>';
+  }
+  h+='</div>';
+  h+='<div class="card"><h3>⚠️ Danger Zone</h3><button class="btn sec sm" onclick="resetAll()">Reset ALL progress</button></div>';
+  el("main").innerHTML=h;
+}
+function resetAll(){
+  if(!confirm("Wipe all XP, mastery, badges and history? This cannot be undone."))return;
+  S=blankState();save();paintTop();go("home");toast("Fresh start. Let's build it back stronger. 💪");
+}
+
+/* ---------- REFERENCE / CURRICULUM ---------- */
+function renderRef(){
+  var h='<div class="card" style="background:none;border:none;padding:0"><h2>📚 Study Center</h2><div class="sub">Formula vault + the official curriculum map.</div></div>';
+  var i,j;
+  for(i=0;i<REFS.length;i++){
+    var u=unitById(REFS[i].u);
+    h+='<div class="card"><h3>'+u.ic+' '+u.name+'</h3><ul style="padding-left:18px;font-size:13.5px;line-height:1.9">';
+    for(j=0;j<REFS[i].items.length;j++)h+='<li>'+REFS[i].items[j]+'</li>';
+    h+='</ul></div>';
+  }
+  h+='<div class="card"><h3>🗺️ Missouri / Branson Curriculum Map</h3><div class="sub" style="margin-bottom:8px">Branson Public Schools follows the <b>Missouri Learning Standards</b>, and Algebra II is a Missouri End-of-Course (EOC) assessed subject. This academy\'s units map to the public MLS Algebra II strands:</div><table class="rt"><tr><th>MLS Strand</th><th>What it covers</th><th>Academy units</th></tr>'+
+   '<tr><td>A2.NQ</td><td>Number &amp; Quantity: radicals, rational exponents, extraneous solutions, complex numbers, Fundamental Theorem of Algebra</td><td>🌱 Radicals · 🌀 Complex</td></tr>'+
+   '<tr><td>A2.SSE</td><td>Structure in Expressions: logarithms from exponent properties, log equations, log scales</td><td>🚀 Exp &amp; Logs · 🎯 Quadratics</td></tr>'+
+   '<tr><td>A2.REI</td><td>Equations &amp; Inequalities: absolute value, rational/radical equations, systems (incl. nonlinear)</td><td>📏 Linear · ⚖️ Systems · ➗ Rational</td></tr>'+
+   '<tr><td>A2.APR</td><td>Polynomials &amp; Rational Expressions: factoring, Remainder Theorem, zeros, rational arithmetic</td><td>📈 Polynomials · ➗ Rational</td></tr>'+
+   '<tr><td>A2.IF</td><td>Interpreting Functions: key features from graphs, tables, symbols</td><td>🧩 Functions · 🪜 Sequences</td></tr>'+
+   '<tr><td>A2.BF</td><td>Building Functions: transformations, inverses, composition</td><td>🧩 Functions · 🚀 Exp &amp; Logs</td></tr>'+
+   '<tr><td>A2.FM</td><td>Function Modeling: quadratic &amp; exponential applications</td><td>🎯 Quadratics · 🚀 Exp &amp; Logs</td></tr>'+
+   '<tr><td>A2.DS</td><td>Data &amp; Statistics: inference, normal distribution, probability</td><td>🎲 Prob &amp; Stats</td></tr>'+
+  '</table><div class="sub" style="margin-top:8px">Sources: Missouri DESE <i>MLS Expanded Expectations — Algebra II</i> and <i>Algebra II Assessment Item Specifications</i> (dese.mo.gov); Branson Public Schools EOC information (branson.k12.mo.us). This app uses only public curriculum information — no private teacher materials.</div></div>';
+  h+='<div class="card"><h3>🎓 How the Academy trains you</h3><div class="sub" style="line-height:1.8">'+
+    '<b>Diagnose</b> → find what you know. <b>Drill</b> → adaptive difficulty attacks weaknesses, skips what you\'ve mastered. '+
+    '<b>Retrieve</b> → spaced review resurfaces skills before they fade (mastery decays if neglected!). '+
+    '<b>Mix</b> → Beast Mode forces multiple concepts into one problem so you can\'t pattern-match. '+
+    '<b>Test</b> → mock EOC exams measure readiness. The goal isn\'t an A — it\'s being able to solve problems you\'ve never seen.</div></div>';
+  el("main").innerHTML=h;
+}
+
+/* ---------- TRAINING VIEW ---------- */
+function modeTitle(){
+  return {practice:"🥊 Practice",quiz:"📚 Unit Quiz",review:"🔁 Spaced Review",diag:"🔬 Diagnostic",mock:"📝 Mock Exam",beast:"🐲 BEAST MODE",blitz:"⚡ Blitz"}[sess.mode]||"Training";
+}
+function renderTrain(){
+  view="train";
+  var qo=sess.qo,total=sessLen();
+  var d=skillDef(sess.cur.sk),u=d?unitById(d.unit):null;
+  var h='<div class="row" style="margin-bottom:10px"><div class="grow"><h2>'+modeTitle()+'</h2></div>';
+  if(sess.mode==="blitz")h+='<div class="timer" id="blitzT">'+sess.timeLeft+'s</div>';
+  else if(total)h+='<div class="pill">'+Math.min(sess.idx+(sess.locked?0:1),total)+' / '+total+'</div>';
+  else h+='<div class="pill">✅ '+sess.cor+' · ❌ '+sess.wrong+'</div>';
+  h+='<button class="btn sec sm" style="margin-left:8px" onclick="'+(total&&sess.mode!=="practice"?"quitConfirm()":"endSess()")+'">'+(sess.mode==="practice"?"Finish":"Quit")+'</button></div>';
+  h+='<div class="qcard"><div class="qmeta">';
+  if(u)h+='<span class="chip">'+u.ic+' '+d.name+'</span>';
+  h+='<span class="chip">Level '+sess.cur.L+' — '+["","Foundation","Fluency","Advanced","Beast","Elite"][sess.cur.L]+'</span>';
+  h+='</div>'+qo.html+'</div>';
+  if(!sess.locked){
+    if(qo.type==="mc"){
+      var i;
+      for(i=0;i<qo.choices.length;i++)h+='<button class="mcbtn" onclick="pickMC('+i+')">'+String.fromCharCode(65+i)+'.  '+qo.choices[i]+'</button>';
+    }else{
+      h+='<input id="ansBox" class="ansin" autocomplete="off" autocapitalize="off" placeholder="Your answer…">';
+    }
+    if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<div id="hintBox" class="fb hint hidden">💡 '+qo.hint+'</div>';
+    h+='<div class="row" style="margin-top:12px">';
+    if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<button class="btn sec" onclick="showHint()">💡 Hint</button>';
+    h+='<button class="btn grow" onclick="submitAns()">Submit</button></div>';
+  }else{
+    // feedback state
+    if(qo.type==="mc"){
+      var j;
+      for(j=0;j<qo.choices.length;j++){
+        var cls=qo.choices[j]===qo.ans?"ok":(j===sess.mcPick&&!sess.lastOk?"bad":"");
+        h+='<button class="mcbtn '+cls+'">'+String.fromCharCode(65+j)+'.  '+qo.choices[j]+'</button>';
+      }
+    }else{
+      h+='<input class="ansin '+(sess.lastOk?"ok":"bad")+'" value="'+esc(sess.lastInput)+'" disabled>';
+    }
+    h+='<div class="fb '+(sess.lastOk?"ok":"bad")+'" style="margin-top:12px"><b>'+(sess.lastOk?pick(["✅ Crushed it!","✅ Correct!","✅ Beast move!","✅ Clean."]):"❌ Not this time.")+'</b>';
+    if(!sess.lastOk&&qo.type!=="mc")h+='<div style="margin-top:4px">Correct answer: <b>'+esc(qo.ans)+'</b></div>';
+    h+='<div style="margin-top:6px">'+(qo.expl||"")+'</div></div>';
+    h+='<button class="btn wide" onclick="nextQ()">Next →</button>';
+  }
+  el("main").innerHTML=h;
+  var box=el("ansBox");
+  if(box)box.focus();
+  window.scrollTo(0,0);
+}
+function quitConfirm(){
+  if(confirm("Quit this session? Progress on answered questions is kept."))
+    {if(sess.results.length&&(sess.mode==="mock"||sess.mode==="diag")){quitSessDiscard();}else{endSess();}}
+}
+function quitSessDiscard(){
+  if(sess&&sess.timerId)clearInterval(sess.timerId);
+  sess=null;go("home");
+}
+
+/* ---------- SUMMARY ---------- */
+function renderSummary(){
+  var m=sess.mode,n=sess.results.length,pct=n?Math.round(100*sess.cor/n):0;
+  var h='<div class="card center hero"><div style="font-size:40px">'+(pct>=90?"🏆":pct>=70?"🎉":pct>=50?"💪":"🧗")+'</div>';
+  h+='<div class="big" style="margin:6px 0">'+(m==="blitz"?sess.cor+" correct in 60s":pct+"%")+'</div>';
+  h+='<div class="sub">'+sess.cor+' / '+n+' correct · '+modeTitle()+'</div></div>';
+  if(m==="diag"){
+    h+='<div class="card"><h3>🧭 Your Personal Training Path</h3><div class="sub" style="margin-bottom:8px">Weakest domains first — attack in this order:</div>';
+    var order=UNITS.slice().sort(function(a,b){return (S.diagUnits[a.id]||0)-(S.diagUnits[b.id]||0);}),i;
+    for(i=0;i<order.length;i++){
+      var uv=S.diagUnits[order[i].id];
+      if(uv===undefined)continue;
+      h+='<div class="row" style="padding:5px 0"><div style="width:24px;font-weight:900;color:var(--dim)">'+(i+1)+'</div><div style="width:26px">'+order[i].ic+'</div><div class="grow" style="font-size:13px;font-weight:700">'+order[i].name+'</div>'+
+        '<span class="mtag t'+(uv>=75?4:uv>=50?3:uv>=25?2:1)+'">'+uv+'%</span></div>';
+    }
+    h+='<div class="sub" style="margin-top:8px">Your skill tree has been seeded with these results. The "Next up" card on Home will always point at your best move.</div></div>';
+  }
+  if(m==="mock"){
+    var t=S.tests[S.tests.length-1],k;
+    h+='<div class="card"><h3>📊 Breakdown by Domain</h3>';
+    for(k in t.per){
+      var uu=unitById(k);
+      h+='<div class="row" style="padding:5px 0"><div style="width:26px">'+uu.ic+'</div><div class="grow"><div style="font-size:12.5px;font-weight:700">'+uu.name+'</div>'+mbar(t.per[k],1)+'</div><div style="width:44px;text-align:right;font-weight:800">'+t.per[k]+'%</div></div>';
+    }
+    h+='<div class="sub" style="margin-top:8px">'+(pct>=90?"EOC-ready. Time for Beast Mode.":pct>=70?"Solid — drill the weak domains above and re-test.":"The plan: hit your two weakest domains this week, then re-test.")+'</div></div>';
+  }
+  // missed questions recap (not for blitz)
+  if(m!=="blitz"&&sess.wrong>0){
+    h+='<div class="card"><h3>❌ What you missed</h3>';
+    var j,shown=0;
+    for(j=0;j<sess.results.length&&shown<6;j++){
+      var r=sess.results[j];
+      if(r.ok)continue;shown++;
+      h+='<div style="border-top:1px solid var(--line);padding:8px 0"><div style="font-size:13px">'+r.q.html+'</div><div class="sub" style="margin-top:4px">You: <span style="color:var(--red)">'+esc(r.input)+'</span>'+(r.q.type!=="mc"?' · Correct: <span style="color:var(--green)">'+esc(r.q.ans)+'</span>':'')+'</div><div class="sub" style="margin-top:4px">'+(r.q.expl||'')+'</div></div>';
+    }
+    h+='</div>';
+  }
+  h+='<div class="row">';
+  if(m==="practice")h+='<button class="btn grow" onclick="startPractice(\''+sess.skillId+'\')">Go Again</button>';
+  if(m==="beast")h+='<button class="btn red grow" onclick="startBeast()">Another Beast</button>';
+  if(m==="blitz")h+='<button class="btn blu grow" onclick="startBlitz()">Run It Back</button>';
+  h+='<button class="btn sec grow" onclick="sess=null;go(\'home\')">Home</button></div>';
+  el("main").innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+/* ---------- init ---------- */
+(function(){
+  load();
+  var btns=document.querySelectorAll(".nbtn"),i;
+  for(i=0;i<btns.length;i++){
+    (function(b){b.onclick=function(){SFX.click();go(b.getAttribute("data-v"));};})(btns[i]);
+  }
+  document.addEventListener("keydown",function(e){
+    if(view!=="train"||!sess)return;
+    if(e.key==="Enter"){
+      if(sess.locked)nextQ();else submitAns();
+    }
+  });
+  go("home");
+})();
+</script>
+</body>
+</html>
