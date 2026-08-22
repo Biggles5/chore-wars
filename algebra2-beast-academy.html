@@ -131,6 +131,11 @@ table.rt th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spac
 .workarea textarea{width:100%;min-height:70px;background:#0a0f24;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font-size:14px;margin-top:8px;font-family:inherit;resize:vertical}
 .workimg{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#0a0f24}
 .workpre{white-space:pre-wrap;font-size:13.5px;background:#0a0f24;border-radius:10px;padding:10px;border:1px solid var(--line)}
+/* music picker */
+.mmenu{position:fixed;top:56px;right:10px;z-index:95;background:var(--card);border:1px solid var(--gold);border-radius:14px;padding:10px;width:220px;box-shadow:0 12px 40px rgba(0,0,0,.6);animation:fadeIn .18s}
+.mrow{padding:10px 8px;border-radius:9px;font-size:13.5px;font-weight:700;cursor:pointer}
+.mrow:hover{background:rgba(255,255,255,.05)}
+.mrow.on{color:var(--gold);background:rgba(255,184,48,.08)}
 /* top-bar icon buttons */
 .iconbtn{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:15px;padding:5px 9px;line-height:1}
 .iconbtn.on{border-color:var(--gold);background:#2a2410}
@@ -173,7 +178,7 @@ a{color:var(--blue)}
   <div class="topin">
     <div class="logo">⚡ A2 BEAST ACADEMY</div>
     <div class="spacer"></div>
-    <button class="iconbtn" id="musicBtn" title="Study beats" onclick="MUSIC.cycle()">🔇</button>
+    <button class="iconbtn" id="musicBtn" title="Study beats" onclick="togMusicMenu()">🔇</button>
     <button class="iconbtn" title="Search" onclick="go('search')">🔍</button>
     <div class="pill" id="pillStreak"><span class="ic flame">🔥</span><span>0</span></div>
     <div class="pill" id="pillLvl"><span class="ic">🏅</span><span>Lv 1</span></div>
@@ -274,12 +279,9 @@ var SFX=(function(){
   };
 })();
 
-/* ---------- study beats: procedural music engine (no audio files) ---------- */
+/* ---------- study beats: procedural music engine, 6 stations, no audio files ---------- */
 var MUSIC=(function(){
-  var ctx=null,master=null,noiseBuf=null,timer=null,nextBar=0,barNo=0,station=0;
-  // stations: 0 off, 1 lo-fi chill, 2 synthwave grind
-  var LOFI={bar:2.4,chords:[[53,57,60,64],[45,48,52,55],[50,53,57,60],[43,47,50,53]]};      // Fmaj7 Am7 Dm7 G7 (midi)
-  var SYNTH={bar:1.6,chords:[[45,48,52],[41,45,48],[43,47,50],[40,43,47]]};                  // Am F G Em
+  var ctx=null,master=null,noiseBuf=null,timer=null,nextBar=0,barNo=0,cur=0;
   function hz(m){return 440*Math.pow(2,(m-69)/12);}
   function c(){
     if(!ctx){
@@ -304,41 +306,97 @@ var MUSIC=(function(){
     else o.connect(g);
     g.connect(master);o.start(t);o.stop(t+dur+.05);
   }
-  function noise(t,dur,peak,hp){
+  function noise(t,dur,peak,hp,att){
     var s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
     s.buffer=noiseBuf;s.loop=true;
     f.type=hp?"highpass":"lowpass";f.frequency.value=hp||1200;
-    env(g,t,.005,peak,dur);
+    env(g,t,att||.005,peak,dur);
     s.connect(f);f.connect(g);g.connect(master);
     s.start(t);s.stop(t+dur+.05);
   }
-  function kick(t){var o=ctx.createOscillator(),g=ctx.createGain();
-    o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);
-    env(g,t,.004,.5,.22);o.connect(g);g.connect(master);o.start(t);o.stop(t+.3);}
-  function bar(t){
-    var st=station===1?LOFI:SYNTH,ch=st.chords[barNo%st.chords.length],dur=st.bar,i;
-    if(station===1){ // lo-fi: warm pad, soft bass, dusty hats, vinyl crackle
-      for(i=0;i<ch.length;i++)osc("triangle",hz(ch[i]),t+.02,dur*.95,.05,.5,900);
-      osc("sine",hz(ch[0]-24),t,dur*.9,.14,.02,300);
-      kick(t);kick(t+dur/2);
-      for(i=0;i<4;i++)noise(t+i*dur/4+dur/8,.05,.025,6000);
-      noise(t,dur,.006,0); // crackle bed (lowpass)
-    }else{ // synthwave: arp + driving bass + hats
-      var seq=[0,1,2,1,0,2,1,2];
-      for(i=0;i<8;i++)osc("sawtooth",hz(ch[seq[i]]+12),t+i*dur/8,dur/8*.9,.035,.01,2500);
-      osc("square",hz(ch[0]-12),t,dur*.45,.06,.01,500);
-      osc("square",hz(ch[0]-12),t+dur/2,dur*.45,.06,.01,500);
-      kick(t);kick(t+dur/2);
-      for(i=0;i<8;i++)noise(t+i*dur/8,.03,.02,8000);
-    }
-    barNo++;
+  function kick(t,deep){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.setValueAtTime(deep?70:110,t);
+    o.frequency.exponentialRampToValueAtTime(deep?28:40,t+(deep?.25:.12));
+    env(g,t,.004,deep?.6:.5,deep?.5:.22);
+    o.connect(g);g.connect(master);o.start(t);o.stop(t+(deep?.6:.3));
   }
+  function snare(t){
+    var s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    s.buffer=noiseBuf;s.loop=true;f.type="bandpass";f.frequency.value=1900;
+    env(g,t,.003,.11,.16);
+    s.connect(f);f.connect(g);g.connect(master);s.start(t);s.stop(t+.2);
+  }
+  function pluck(f,t,vol){osc("triangle",f,t,1.1,vol||.09,.006,1900);}
+  // chord banks (midi)
+  var LOFI=[[53,57,60,64],[45,48,52,55],[50,53,57,60],[43,47,50,53]];   // Fmaj7 Am7 Dm7 G7
+  var SYNC=[[45,48,52],[41,45,48],[43,47,50],[40,43,47]];               // Am F G Em
+  var TRAPC=[[45,48,52],[44,48,51],[41,45,48],[43,47,50]];
+  var PIANO=[[48,52,55,59],[45,48,52,55],[41,45,48,52],[43,47,50,53]];  // Cmaj7 Am7 Fmaj7 G7
+  var PENT=[69,72,74,76,79,81];
+  function playLofi(t,dur){
+    var ch=LOFI[barNo%4],i;
+    for(i=0;i<ch.length;i++)osc("triangle",hz(ch[i]),t+.02,dur*.95,.05,.5,900);
+    osc("sine",hz(ch[0]-24),t,dur*.9,.14,.02,300);
+    kick(t);kick(t+dur/2);
+    for(i=0;i<4;i++)noise(t+i*dur/4+dur/8,.05,.025,6000);
+    noise(t,dur,.006,0);
+  }
+  function playSynth(t,dur){
+    var ch=SYNC[barNo%4],seq=[0,1,2,1,0,2,1,2],i;
+    for(i=0;i<8;i++)osc("sawtooth",hz(ch[seq[i]]+12),t+i*dur/8,dur/8*.9,.035,.01,2500);
+    osc("square",hz(ch[0]-12),t,dur*.45,.06,.01,500);
+    osc("square",hz(ch[0]-12),t+dur/2,dur*.45,.06,.01,500);
+    kick(t);kick(t+dur/2);
+    for(i=0;i<8;i++)noise(t+i*dur/8,.03,.02,8000);
+  }
+  function playTrap(t,dur){
+    var ch=TRAPC[barNo%4],i;
+    kick(t,true);kick(t+dur*.375,true);kick(t+dur*.625,true);         // 808 pattern
+    snare(t+dur/2);
+    var nH=(barNo%4===3)?16:8;                                         // hat roll every 4th bar
+    for(i=0;i<nH;i++)noise(t+i*dur/nH,.025,.018,9000);
+    for(i=0;i<4;i++)osc("triangle",hz(ch[i%3]+12),t+i*dur/4,dur/4,.03,.01,1600);
+    osc("sine",hz(ch[0]-24),t,dur*.9,.1,.03,200);                      // sub bass
+  }
+  function playChip(t,dur){
+    var ch=SYNC[barNo%4],i;
+    for(i=0;i<8;i++){
+      var n=PENT[(barNo*3+i*2)%PENT.length];
+      osc("square",hz(n),t+i*dur/8,dur/8*.85,.028,.005,3500);
+    }
+    osc("square",hz(ch[0]-12),t,dur*.4,.05,.01,900);
+    osc("square",hz(ch[0]-12),t+dur/2,dur*.4,.05,.01,900);
+    kick(t);
+    for(i=0;i<4;i++)noise(t+i*dur/4,.02,.015,9000);
+  }
+  function playRain(t,dur){
+    noise(t,dur*1.1,.05,0,.6);                                         // rain bed (lowpass, slow swell)
+    var i;
+    for(i=0;i<3;i++)osc("sine",1400+Math.random()*1200,t+Math.random()*dur,.08,.012,.005);
+    if(barNo%2===0){var ch=PIANO[(barNo/2)%4|0],j;for(j=0;j<ch.length;j++)osc("sine",hz(ch[j]),t+.1,dur*.9,.02,1.2);}
+  }
+  function playPiano(t,dur){
+    var ch=PIANO[barNo%4],i;
+    for(i=0;i<ch.length;i++)pluck(hz(ch[i]),t+i*dur/6,.07);
+    pluck(hz(ch[(barNo+1)%4]+12),t+dur*.7,.045);
+    osc("sine",hz(ch[0]-12),t,dur*.9,.06,.05,400);
+  }
+  var ST=[
+    {name:"Off",ic:"🔇"},
+    {name:"Lo-fi Chill",ic:"🎧",bar:2.4,play:playLofi},
+    {name:"Trap Focus",ic:"🥁",bar:2.0,play:playTrap},
+    {name:"Synthwave Grind",ic:"🎹",bar:1.6,play:playSynth},
+    {name:"8-Bit Boss Fight",ic:"🕹️",bar:1.4,play:playChip},
+    {name:"Rainy Window",ic:"🌧️",bar:3.0,play:playRain},
+    {name:"Soft Piano",ic:"🎼",bar:3.0,play:playPiano}
+  ];
   function tick(){
-    if(!ctx||station===0)return;
-    var st=station===1?LOFI:SYNTH;
+    if(!ctx||cur===0)return;
+    var st=ST[cur];
     while(nextBar<ctx.currentTime+.8){
       if(nextBar<ctx.currentTime)nextBar=ctx.currentTime+.05;
-      bar(nextBar);nextBar+=st.bar;
+      st.play(nextBar,st.bar);barNo++;nextBar+=st.bar;
     }
   }
   function start(){
@@ -350,16 +408,30 @@ var MUSIC=(function(){
   }
   function stop(){if(timer)clearInterval(timer);timer=null;}
   return {
-    cycle:function(){
-      station=(station+1)%3;
+    list:ST,
+    cur:function(){return cur;},
+    set:function(i){
+      cur=i;
       var b=document.getElementById("musicBtn");
-      if(station===0){stop();if(b){b.textContent="🔇";b.className="iconbtn";}toast("🔇 Beats off");}
-      else{start();if(b){b.textContent=station===1?"🎧":"🎹";b.className="iconbtn on";}
-        toast(station===1?"🎧 Lo-fi chill — study beats on":"🎹 Synthwave grind — lock in");}
+      if(i===0){stop();if(b){b.textContent="🔇";b.className="iconbtn";}toast("🔇 Beats off");}
+      else{start();if(b){b.textContent=ST[i].ic;b.className="iconbtn on";}toast(ST[i].ic+" "+ST[i].name+" — locked in");}
     },
-    playing:function(){return station!==0;}
+    playing:function(){return cur!==0;}
   };
 })();
+function togMusicMenu(){
+  var ex=document.getElementById("mmenu");
+  if(ex){ex.parentNode.removeChild(ex);return;}
+  var d=document.createElement("div");
+  d.id="mmenu";d.className="mmenu";
+  var h='<div style="font-weight:900;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🎵 Study Beats</div>',i;
+  for(i=0;i<MUSIC.list.length;i++){
+    var s=MUSIC.list[i];
+    h+='<div class="mrow'+(MUSIC.cur()===i?" on":"")+'" onclick="MUSIC.set('+i+');togMusicMenu()">'+s.ic+'  '+s.name+(MUSIC.cur()===i?' <span style="float:right">✓</span>':'')+'</div>';
+  }
+  d.innerHTML=h;
+  document.body.appendChild(d);
+}
 
 /* ---------- confetti ---------- */
 function confetti(){
@@ -401,7 +473,7 @@ function blankState(){
     beastWins:0, blitzBest:0,
     sessionCorrectRow:0, lastCtx:null,
     labs:{}, comboBest:0, justify:{},
-    chat:[], chatKey:"", chatModel:"claude-opus-5", tutorMsgs:0
+    chat:[], tutorMsgs:0
   };
 }
 function load(){
@@ -3048,7 +3120,7 @@ function renderHome(){
   h+='<div class="card click" style="margin:0" onclick="startBlitz()"><div style="font-size:22px">⚡</div><h3>Blitz</h3><div class="sub">60 seconds. Best: '+S.blitzBest+'</div></div>';
   var nlabs=0,lk;for(lk in S.labs)nlabs++;
   h+='<div class="card click" style="margin:0;border-color:var(--cyan)" onclick="go(\'battle\')"><div style="font-size:22px">🧪</div><h3>Practice Labs</h3><div class="sub">Real-world missions · '+nlabs+'/'+LABS.length+' done</div></div>';
-  h+='<div class="card click" style="margin:0;border-color:#3d55b0" onclick="go(\'chat\')"><div style="font-size:22px">🤖</div><h3>AI Tutor</h3><div class="sub">Stuck? Ask anything, anytime</div></div>';
+  h+='<div class="card click" style="margin:0;border-color:#3d55b0" onclick="go(\'chat\')"><div style="font-size:22px">🤖</div><h3>Coach</h3><div class="sub">Stuck? Ask anything, anytime</div></div>';
   var njz=0,jzk;for(jzk in S.justify)njz++;
   h+='<div class="card click" style="margin:0;border-color:var(--purple)" onclick="go(\'battle\')"><div style="font-size:22px">⚖️</div><h3>Justify It</h3><div class="sub">Defend every step · '+njz+'/'+JUSTIFY.length+'</div></div>';
   h+='<div class="card click" style="margin:0" onclick="startReview()"><div style="font-size:22px">🔁</div><h3>Review</h3><div class="sub">Spaced repetition — keep it locked in</div></div>';
@@ -3361,7 +3433,7 @@ function renderTrain(){
     if(!sess.lastOk&&(sess.mode==="practice"||sess.mode==="review"||sess.mode==="quiz")){
       h+='<div class="row" style="margin-bottom:8px">';
       if(WORKED[skid])h+='<button class="btn sec grow" onclick="toLesson(\''+skid+'\')">📖 Worked example</button>';
-      h+='<button class="btn blu grow" onclick="askTutorWhy()">🤖 Ask tutor why</button></div>';
+      h+='<button class="btn blu grow" onclick="askTutorWhy()">🤖 Ask the Coach</button></div>';
     }
     h+='<button class="btn wide" onclick="nextQ()">Next →</button>';
   }
@@ -3624,8 +3696,7 @@ function buildSearch(){
   idx.push({l:"⚡ Blitz",s:"60-second speed round",k:"blitz speed timed fast round",act:"startBlitz()"});
   idx.push({l:"🐲 Beast Mode",s:"Multi-topic challenge problems",k:"beast mode challenge hard elite",act:"startBeast()"});
   idx.push({l:"🔁 Review Queue",s:"Spaced review of fading skills",k:"review spaced repetition due queue",act:"startReview()"});
-  idx.push({l:"🤖 AI Tutor",s:"Ask anything, get unstuck",k:"tutor chat help ask question ai claude stuck",act:"go('chat')"});
-  idx.push({l:"🔑 Tutor Settings — API Key",s:"Connect the full AI tutor",k:"api key settings setup connect claude tutor model",act:"openTutorSettings()"});
+  idx.push({l:"🤖 Coach",s:"Solves, quizzes, teaches — ask anything",k:"tutor coach chat help ask question ai stuck solve",act:"go('chat')"});
   idx.push({l:"📚 Formula Vault",s:"Every formula + the curriculum map",k:"formula reference sheet curriculum standards missouri map",act:"go('ref')"});
   SIDX=idx;return idx;
 }
@@ -3643,7 +3714,7 @@ function doSearch(){
   var qv=b.value.toLowerCase().replace(/^\s+|\s+$/g,""),idx=buildSearch(),res=[],i;
   if(!qv){
     out.innerHTML='<div class="card"><div class="sub">Popular jumps:</div>'+
-      ['startDiag()|🔬 Diagnostic',"go('chat')|🤖 Ask the AI Tutor","togUnitGo('quad')|🎯 Quadratics","startLab('lab_quad')|💧 Water Balloon Lab"].map(function(s){var p=s.split("|");return '<span class="qchip" onclick="'+p[0]+'">'+p[1]+'</span>';}).join("")+'</div>';
+      ['startDiag()|🔬 Diagnostic',"go('chat')|🤖 Ask the Coach","togUnitGo('quad')|🎯 Quadratics","startLab('lab_quad')|💧 Water Balloon Lab"].map(function(s){var p=s.split("|");return '<span class="qchip" onclick="'+p[0]+'">'+p[1]+'</span>';}).join("")+'</div>';
     return;
   }
   var terms=qv.split(/\s+/);
@@ -3661,30 +3732,14 @@ function doSearch(){
   for(j=0;j<res.length&&j<12;j++){
     h+='<div class="sres" onclick="'+res[j].e.act+'"><div class="grow"><div style="font-weight:800;font-size:14px">'+res[j].e.l+'</div><div class="sub" style="font-size:11.5px">'+res[j].e.s+'</div></div><span class="chev">▶</span></div>';
   }
-  out.innerHTML=h||'<div class="card"><div class="sub">Nothing matched "'+esc(qv)+'". Try a topic word like "logs", "factoring", "asymptote" — or ask the <span style="color:var(--gold);cursor:pointer" onclick="go(\'chat\')">AI Tutor</span>.</div></div>';
+  out.innerHTML=h||'<div class="card"><div class="sub">Nothing matched "'+esc(qv)+'". Try a topic word like "logs", "factoring", "asymptote" — or ask the <span style="color:var(--gold);cursor:pointer" onclick="go(\'chat\')">Coach</span>.</div></div>';
 }
 
 /* ============================================================
    AI TUTOR CHAT — Claude API (student's own key, stored locally)
    with a useful offline coach as the no-key fallback.
    ============================================================ */
-var chatBusy=false,chatShowSettings=false;
-function fmtBot(t){ // escape, then light markdown (bold + newlines)
-  var s=esc(t);
-  s=s.replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
-  return s.replace(/\n/g,"<br>");
-}
-function tutorSystem(){
-  var wk=weakSkills(3),i,names=[];
-  for(i=0;i<wk.length;i++)names.push(skillDef(wk[i].d.id).name+" ("+Math.round(wk[i].m)+"%)");
-  var s="You are the Beast Academy Tutor: an elite, energetic Algebra 2 coach inside a training app used by a 16-year-old student in Branson, Missouri. Teaching style: diagnose the misconception first, explain the concept simply, show ONE short worked example with plain-text math (x^2, sqrt(x), 3/4), then give ONE similar practice problem and STOP so the student can try. Never solve graded schoolwork wholesale. Be direct, encouraging, never condescending. Keep answers under 250 words. Stay on math and study skills.";
-  s+="\n\nSTUDENT SNAPSHOT: Level "+lvlInfo().def.name+", "+S.xp+" XP, overall Algebra 2 mastery "+Math.round(overallMastery())+"%, day streak "+S.streak.count+". Weakest skills: "+(names.join("; ")||"none measured yet")+".";
-  if(S.lastCtx){
-    var c=S.lastCtx;
-    s+="\n\nMOST RECENT PROBLEM (the student may ask about it):\nProblem: "+c.q+"\nStudent's answer: "+c.ur+" ("+(c.ok?"correct":"wrong")+")\nCorrect answer: "+c.ans+"\nSolution: "+c.expl+(c.work?"\nStudent's typed work: "+c.work:"");
-  }
-  return s;
-}
+var chatBusy=false;
 function chatSend(preset){
   if(chatBusy)return;
   var inp=el("chatIn"),txt=preset||(inp?inp.value:"");
@@ -3694,54 +3749,17 @@ function chatSend(preset){
   if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
   S.tutorMsgs++;save();checkBadges();
   chatBusy=true;renderChat();
-  if(S.chatKey)callClaude(txt);
-  else setTimeout(function(){offlineTutor(txt);},450);
-}
-/* if the API fails for any reason, the built-in Coach answers instead */
-var coachNotice=null;
-function apiFallback(userTxt,reason){
-  coachNotice="<div class='sub' style='margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)'>⚠️ "+reason+" — the built-in Coach has you covered: <span class='qchip' onclick=\"openTutorSettings()\">⚙️ Fix key</span> <span class='qchip' onclick=\"useCoachOnly()\">Use Coach only</span></div>";
-  offlineTutor(userTxt);
-}
-function useCoachOnly(){
-  S.chatKey="";save();renderChat();
-  toast("🤖 Built-in Coach mode — fully working, no key needed");
+  setTimeout(function(){offlineTutor(txt);},450);
 }
 function pushBot(html,isHtml){
-  if(coachNotice&&isHtml){html=coachNotice+html;coachNotice=null;}
   S.chat.push({r:"a",c:html,h:isHtml?1:0});
   if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
   chatBusy=false;save();renderChat();
 }
-function callClaude(userTxt){
-  var msgs=[],i,hist=S.chat.slice(-12);
-  for(i=0;i<hist.length;i++)msgs.push({role:hist[i].r==="u"?"user":"assistant",content:hist[i].c});
-  var headers={
-    "content-type":"application/json",
-    "x-api-key":S.chatKey,
-    "anthropic-version":"2023-06-01",
-    "anthropic-dangerous-direct-browser-access":"true"
-  };
-  var body={model:S.chatModel||"claude-opus-5",max_tokens:1500,system:tutorSystem(),messages:msgs};
-  if((body.model||"").indexOf("claude-opus-5")===0){
-    headers["anthropic-beta"]="server-side-fallback-2026-07-01";
-    body.fallbacks="default";
-  }
-  fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:headers,body:JSON.stringify(body)})
-    .then(function(r){return r.json();})
-    .then(function(j){
-      if(j.error){
-        var why=j.error.type==="authentication_error"?"Your API key looks invalid":(j.error.type==="rate_limit_error"?"Claude is rate-limited right now":(j.error.type==="overloaded_error"?"Claude is overloaded right now":"API error: "+(j.error.message||"").slice(0,60)));
-        apiFallback(userTxt,why);return;
-      }
-      if(j.stop_reason==="refusal"){pushBot("I can't help with that one. Let's get back to the math — what are you working on?");return;}
-      var t="",k;
-      for(k=0;k<(j.content||[]).length;k++)if(j.content[k].type==="text")t+=j.content[k].text;
-      pushBot(t||"(empty response — try rephrasing)");
-    })
-    .catch(function(e){
-      apiFallback(userTxt,"Couldn't reach Claude (no internet?)");
-    });
+function fmtBot(t){ // escape, then light markdown (bold + newlines)
+  var s=esc(t);
+  s=s.replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+  return s.replace(/\n/g,"<br>");
 }
 /* ============================================================
    THE COACH — a serious rule-based tutor that needs no API.
@@ -4003,12 +4021,12 @@ var FAQ=[
  {p:["what is beast mode"],a:"<b>🐲 Beast Mode</b> = multi-topic problems with no label telling you which chapter they're from — Vieta's tricks, error-hunting, extraneous traps, optimization. Unlocks when 3 units hit 60% mastery. 60 XP per kill. It exists because real tests don't announce the topic."},
  {p:["what is mastery","how is mastery calculated"],a:"Each skill's <b>mastery %</b> blends accuracy, difficulty, and consistency — one lucky answer can't max it (caps until you've done enough reps), and it <b>decays if you ghost a skill</b>, which feeds the 🔁 Review queue. 90%+ = Mastered, 97%+ = Elite. That's real learning science: spaced retrieval."},
  {p:["reset my progress","start over"],a:"📊 Stats → scroll to <b>Danger Zone</b> → Reset ALL progress. It wipes XP, mastery, badges, everything on this device. No undo — be sure."},
- {p:["add api key","connect claude","get the full tutor","api key"],a:"Tap <b>⚙️ Settings</b> up top in this chat (or the gold 🔑 banner). Paste a key from console.anthropic.com — it stays on this device only. Shortcut: open the file once with <b>#key=sk-ant-…</b> at the end of the address and it installs itself."},
+ {p:["add api key","connect claude","api key","do i need an account"],a:"No account, no key, no sign-up — everything here runs fully on your device. Just open the app and train."},
  {p:["im stuck","this is too hard","i cant do this","i dont get it","im confused"],a:"Stuck is a location, not a verdict — and it's exactly where learning happens. Do this: <b>1)</b> name the exact line where it stops making sense, <b>2)</b> hit the 📖 worked example for that skill and read the WHY under each step, <b>3)</b> retry one level easier to rebuild footing. Tell me the topic and I'll break it down right now."},
  {p:["i hate math","math is boring","im bad at math","why do i need algebra"],a:"Fair — but 'bad at math' usually means 'missing one prerequisite that made everything after feel like fog.' This app exists to find that gap and fill it. And Algebra 2 is the price of admission for engineering, game dev, medicine, finance, flying planes… Give me your weakest topic and 10 minutes.<br><br><span class='qchip' onclick=\"chatSend('quiz me on my weakest skill')\">🎯 Find my gap</span>"},
  {p:["how to study for a math test","study tips","how should i study"],a:"What works (proven): <b>1) Retrieval</b> — close the notes, do problems cold. <b>2) Spacing</b> — 30 min/day beats 3 hours once. <b>3) Mixing</b> — shuffle topics so you practice CHOOSING the method. <b>4) Error autopsy</b> — every miss goes in the journal and gets re-tried. What doesn't: rereading and highlighting. Mock test 3 days out, review misses, re-test."},
  {p:["test anxiety","nervous for test"],a:"Anxiety shrinks with <b>overpreparation + simulation</b>: take Mock EOCs under real conditions until the format is boring. On test day: brain-dump formulas on scratch paper first, do easy questions first (momentum), and remember blanking on one problem ≠ failing. Breathe out longer than you breathe in — it genuinely calms the nervous system."},
- {p:["who are you","what are you","what can you do"],a:"I'm your <b>Coach</b> — built into this app, no internet needed. I can: <b>solve equations you type</b> (try 'solve 3x+5=17' or 'x^2-5x+6=0'), <b>factor</b>, simplify <b>√</b> and <b>logs</b>, <b>quiz you for real XP</b>, explain every topic in the tree, and autopsy your mistakes. With an API key (⚙️) I upgrade into the full Claude tutor."}
+ {p:["who are you","what are you","what can you do"],a:"I'm your <b>Coach</b> — built into this app, no internet needed. I can: <b>solve equations you type</b> (try 'solve 3x+5=17' or 'x^2-5x+6=0'), <b>factor</b>, simplify <b>√</b> and <b>logs</b>, <b>quiz you for real XP</b>, explain every topic in the tree, and autopsy your mistakes."}
 ];
 function coachFAQ(t){
   var best=null,bestScore=0,i,j;
@@ -4063,10 +4081,9 @@ function coachQuizReply(txt){
 function offlineTutor(txt){
   var t=" "+txt.toLowerCase().replace(/[’']/g,"'").replace(/\s+/g," ").replace(/^\s+|\s+$/g,"")+" ";
   t=t.slice(1,t.length-1);
-  // settings by typing — works even if the button is being stubborn
+  // there's nothing to configure — everything is built in
   if(/^(settings?|api ?key|add ?(the )?key|set ?up)$/.test(t)||/open settings/.test(t)){
-    chatShowSettings=true;chatQuiz=null;
-    pushBot("⚙️ Settings panel is open at the top of this screen — paste your key there and hit Save. It never leaves this device.",true);
+    pushBot("Nothing to set up — I'm fully built in: no account, no key, no internet needed. 🗑 up top starts a fresh chat, and 🎵 in the top bar picks your study beats.",true);
     return;
   }
   // 0) mid-quiz → everything is an answer/command
@@ -4143,33 +4160,21 @@ function offlineTutor(txt){
   // 10) smart default
   pushBot("I didn't catch a topic in that — but here's what I've got:<br><br>• <b>Type an equation</b> — 'solve 2x+7=15', 'x^2-5x+6=0', 'factor x^2+7x+12', 'sqrt 72', 'log2(32)'<br>• <b>Name any topic</b> — 'how do inverses work', 'what's the discriminant'<br>• <b>'quiz me'</b> — real questions, real XP, right here<br>• <b>'why was I wrong'</b> — after any miss<br><br><span class='qchip' onclick=\"chatSend('quiz me on my weakest skill')\">🎯 Quiz my weakest skill</span> <span class='qchip' onclick=\"go('search')\">🔍 Search everything</span>",true);
 }
-function chatSaveKey(){
-  var k=el("keyIn"),m=el("mdlSel");
-  if(k)S.chatKey=k.value.replace(/^\s+|\s+$/g,"");
-  if(m)S.chatModel=m.value;
-  save();chatShowSettings=false;renderChat();
-  toast(S.chatKey?"🔑 Key saved (stored only on this device)":"Key cleared — offline coach mode");
-}
-/* no native confirm() popups — iOS often swallows them silently.
-   Instead: tap once to arm, tap again within 4s to execute. */
 var clearArm=0;
 function chatClear(){
   if(!S.chat.length)return;
   var now=Date.now();
   if(now-clearArm>4000){
     clearArm=now;
-    var b1=el("clearBtn");if(b1)b1.innerHTML="🗑 Sure?";
-    var b2=el("clearBtn2");if(b2)b2.innerHTML="🗑 Sure? Tap again";
+    var b1=el("clearBtn");if(b1)b1.innerHTML="🗑 Sure? Tap again";
     toast("Tap 🗑 again to clear the chat (XP & mastery are safe)");
     return;
   }
   clearArm=0;
-  S.chat=[];chatQuiz=null;chatTopic=null;chatBusy=false;chatShowSettings=false;
+  S.chat=[];chatQuiz=null;chatTopic=null;chatBusy=false;
   save();renderChat();
   toast("🗑 Fresh chat — history cleared");
 }
-function togChatSettings(){chatShowSettings=!chatShowSettings;renderChat();}
-function openTutorSettings(){chatShowSettings=true;go("chat");}
 function askTutorWhy(){
   go("chat");
   chatSend("Why was my answer wrong on that last problem? Walk me through where my thinking broke, then give me one similar problem to try.");
@@ -4178,19 +4183,8 @@ function renderChat(){
   view="chat";
   var btns=document.querySelectorAll(".nbtn"),bi;
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
-  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 '+(S.chatKey?"AI Tutor":"Coach")+'</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Built-in Coach — solves equations, quizzes for XP, teaches every topic. No internet needed.")+'</div></div>'+(S.chat.length?'<button id="clearBtn" class="btn sec sm" style="margin-right:6px;padding:10px 12px" onclick="chatClear()">🗑</button>':'')+'<button class="btn sec sm" style="padding:10px 14px" onclick="togChatSettings()">'+(chatShowSettings?"✕ Close":"⚙️ Settings")+'</button></div>';
+  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 Coach</h2><div class="sub">Solves equations · quizzes for XP · teaches every topic — all built in.</div></div>'+(S.chat.length?'<button id="clearBtn" class="btn sec sm" style="padding:10px 14px" onclick="chatClear()">🗑 New chat</button>':'')+'</div>';
   // (API key setup lives in ⚙️ Settings — no banner cluttering the chat)
-  if(chatShowSettings){
-    h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).<br><br><b>No-typing shortcut:</b> open this file once with <b>#key=sk-ant-…</b> added to the end of the address — the key installs itself and is scrubbed from the address bar.</div>'+
-      '<input id="keyIn" class="ansin" type="password" placeholder="sk-ant-…" value="'+esc(S.chatKey)+'">'+
-      '<div class="row" style="margin-top:8px"><select id="mdlSel" class="ansin" style="flex:1">'+
-      '<option value="claude-opus-5"'+(S.chatModel==="claude-opus-5"?" selected":"")+'>Claude Opus 5 — best teacher</option>'+
-      '<option value="claude-sonnet-5"'+(S.chatModel==="claude-sonnet-5"?" selected":"")+'>Claude Sonnet 5 — fast + cheaper</option>'+
-      '<option value="claude-haiku-4-5"'+(S.chatModel==="claude-haiku-4-5"?" selected":"")+'>Claude Haiku 4.5 — cheapest</option>'+
-      '</select></div>'+
-      '<div class="row" style="margin-top:10px"><button class="btn grow" onclick="chatSaveKey()">Save</button><button id="clearBtn2" class="btn sec" onclick="chatClear()">🗑 Clear chat</button></div>'+
-      '<button class="btn sec wide" style="margin-top:8px" onclick="togChatSettings()">← Back to chat</button></div>';
-  }
   h+='<div class="chatwrap" id="chatLog">';
   if(!S.chat.length){
     h+='<div class="msg bot"><div class="who">Coach</div>Yo! I\'m your Algebra 2 coach — and I work with no internet. I can:<br><br>🧮 <b>Solve equations you type</b> — try "solve 3x+5=17" or "x^2-5x+6=0"<br>🎯 <b>Quiz you right here</b> — real XP, counts toward mastery<br>📖 <b>Teach any topic</b> — "how do logs work?"<br>🔎 <b>Autopsy your misses</b> — "why was I wrong?"<br><br>What are we working on?</div>';
@@ -4199,7 +4193,7 @@ function renderChat(){
   for(i=0;i<S.chat.length;i++){
     var m=S.chat[i];
     if(m.r==="u")h+='<div class="msg me">'+esc(m.c)+'</div>';
-    else h+='<div class="msg bot"><div class="who">'+(S.chatKey?"Claude Tutor":"Coach")+'</div>'+(m.h?m.c:fmtBot(m.c))+'</div>';
+    else h+='<div class="msg bot"><div class="who">Coach</div>'+(m.h?m.c:fmtBot(m.c))+'</div>';
   }
   if(chatBusy)h+='<div class="msg bot"><div class="typing"><span></span><span></span><span></span></div></div>';
   h+='</div>';
@@ -4208,12 +4202,10 @@ function renderChat(){
     '<span class="qchip" onclick="chatSend(\'why was I wrong on the last problem?\')">🔎 Why was I wrong?</span>'+
     '<span class="qchip" onclick="chatSend(\'show me an example\')">📖 Example</span>'+
     '<span class="qchip" onclick="chatSend(\'solve x^2-5x+6=0\')">🧮 Solve x²−5x+6=0</span>'+
-    '<span class="qchip" onclick="openTutorSettings()">⚙️ Settings</span></div>';
+    '</div>';
   h+='<div class="chatbar"><input id="chatIn" placeholder="Ask anything… (e.g. how do logs work?)" autocomplete="off"><button class="btn" onclick="chatSend()">Send</button></div>';
   el("main").innerHTML=h;
-  // settings open → show the panel (top); otherwise follow the conversation (bottom)
-  if(chatShowSettings)window.scrollTo(0,0);
-  else window.scrollTo(0,document.body.scrollHeight);
+  window.scrollTo(0,document.body.scrollHeight);
   var ci=el("chatIn");
   if(ci){ci.onkeydown=function(e){if(e.key==="Enter"){chatSend();}};}
 }
@@ -4221,22 +4213,6 @@ function renderChat(){
 /* ---------- init ---------- */
 (function(){
   load();
-  // One-tap tutor setup: open the file once with #key=sk-ant-... appended
-  // (optionally &model=claude-...) and the key is stored in localStorage,
-  // then scrubbed from the address bar. Never hardcode a key in this file —
-  // it's committed to GitHub, where leaked keys get scraped and revoked.
-  try{
-    var frag=(location.hash||"")+"&"+(location.search||"");
-    var km=frag.match(/[#&?]key=(sk-ant-[A-Za-z0-9_\-]+)/);
-    if(km){
-      S.chatKey=km[1];
-      var mm=frag.match(/[#&?]model=(claude-[a-z0-9.\-]+)/);
-      if(mm)S.chatModel=mm[1];
-      save();
-      try{history.replaceState(null,"",location.pathname);}catch(e2){location.hash="";}
-      setTimeout(function(){toast("🔑 Tutor key installed — the AI tutor is live on this device");},400);
-    }
-  }catch(e){}
   var btns=document.querySelectorAll(".nbtn"),i;
   for(i=0;i<btns.length;i++){
     (function(b){b.onclick=function(){SFX.click();go(b.getAttribute("data-v"));};})(btns[i]);
