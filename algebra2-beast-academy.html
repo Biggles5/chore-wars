@@ -3757,7 +3757,7 @@ function renderChat(){
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
   var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 AI Tutor</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Offline coach mode — add a key in ⚙️ for the full AI tutor")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️</button></div>';
   if(chatShowSettings){
-    h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).</div>'+
+    h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).<br><br><b>No-typing shortcut:</b> open this file once with <b>#key=sk-ant-…</b> added to the end of the address — the key installs itself and is scrubbed from the address bar.</div>'+
       '<input id="keyIn" class="ansin" type="password" placeholder="sk-ant-…" value="'+esc(S.chatKey)+'">'+
       '<div class="row" style="margin-top:8px"><select id="mdlSel" class="ansin" style="flex:1">'+
       '<option value="claude-opus-5"'+(S.chatModel==="claude-opus-5"?" selected":"")+'>Claude Opus 5 — best teacher</option>'+
@@ -3794,6 +3794,22 @@ function renderChat(){
 /* ---------- init ---------- */
 (function(){
   load();
+  // One-tap tutor setup: open the file once with #key=sk-ant-... appended
+  // (optionally &model=claude-...) and the key is stored in localStorage,
+  // then scrubbed from the address bar. Never hardcode a key in this file —
+  // it's committed to GitHub, where leaked keys get scraped and revoked.
+  try{
+    var frag=(location.hash||"")+"&"+(location.search||"");
+    var km=frag.match(/[#&?]key=(sk-ant-[A-Za-z0-9_\-]+)/);
+    if(km){
+      S.chatKey=km[1];
+      var mm=frag.match(/[#&?]model=(claude-[a-z0-9.\-]+)/);
+      if(mm)S.chatModel=mm[1];
+      save();
+      try{history.replaceState(null,"",location.pathname);}catch(e2){location.hash="";}
+      setTimeout(function(){toast("🔑 Tutor key installed — the AI tutor is live on this device");},400);
+    }
+  }catch(e){}
   var btns=document.querySelectorAll(".nbtn"),i;
   for(i=0;i<btns.length;i++){
     (function(b){b.onclick=function(){SFX.click();go(b.getAttribute("data-v"));};})(btns[i]);
