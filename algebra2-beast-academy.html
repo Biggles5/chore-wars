@@ -3717,27 +3717,394 @@ function callClaude(){
       pushBot("⚠️ Couldn't reach the tutor ("+e.message+"). Check your internet connection — or I can still help offline: try 'why was I wrong' or name a topic.");
     });
 }
-function offlineTutor(txt){
-  var t=txt.toLowerCase(),i,j;
-  // 1) "why was I wrong" → replay last mistake
-  if(/why|wrong|mistake|missed|help me/.test(t)&&S.lastCtx&&!S.lastCtx.ok){
-    var c=S.lastCtx,d=skillDef(c.skill);
-    pushBot("<b>Let's autopsy that one.</b><br><br><b>The problem:</b> "+esc(c.q).slice(0,220)+"<br><b>You said:</b> "+esc(c.ur)+" · <b>Correct:</b> "+esc(c.ans)+"<br><br><b>The fix:</b> "+c.expl+"<br><br>"+(d&&WORKED[d.id]?"Want the full method? <span class='qchip' onclick=\"openLesson('"+d.id+"')\">📖 Walk through a worked example</span>":""),true);
-    return;
-  }
-  // 2) topic mention → route to that skill's lesson
-  var best=null,bestScore=0,idx=buildSearch();
+/* ============================================================
+   THE COACH — a serious rule-based tutor that needs no API.
+   Can: solve typed equations with steps, factor, simplify
+   radicals, evaluate logs and arithmetic, run quizzes in chat
+   (for real XP + mastery), answer ~50 likely questions, teach
+   any topic, autopsy mistakes, and remember the conversation
+   topic for follow-ups like "another one" or "harder".
+   ============================================================ */
+var chatTopic=null,chatQuiz=null,chatL=2;
+
+/* ---- topic synonyms so "how do logs work" finds the right skill ---- */
+var SKILL_KEYS={
+ lin1:"solve equation multi step distribute",lin2:"literal formula rearrange isolate variable",
+ lin3:"absolute value equation",lin4:"absolute value inequality",lin5:"compound inequality and or flip",
+ fun1:"function notation evaluate plug input output",fun2:"domain range allowed",
+ fun3:"composition composite fog gof f(g(x))",fun4:"inverse undo swap reverse",
+ fun5:"transformation shift translate reflect flip stretch parent graph move",fun6:"piecewise pieces",
+ sys1:"system elimination substitution two equations intersect",sys2:"three variable system",
+ sys3:"nonlinear system parabola line circle intersect",sys4:"word problem tickets mixture boat current",
+ quad1:"gcf greatest common difference of squares special pattern",quad2:"factor trinomial ac method foil",
+ quad3:"zero product solve by factoring roots",quad4:"complete completing the square",
+ quad5:"vertex parabola axis symmetry maximum minimum max min",quad6:"quadratic formula",
+ quad7:"discriminant how many solutions",quad8:"projectile height ball launch thrown revenue profit",
+ cplx1:"powers of i imaginary cycle",cplx2:"add subtract complex imaginary",
+ cplx3:"multiply complex imaginary foil",cplx4:"divide complex conjugate",cplx5:"complex roots imaginary solutions",
+ poly1:"add multiply polynomials expand distribute",poly2:"synthetic division divide polynomial",
+ poly3:"remainder theorem",poly4:"zeros roots cubic find all",poly5:"end behavior leading coefficient",
+ poly6:"multiplicity touch cross bounce build",
+ rat1:"simplify rational expression cancel reduce",rat2:"multiply divide rational fractions",
+ rat3:"add subtract rational lcd common denominator",rat4:"rational equation proportion cross",
+ rat5:"asymptote hole vertical horizontal",
+ rad1:"simplify radical square root sqrt",rad2:"rational exponent fractional power",
+ rad3:"add combine like radicals multiply roots",rad4:"radical equation extraneous square both sides",
+ exp1:"exponent rules laws power product quotient negative zero",
+ exp2:"growth decay half life interest compound depreciation percent",
+ exp3:"convert log exponential form rewrite",exp4:"evaluate log logarithm",
+ exp5:"log properties expand condense product power quotient rule",
+ exp6:"exponential equation same base",exp7:"log equation logarithmic solve",
+ seq1:"arithmetic sequence common difference nth term",seq2:"geometric sequence common ratio",
+ seq3:"recursive sequence",seq4:"arithmetic series sum gauss",seq5:"geometric series infinite sum converge",
+ data1:"permutation combination counting factorial choose order",
+ data2:"probability marble chance odds dice coin",data3:"binomial exactly heads coin flips",
+ data4:"expected value ev fair game",data5:"normal distribution z score bell curve standard deviation empirical"
+};
+function coachTopic(t){
+  var best=null,bestScore=0,i,j,w;
   for(i=0;i<UNITS.length;i++)for(j=0;j<UNITS[i].skills.length;j++){
-    var d2=UNITS[i].skills[j],words=d2.name.toLowerCase().split(/[^a-z]+/),sc=0,w;
-    for(w=0;w<words.length;w++)if(words[w].length>3&&t.indexOf(words[w])>=0)sc++;
-    if(sc>bestScore){bestScore=sc;best=d2;}
+    var d=UNITS[i].skills[j],sc=0;
+    var nw=d.name.toLowerCase().split(/[^a-z0-9()]+/);
+    for(w=0;w<nw.length;w++)if(nw[w].length>3&&t.indexOf(nw[w])>=0)sc+=2;
+    var kw=(SKILL_KEYS[d.id]||"").split(" ");
+    for(w=0;w<kw.length;w++)if(kw[w].length>2&&t.indexOf(kw[w])>=0)sc+=1;
+    if(sc>bestScore){bestScore=sc;best=d;}
   }
-  if(best){
-    pushBot("<b>"+best.name+"</b> — here's the core idea:<br><br>"+(LESSONS[best.id]||"")+"<br><br><span class='qchip' onclick=\"openLesson('"+best.id+"')\">📖 See it solved step-by-step</span> <span class='qchip' onclick=\"startPractice('"+best.id+"',true)\">🥊 Practice it</span>",true);
+  return bestScore>=2?best:null;
+}
+
+/* ---- tiny math engine: arithmetic, polynomials, exact answers ---- */
+function fmtNum(v){
+  if(Math.abs(v-Math.round(v))<1e-9)return String(Math.round(v));
+  return String(Math.round(v*10000)/10000);
+}
+function evalArith(s){
+  s=s.replace(/\s+/g,"").replace(/−/g,"-").replace(/×|·/g,"*").replace(/÷/g,"/")
+     .replace(/²/g,"^2").replace(/³/g,"^3").replace(/pi|π/g,"("+Math.PI+")").replace(/sqrt/g,"√");
+  if(s===""||!/^[-0-9+*/^().√]+$/.test(s))return null;
+  var i=0;
+  function expr(){var v=term();while(s[i]==="+"||s[i]==="-"){var op=s[i++];var r=term();v=op==="+"?v+r:v-r;}return v;}
+  function term(){var v=pw();while(s[i]==="*"||s[i]==="/"){var op=s[i++];var r=pw();v=op==="*"?v*r:v/r;}return v;}
+  function pw(){var v=base();if(s[i]==="^"){i++;var e=pw();v=Math.pow(v,e);}return v;}
+  function base(){
+    if(s[i]==="("){i++;var v=expr();if(s[i]!==")")throw 0;i++;return v;}
+    if(s[i]==="√"){i++;var v2=base();if(v2<0)throw 0;return Math.sqrt(v2);}
+    if(s[i]==="-"){i++;return -base();}
+    var m=/^\d*\.?\d+/.exec(s.slice(i));
+    if(!m)throw 0;
+    i+=m[0].length;return parseFloat(m[0]);
+  }
+  try{var out=expr();if(i!==s.length||!isFinite(out))return null;return out;}catch(e){return null;}
+}
+function parsePoly(s){ // "3x^2-4x+7" → [c0,c1,c2]; null if not a poly in x (deg ≤ 2)
+  if(s===""||!/^[-+0-9x^.]+$/.test(s))return null;
+  var c=[0,0,0],re=/([+-]?)(\d*\.?\d*)x(?:\^(\d))?|([+-]?)(\d+\.?\d*)/g,m,consumed=0;
+  while((m=re.exec(s))!==null){
+    if(m[0]==="")return null;
+    consumed+=m[0].length;
+    if(m[0].indexOf("x")>=0){
+      var sg=m[1]==="-"?-1:1,co=(m[2]===""||m[2]===undefined)?1:parseFloat(m[2]);
+      var d=(m[3]===""||m[3]===undefined)?1:parseInt(m[3],10);
+      if(d>2)return null;
+      c[d]+=sg*co;
+    }else{
+      c[0]+=(m[4]==="-"?-1:1)*parseFloat(m[5]);
+    }
+  }
+  return consumed===s.length?c:null;
+}
+function fracOrDec(n,d){ // exact fraction when integer, else decimal
+  if(Math.abs(n-Math.round(n))<1e-9&&Math.abs(d-Math.round(d))<1e-9)return frac(Math.round(n),Math.round(d));
+  return fmtNum(n/d);
+}
+function polyPretty(c){return polyStr([c[2],c[1],c[0]].slice(c[2]!==0?0:1));}
+function coachSolveEq(lhs,rhs){
+  var Lp=parsePoly(lhs),Rp=parsePoly(rhs);
+  if(!Lp||!Rp)return null;
+  var a=Lp[2]-Rp[2],b=Lp[1]-Rp[1],c=Lp[0]-Rp[0];
+  var moved=(Rp[0]!==0||Rp[1]!==0||Rp[2]!==0);
+  var head="🧮 <b>Solving "+esc(lhs)+" = "+esc(rhs)+"</b><br><br>";
+  if(moved)head+="Move everything to one side: <b>"+polyPretty([c,b,a])+" = 0</b><br><br>";
+  if(a===0&&b===0)return head+(Math.abs(c)<1e-9?"Every x works — the two sides are identical. <b>All real numbers.</b>":"That simplifies to "+fmtNum(c)+" = 0, which is false. <b>No solution.</b>");
+  if(a===0){
+    var x=-c/b;
+    return head+"Isolate x:<br>"+fmtNum(b)+"x = "+fmtNum(-c)+" <span class='sub'>(subtract "+fmtNum(c)+" from both sides)</span><br><b>x = "+fracOrDec(-c,b)+"</b> <span class='sub'>(divide by "+fmtNum(b)+")</span><br><br>Check it by plugging back in — 10 seconds, catches everything.";
+  }
+  var D=b*b-4*a*c;
+  var out=head+"This is a quadratic with a = "+fmtNum(a)+", b = "+fmtNum(b)+", c = "+fmtNum(c)+".<br>Discriminant: D = b² − 4ac = "+fmtNum(b*b)+" − "+fmtNum(4*a*c)+" = <b>"+fmtNum(D)+"</b><br><br>";
+  if(D<0){
+    var re2=fracOrDec(-b,2*a),im=Math.sqrt(-D)/(2*Math.abs(a));
+    var imS=Math.abs(im-Math.round(im))<1e-9?String(Math.round(im)):fmtNum(im);
+    return out+"D &lt; 0 → no real solutions. Two complex conjugate roots:<br><b>x = "+re2+" ± "+imS+"i</b>";
+  }
+  var sq=Math.sqrt(D);
+  if(Math.abs(sq-Math.round(sq))<1e-9){
+    sq=Math.round(sq);
+    var r1=fracOrDec(-b+sq,2*a),r2=fracOrDec(-b-sq,2*a);
+    return out+"√D = "+sq+" (perfect square → it factors!)<br>x = (−b ± √D)/2a = ("+fmtNum(-b)+" ± "+sq+")/"+fmtNum(2*a)+"<br><b>x = "+r1+"  or  x = "+r2+"</b>";
+  }
+  var d1=(-b+sq)/(2*a),d2=(-b-sq)/(2*a);
+  return out+"√"+fmtNum(D)+" isn't a whole number, so leave it exact:<br><b>x = ("+fmtNum(-b)+" ± √"+fmtNum(D)+")/"+fmtNum(2*a)+"</b><br>≈ "+fmtNum(d1)+" or "+fmtNum(d2);
+}
+function coachFactor(s){
+  var c=parsePoly(s);
+  if(!c)return null;
+  var a=c[2],b=c[1],cc=c[0];
+  if(a===0)return "That's linear — nothing to factor beyond a GCF. Did you mean an x² expression?";
+  if(a===1){
+    var p,q,found=null;
+    for(p=-60;p<=60;p++){if(p===0&&cc!==0)continue;q=(p===0)?0:cc/p;
+      if(cc===0){if(p===0){found=[0,b];break;}continue;}
+      if(q===Math.round(q)&&p+q===b){found=[p,q];break;}}
+    if(cc===0)return "🧩 <b>Factor "+esc(s)+"</b><br><br>GCF first: <b>x(x "+(b<0?"− "+(-b):"+ "+b)+")</b>. Zeros: x = 0 and x = "+fmtNum(-b)+".";
+    if(found)return "🧩 <b>Factor "+esc(s)+"</b><br><br>Hunt two numbers that multiply to "+fmtNum(cc)+" and add to "+fmtNum(b)+": that's <b>"+found[0]+"</b> and <b>"+found[1]+"</b>.<br><br><b>(x "+(found[0]<0?"− "+(-found[0]):"+ "+found[0])+")(x "+(found[1]<0?"− "+(-found[1]):"+ "+found[1])+")</b><br><br>FOIL it back to check.";
+    return "🧩 <b>"+esc(s)+"</b> doesn't factor over the integers (no pair multiplies to "+fmtNum(cc)+" and adds to "+fmtNum(b)+").<br><br>"+coachSolveEq(s,"0");
+  }
+  var m,n,p2,q2;
+  for(m=1;m<=Math.abs(a);m++){
+    if(a%m!==0)continue;n=a/m;
+    for(p2=-40;p2<=40;p2++){
+      if(p2===0){if(cc===0){}else continue;}
+      q2=(p2===0)?0:cc/p2;
+      if(cc!==0&&(q2!==Math.round(q2)))continue;
+      if(cc===0)q2=0;
+      if(m*q2+n*p2===b&&p2*q2===cc)
+        return "🧩 <b>Factor "+esc(s)+"</b><br><br>AC method: a·c = "+fmtNum(a*cc)+", target middle "+fmtNum(b)+".<br><br><b>("+(m===1?"":m)+"x "+(p2<0?"− "+(-p2):"+ "+p2)+")("+(n===1?"":n)+"x "+(q2<0?"− "+(-q2):"+ "+q2)+")</b><br><br>FOIL back to verify.";
+    }
+  }
+  return "🧩 <b>"+esc(s)+"</b> doesn't factor nicely over the integers. Quadratic formula instead:<br><br>"+coachSolveEq(s,"0");
+}
+function coachSqrt(n){
+  if(n<0)return "√ of a negative isn't real — it's imaginary: √("+n+") = "+(Math.sqrt(-n)===Math.round(Math.sqrt(-n))?Math.sqrt(-n):"√"+(-n))+"i.";
+  var k;
+  for(k=Math.floor(Math.sqrt(n));k>=1;k--)if(n%(k*k)===0)break;
+  var b=n/(k*k);
+  if(b===1)return "🌱 <b>√"+n+" = "+k+"</b> — "+n+" is a perfect square ("+k+"² = "+n+").";
+  if(k===1)return "🌱 <b>√"+n+"</b> is already as simple as it gets — "+n+" has no perfect-square factor. ≈ "+fmtNum(Math.sqrt(n))+".";
+  return "🌱 <b>Simplify √"+n+"</b><br><br>Biggest perfect square inside "+n+": <b>"+(k*k)+"</b>.<br>√"+n+" = √("+(k*k)+" · "+b+") = √"+(k*k)+" · √"+b+" = <b>"+k+"√"+b+"</b> ≈ "+fmtNum(Math.sqrt(n));
+}
+function coachLog(base,val){
+  var v;
+  if(String(val).indexOf("/")>=0){var pp=String(val).split("/");v=parseFloat(pp[0])/parseFloat(pp[1]);}
+  else v=parseFloat(val);
+  if(!(v>0))return "log of zero or a negative doesn't exist — "+base+" to ANY power is always positive. That's a domain wall, not a puzzle.";
+  var r=Math.log(v)/Math.log(base);
+  if(Math.abs(r-Math.round(r))<1e-9)return "🪵 <b>log"+sub2(base)+"("+esc(String(val))+") = "+Math.round(r)+"</b><br><br>Because "+base+sup(Math.round(r))+" = "+esc(String(val))+". A log just asks: 'the base to what power?'";
+  var qd;
+  for(qd=2;qd<=4;qd++){var num=r*qd;if(Math.abs(num-Math.round(num))<1e-9)return "🪵 <b>log"+sub2(base)+"("+esc(String(val))+") = "+frac(Math.round(num),qd)+"</b><br><br>Because "+base+sup(frac(Math.round(num),qd))+" = "+esc(String(val))+" — fractional exponents are roots.";}
+  return "🪵 <b>log"+sub2(base)+"("+esc(String(val))+") ≈ "+fmtNum(r)+"</b><br><br>Not a clean power — by change of base: ln("+esc(String(val))+")/ln("+base+").";
+}
+function coachSolve(raw){
+  var t=raw.toLowerCase().replace(/−/g,"-").replace(/²/g,"^2").replace(/³/g,"^3")
+    .replace(/\*\*/g,"^").replace(/ times /g,"*").replace(/ plus /g,"+").replace(/ minus /g,"-").replace(/ divided by /g,"/")
+    .replace(/\s+/g,"").replace(/^(cansolve|solvethis|solve|whatis|whats|calculate|compute|evaluate|simplify)[:,]?/,"").replace(/[?.!]+$/,"");
+  var fm=raw.toLowerCase().match(/factor[:\s]*([-+0-9x^.\s²³]+)/);
+  if(fm){var r1=coachFactor(fm[1].replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,""));if(r1)return r1;}
+  var sm=t.match(/^(?:sqrt|√)\(?(-?\d+)\)?$/);
+  if(sm)return coachSqrt(parseInt(sm[1],10));
+  var lm=t.match(/^log_?(\d*)\(?(\d+(?:\/\d+)?)\)?$/)||t.match(/^log_?(\d*)of(\d+(?:\/\d+)?)$/);
+  if(lm)return coachLog(lm[1]?parseInt(lm[1],10):10,lm[2]);
+  var lnm=t.match(/^ln\(?(\d+\.?\d*)\)?$/);
+  if(lnm)return "🪵 <b>ln("+lnm[1]+") ≈ "+fmtNum(Math.log(parseFloat(lnm[1])))+"</b> — ln is just log base e (e ≈ 2.718).";
+  if(t.indexOf("=")>=0&&t.indexOf("x")>=0){
+    // pull the equation out even if it's wrapped in words
+    var eqm=t.match(/([-+0-9x^.]+=[-+0-9x^.]+)/);
+    if(eqm){
+      var sides=eqm[1].split("=");
+      if(sides.length===2){var r2=coachSolveEq(sides[0],sides[1]);if(r2)return r2;}
+    }
+  }
+  if(t.indexOf("x")<0&&/\d/.test(t)){
+    var v=evalArith(t);
+    if(v!==null)return "🧮 <b>"+esc(t)+" = "+fmtNum(v)+"</b>";
+    var am=t.match(/([0-9][-+*/^0-9().√]*)/);
+    if(am){var v2=evalArith(am[1]);if(v2!==null&&/[-+*/^√]/.test(am[1]))return "🧮 <b>"+esc(am[1])+" = "+fmtNum(v2)+"</b>";}
+  }
+  return null;
+}
+
+/* ---- likely-questions bank ---- */
+var FAQ=[
+ {p:["what is a function","whats a function","define function"],a:"A <b>function</b> is a machine: every input gets exactly ONE output. f(x) = x² is a function; 'x² = 4' is an equation. Graph test: if any vertical line hits the graph twice, it's NOT a function (one input, two outputs — illegal)."},
+ {p:["vertical line test"],a:"The <b>vertical line test</b>: sweep a vertical line across the graph. If it ever crosses the curve more than once, some input has two outputs → not a function. A circle fails; a parabola opening up passes; a parabola opening sideways fails."},
+ {p:["domain and range","difference between domain and range"],a:"<b>Domain</b> = allowed inputs (x). <b>Range</b> = possible outputs (y). Two classic domain-killers: denominators can't be 0, and even-root insides must be ≥ 0. For range, picture the graph: y = x² never goes below 0, so its range is y ≥ 0."},
+ {p:["what is i","what does i mean","what is the imaginary unit"],a:"<b>i = √(−1)</b>, invented so x² = −1 has a solution. The one rule that runs everything: <b>i² = −1</b>. Powers cycle every 4: i, −1, −i, 1, repeat. 'Imaginary' is a terrible name — electrical engineers use i (they call it j) to design real circuits."},
+ {p:["imaginary and complex","complex number mean"],a:"A <b>complex number</b> is a + bi: a real part glued to an imaginary part. 3 + 2i is complex; 5 is complex too (b = 0); 4i is 'purely imaginary' (a = 0). Every number you've ever used lives inside the complex numbers."},
+ {p:["divide by zero","division by zero"],a:"Division asks 'what times the bottom gives the top?' — and NOTHING times 0 gives 6, so 6/0 has no answer. And 0/0 is worse: EVERYTHING times 0 gives 0, so there's no single answer. That's why denominators = 0 are banned and create vertical asymptotes."},
+ {p:["flip the inequality","flip the sign","when do i flip"],a:"Flip the inequality symbol exactly when you <b>multiply or divide both sides by a negative</b>. Why: 2 &lt; 5 is true, but ×(−1) gives −2 vs −5, and −2 &gt; −5. Adding/subtracting anything, or ×/÷ by a positive: no flip."},
+ {p:["extraneous solution","extraneous"],a:"An <b>extraneous solution</b> pops out of correct algebra but fails the ORIGINAL equation. Squaring both sides and multiplying by variable expressions can create them. √x = −3 → x = 9, but √9 = 3 ≠ −3. Fake. The check step isn't politeness — it's part of the method (and Missouri's EOC loves testing it)."},
+ {p:["what is the discriminant","discriminant do"],a:"The <b>discriminant</b> D = b² − 4ac lives under the radical in the quadratic formula. It predicts solutions without solving: D &gt; 0 → two real roots; D = 0 → one repeated root; D &lt; 0 → two complex conjugate roots. Perfect square D → it factors nicely."},
+ {p:["how many solutions does a quadratic"],a:"Always <b>2, counting everything</b> (Fundamental Theorem of Algebra). On the real line: D &gt; 0 → two, D = 0 → one repeated, D &lt; 0 → zero real (two complex). Compute D = b² − 4ac and read it off."},
+ {p:["vertex form","standard form parabola","difference between vertex and standard"],a:"<b>Standard:</b> y = ax² + bx + c (c is the y-intercept). <b>Vertex:</b> y = a(x − h)² + k (vertex at (h, k), read instantly). Convert standard → vertex by completing the square, or h = −b/2a then k = f(h). Same parabola, different outfits."},
+ {p:["axis of symmetry"],a:"The <b>axis of symmetry</b> is the vertical mirror line through the vertex: x = −b/(2a). Every parabola point has a twin across it — which is why the vertex sits exactly halfway between the two x-intercepts."},
+ {p:["what is foil","how do i foil"],a:"<b>FOIL</b> = First, Outer, Inner, Last — the four multiplications in (a+b)(c+d). (x+3)(x−2) = x² −2x +3x −6 = x² + x − 6. It's just the distributive property twice; for bigger products, 'every term times every term.'"},
+ {p:["gcf and lcm","difference between gcf and lcm"],a:"<b>GCF</b> = biggest thing that divides INTO both (used to factor OUT). <b>LCM</b> = smallest thing both divide into (used for common denominators). For 12 and 18: GCF 6, LCM 36. For polynomials, same idea with factors."},
+ {p:["what is slope","find slope"],a:"<b>Slope</b> = rise/run = (y₂−y₁)/(x₂−x₁) — how much y changes per step of x. Positive climbs, negative falls, 0 is flat, undefined is vertical. In y = mx + b, m IS the slope."},
+ {p:["parallel and perpendicular","perpendicular slope"],a:"<b>Parallel</b> lines: same slope, never meet. <b>Perpendicular</b>: slopes are negative reciprocals — m and −1/m (their product is −1). Slope 2/3 → perpendicular slope −3/2."},
+ {p:["interval notation"],a:"<b>Interval notation</b> compresses inequalities: x &gt; 3 → (3, ∞); −2 ≤ x &lt; 5 → [−2, 5). Round bracket = not included, square = included. Infinity ALWAYS gets a round bracket. 'Or' statements use ∪: x &lt; 1 or x ≥ 4 → (−∞, 1) ∪ [4, ∞)."},
+ {p:["order of operations","pemdas"],a:"<b>PEMDAS</b>, but know the fine print: Multiplication/Division are ONE level (left to right), same for Addition/Subtraction. 8 ÷ 2 · 4 = 16, not 1. And exponents before negation: −3² = −9, but (−3)² = 9. That parentheses distinction causes half of all sign errors."},
+ {p:["negative exponent"],a:"A <b>negative exponent</b> means reciprocal, never negative value: 2⁻³ = 1/2³ = 1/8. x⁻² = 1/x². Flip it across the fraction bar and the exponent turns positive. 5⁻¹ = 1/5 — that's it."},
+ {p:["zero exponent","power of zero","anything to the 0"],a:"Anything (except 0) to the <b>0 power is 1</b>. Why: x³/x³ = 1, but subtracting exponents gives x⁰. So x⁰ = 1 keeps the rules consistent. It's not 'nothing' — it's an empty product, which is 1."},
+ {p:["fractional exponent","rational exponent mean"],a:"<b>b^(m/n)</b> = (ⁿ√b)ᵐ: denominator = root, numerator = power. 27^(2/3) = (∛27)² = 3² = 9. Take the root FIRST — smaller numbers, fewer mistakes. And b^(−m/n) just adds a reciprocal flip."},
+ {p:["rationalize the denominator","rationalize"],a:"<b>Rationalizing</b> clears roots from the bottom by multiplying by a clever form of 1. 1/√2 · (√2/√2) = √2/2. For binomial bottoms like 1/(3−√2), multiply by the conjugate (3+√2)/(3+√2) — the middle terms cancel and the bottom goes rational."},
+ {p:["what is e","eulers number"],a:"<b>e ≈ 2.71828…</b> is the natural growth constant: what $1 becomes after a year of 100% interest compounded continuously. It shows up anywhere growth is proportional to size — populations, radioactive decay, interest. ln means log base e."},
+ {p:["ln and log","difference between ln and log"],a:"<b>log</b> (no base shown) = base 10. <b>ln</b> = base e ≈ 2.718. Same machine, different base: log(1000) = 3, ln(e²) = 2. Every log rule works identically for both."},
+ {p:["log of a negative","log of zero"],a:"<b>Doesn't exist</b> (in real numbers). log_b(x) asks 'b to what power gives x?' — but a positive base to ANY power stays positive. So log arguments must be &gt; 0, which is why log equations demand an extraneous-solution check."},
+ {p:["change of base"],a:"<b>Change of base:</b> log_b(x) = log(x)/log(b) = ln(x)/ln(b). It's how you compute log₇(20) on a calculator: log(20)/log(7) ≈ 1.539. Any base works as long as top and bottom match."},
+ {p:["what is an asymptote","asymptote mean"],a:"An <b>asymptote</b> is a line the graph hugs but never crosses (well — horizontal ones CAN be crossed in the middle; they describe end behavior). Vertical: where the denominator dies (x = a). Horizontal: where the function levels off as x → ±∞. They're the skeleton of a rational graph."},
+ {p:["hole and asymptote","hole in the graph","removable"],a:"If a factor cancels from top AND bottom, you get a <b>hole</b> (one missing point). If it survives in the bottom, you get a <b>vertical asymptote</b> (graph explodes). (x²−9)/(x−3): the (x−3) cancels → hole at x = 3, not an asymptote."},
+ {p:["end behavior"],a:"<b>End behavior</b> = what the graph does far left and far right, and ONLY the leading term matters. Even degree: ends match (up-up if positive, down-down if negative). Odd degree: ends oppose (down-up if positive, up-down if negative). Everything in between is temporary wiggle."},
+ {p:["what is multiplicity","multiplicity mean"],a:"<b>Multiplicity</b> = how many times a zero repeats. (x−2)³(x+1): zero 2 has multiplicity 3, zero −1 has 1. Graph rule: <b>odd multiplicity crosses</b> the x-axis, <b>even touches and bounces</b>. Multiplicities sum to the degree."},
+ {p:["synthetic division and long division","when synthetic"],a:"<b>Synthetic division</b> is a shortcut that only works dividing by (x − k) — linear, leading coefficient 1. Anything else (like dividing by x² + 1 or 2x − 3) needs <b>long division</b>. When synthetic applies, it's faster and the bottom row hands you the quotient + remainder."},
+ {p:["remainder theorem"],a:"<b>Remainder Theorem:</b> dividing f(x) by (x − k) leaves remainder f(k). So don't divide — just evaluate! And its twin, the <b>Factor Theorem</b>: f(k) = 0 ⟺ (x − k) is a factor. One substitution can prove a factor."},
+ {p:["arithmetic and geometric","difference between arithmetic and geometric"],a:"<b>Arithmetic</b> = ADD the same d each step (3, 7, 11, …) — linear growth. <b>Geometric</b> = MULTIPLY by the same r (3, 6, 12, …) — exponential growth. Check neighbors: constant difference → arithmetic; constant ratio → geometric."},
+ {p:["infinite series","converge","infinite sum"],a:"An infinite geometric series has a finite sum exactly when <b>|r| &lt; 1</b> — each term shrinks fast enough. Then S = a₁/(1 − r). 8 + 4 + 2 + 1 + … = 8/(1 − ½) = 16. If |r| ≥ 1 the terms don't shrink and the sum blows up."},
+ {p:["permutation and combination","permutations or combinations"],a:"One question: <b>does order matter?</b> Yes → permutation P(n,k) = n!/(n−k)! (medals, passwords, rankings). No → combination C(n,k) = n!/(k!(n−k)!) (teams, pizza toppings). C is always smaller — it divides out the k! orderings."},
+ {p:["independent events","dependent events"],a:"<b>Independent</b>: one outcome doesn't change the other (coin flips) → multiply probabilities straight. <b>Dependent</b>: the first changes the pool (drawing cards without replacement) → the second fraction shifts: P(2 aces) = 4/52 · 3/51."},
+ {p:["with replacement","without replacement"],a:"<b>With replacement</b>: put it back — probabilities stay identical each draw. <b>Without replacement</b>: the pool shrinks — numerator AND denominator drop on the next draw. 'Two reds from 3R/7B': with = (3/10)², without = (3/10)(2/9)."},
+ {p:["what is expected value"],a:"<b>Expected value</b> = Σ(value × probability) — your long-run average per play. A raffle: (1/50)($60) − $2 ticket = −$0.80 per ticket. Negative EV means the game takes your money on average. It's THE tool for judging bets, games, and insurance."},
+ {p:["standard deviation"],a:"<b>Standard deviation (σ)</b> measures spread — the typical distance from the mean. Small σ: data hugs the average. Large σ: scattered. For normal data, 68% falls within 1σ, 95% within 2σ, 99.7% within 3σ."},
+ {p:["what is a z score","z score mean"],a:"A <b>z-score</b> = (x − μ)/σ counts how many standard deviations you are from the mean. z = 2 → two SDs above (top ~2.5%). Superpower: it puts different scales on one ruler, so an 84 in one class can beat a 90 in another."},
+ {p:["empirical rule","68 95"],a:"The <b>empirical rule</b> for normal data: ~68% within 1σ of the mean, ~95% within 2σ, ~99.7% within 3σ. Each middle half-band is 34%; the band from 1σ to 2σ is ~13.5%. It's the fast way to estimate percentages without a calculator."},
+ {p:["mean and median","mean or median"],a:"<b>Mean</b> = average (add, divide). <b>Median</b> = middle value. Outliers yank the mean but barely touch the median — that's why home prices are reported as medians. Skewed right → mean &gt; median."},
+ {p:["when do i complete the square","completing the square or quadratic formula","factor or formula"],a:"Priority order for ax² + bx + c = 0: <b>1)</b> Factor if it factors fast (check D — perfect square means it factors). <b>2)</b> Square-root method if there's no x-term. <b>3)</b> Completing the square if b is even (and it's how you get vertex form). <b>4)</b> Quadratic formula ALWAYS works — the reliable fallback."},
+ {p:["which method for systems","elimination or substitution"],a:"<b>Substitution</b> when a variable is already alone (y = …). <b>Elimination</b> when coefficients line up or can be scaled to opposites. <b>Graphing</b> for a rough picture. All three find the same intersection point — pick the one with the least algebra."},
+ {p:["composition order","fog and gof"],a:"<b>f(g(x)) works inside-out</b>: g fires first, f eats its output. And f∘g ≠ g∘f in general — order matters like socks and shoes. With f(x) = 2x+1, g(x) = x²: f(g(3)) = f(9) = 19 but g(f(3)) = g(7) = 49."},
+ {p:["what is an inverse function","inverse function mean"],a:"An <b>inverse</b> undoes a function: if f sends 2 → 7, f⁻¹ sends 7 → 2, and f⁻¹(f(x)) = x. Find it: swap x and y, re-solve for y. Graphs mirror over y = x. Warning: f⁻¹ is NOT 1/f — that notation is a trap."},
+ {p:["how does this app work","how do i use this","where do i start"],a:"The loop: <b>🔬 Diagnostic</b> maps your level → <b>Home</b> always shows your best next move → each skill goes <b>📖 Learn → ⚡ Quick check → 🥊 Practice</b> → <b>🧪 Labs</b> and <b>⚖️ Justify It</b> make it stick → <b>📝 Mock EOC</b> proves it. The engine adapts to you automatically.<br><br><span class='qchip' onclick=\"startDiag()\">🔬 Start the Diagnostic</span>"},
+ {p:["how do streaks work","how does xp work","how do levels work","how do i level up"],a:"<b>XP</b>: correct answers pay 10× the difficulty level (hints cost 3). <b>Combos</b>: 5-in-a-row = ×2 XP, 10 = ×3. <b>Streak</b> 🔥 = days in a row with at least one answer. <b>Levels</b> climb from Rookie to Math Immortal. Daily quests pay +50 XP. Beasts pay 60. Labs pay up to 90."},
+ {p:["what is beast mode"],a:"<b>🐲 Beast Mode</b> = multi-topic problems with no label telling you which chapter they're from — Vieta's tricks, error-hunting, extraneous traps, optimization. Unlocks when 3 units hit 60% mastery. 60 XP per kill. It exists because real tests don't announce the topic."},
+ {p:["what is mastery","how is mastery calculated"],a:"Each skill's <b>mastery %</b> blends accuracy, difficulty, and consistency — one lucky answer can't max it (caps until you've done enough reps), and it <b>decays if you ghost a skill</b>, which feeds the 🔁 Review queue. 90%+ = Mastered, 97%+ = Elite. That's real learning science: spaced retrieval."},
+ {p:["reset my progress","start over"],a:"📊 Stats → scroll to <b>Danger Zone</b> → Reset ALL progress. It wipes XP, mastery, badges, everything on this device. No undo — be sure."},
+ {p:["add api key","connect claude","get the full tutor","api key"],a:"Tap <b>⚙️ Settings</b> up top in this chat (or the gold 🔑 banner). Paste a key from console.anthropic.com — it stays on this device only. Shortcut: open the file once with <b>#key=sk-ant-…</b> at the end of the address and it installs itself."},
+ {p:["im stuck","this is too hard","i cant do this","i dont get it","im confused"],a:"Stuck is a location, not a verdict — and it's exactly where learning happens. Do this: <b>1)</b> name the exact line where it stops making sense, <b>2)</b> hit the 📖 worked example for that skill and read the WHY under each step, <b>3)</b> retry one level easier to rebuild footing. Tell me the topic and I'll break it down right now."},
+ {p:["i hate math","math is boring","im bad at math","why do i need algebra"],a:"Fair — but 'bad at math' usually means 'missing one prerequisite that made everything after feel like fog.' This app exists to find that gap and fill it. And Algebra 2 is the price of admission for engineering, game dev, medicine, finance, flying planes… Give me your weakest topic and 10 minutes.<br><br><span class='qchip' onclick=\"chatSend('quiz me on my weakest skill')\">🎯 Find my gap</span>"},
+ {p:["how to study for a math test","study tips","how should i study"],a:"What works (proven): <b>1) Retrieval</b> — close the notes, do problems cold. <b>2) Spacing</b> — 30 min/day beats 3 hours once. <b>3) Mixing</b> — shuffle topics so you practice CHOOSING the method. <b>4) Error autopsy</b> — every miss goes in the journal and gets re-tried. What doesn't: rereading and highlighting. Mock test 3 days out, review misses, re-test."},
+ {p:["test anxiety","nervous for test"],a:"Anxiety shrinks with <b>overpreparation + simulation</b>: take Mock EOCs under real conditions until the format is boring. On test day: brain-dump formulas on scratch paper first, do easy questions first (momentum), and remember blanking on one problem ≠ failing. Breathe out longer than you breathe in — it genuinely calms the nervous system."},
+ {p:["who are you","what are you","what can you do"],a:"I'm your <b>Coach</b> — built into this app, no internet needed. I can: <b>solve equations you type</b> (try 'solve 3x+5=17' or 'x^2-5x+6=0'), <b>factor</b>, simplify <b>√</b> and <b>logs</b>, <b>quiz you for real XP</b>, explain every topic in the tree, and autopsy your mistakes. With an API key (⚙️) I upgrade into the full Claude tutor."}
+];
+function coachFAQ(t){
+  var best=null,bestScore=0,i,j;
+  for(i=0;i<FAQ.length;i++){
+    var sc=0;
+    for(j=0;j<FAQ[i].p.length;j++)if(t.indexOf(FAQ[i].p[j])>=0)sc=Math.max(sc,FAQ[i].p[j].split(" ").length*2);
+    if(sc>bestScore){bestScore=sc;best=FAQ[i];}
+  }
+  return {e:best,sc:bestScore};
+}
+
+/* ---- chat quiz: real questions, real XP, right here in chat ---- */
+function coachAsk(skid,L){
+  chatTopic=skid;chatL=L||pickLevel(skid);
+  var qo=GEN[skid](chatL);
+  chatQuiz={sk:skid,L:chatL,qo:qo};
+  var d=skillDef(skid);
+  var opts="";
+  if(qo.type==="mc"){var i;for(i=0;i<qo.choices.length;i++)opts+="<br><b>"+String.fromCharCode(65+i)+".</b> "+qo.choices[i];}
+  pushBot("🎯 <b>"+d.name+"</b> — Level "+chatL+" ("+["","Foundation","Fluency","Advanced","Beast","Elite"][chatL]+"):<br><br>"+qo.html+opts+"<br><br><span class='sub'>Type your answer"+(qo.type==="mc"?" (or just the letter)":"")+" — or say <b>hint</b>, <b>skip</b>, or <b>stop</b>.</span>",true);
+}
+function coachQuizReply(txt){
+  var t=txt.toLowerCase().replace(/^\s+|\s+$/g,""),qo=chatQuiz.qo,sk2=chatQuiz.sk,L=chatQuiz.L;
+  if(/^(stop|quit|exit|done|no more)/.test(t)){chatQuiz=null;pushBot("Quiz paused. Say <b>quiz me</b> anytime — or name any topic.",true);return;}
+  if(/^hint/.test(t)){pushBot("💡 "+(qo.hint||"Break it into steps — what's the first legal move?")+"<br><br><span class='sub'>Your answer?</span>",true);return;}
+  if(/^(skip|idk|i don'?t know|give ?up|show( me)? the answer|answer)/.test(t)){
+    chatQuiz=null;
+    pushBot("No stress — here it is:<br><br><b>Answer: "+esc(qo.type==="mc"?qo.ans:qo.ans)+"</b><br>"+(qo.expl||"")+"<br><br><span class='qchip' onclick=\"chatSend('another one')\">🎯 Another</span> <span class='qchip' onclick=\"openLesson('"+sk2+"')\">📖 Re-learn this</span>",true);
     return;
   }
-  // 3) default
-  pushBot("I'm in <b>offline coach</b> mode right now (add a Claude API key in ⚙️ Settings to unlock the full AI tutor — it can diagnose your exact mistakes and make custom examples).<br><br>Meanwhile I can still help. Try:<br>• \"why was I wrong\" after missing a question<br>• naming a topic — \"logarithms\", \"factoring\", \"asymptotes\"<br>• 🔍 Search to jump anywhere",true);
+  var input=txt,ok;
+  if(qo.type==="mc"){
+    var lm=t.match(/^\(?([a-d])\)?[.)]?$/);
+    if(lm)input=qo.choices["abcd".indexOf(lm[1])]||txt;
+    ok=(input===qo.ans)||elemEq(input,qo.ans);
+  }else ok=checkAnswer(qo,input);
+  recordAnswer(sk2,L,ok);
+  questTick(ok);
+  if(ok){addXP(10*L);}else{addXP(2);logMistake(sk2,qo,input);}
+  checkBadges();
+  chatQuiz=null;
+  if(ok){
+    SFX.ok();
+    pushBot(pick(["✅ <b>Bang. Correct.</b>","✅ <b>Clean.</b>","✅ <b>That's it.</b>","✅ <b>Beast move.</b>"])+" +"+(10*L)+" XP (this counts toward your mastery!)<br><br>"+(qo.expl||"")+"<br><br><span class='qchip' onclick=\"chatSend('another one')\">🎯 Another</span> <span class='qchip' onclick=\"chatSend('harder')\">🔥 Harder</span> <span class='qchip' onclick=\"chatSend('stop')\">✋ Done</span>",true);
+  }else{
+    SFX.bad();
+    pushBot("❌ Not this time — you said <b>"+esc(String(input).slice(0,40))+"</b>, it's <b>"+esc(qo.ans)+"</b>.<br><br>"+(qo.expl||"")+"<br><br><span class='qchip' onclick=\"chatSend('another one')\">🎯 Try another</span> <span class='qchip' onclick=\"chatSend('easier')\">🪜 Easier</span> <span class='qchip' onclick=\"openLesson('"+sk2+"')\">📖 Re-learn this</span>",true);
+  }
+}
+
+/* ---- the router ---- */
+function offlineTutor(txt){
+  var t=" "+txt.toLowerCase().replace(/[’']/g,"'").replace(/\s+/g," ").replace(/^\s+|\s+$/g,"")+" ";
+  t=t.slice(1,t.length-1);
+  // 0) mid-quiz → everything is an answer/command
+  if(chatQuiz){coachQuizReply(txt);return;}
+  // 1) follow-ups on the current topic
+  if(/^(another( one)?|again|more|next( one)?|one more)\b/.test(t)){
+    if(chatTopic){coachAsk(chatTopic,chatL);return;}
+  }
+  if(/^harder/.test(t)&&chatTopic){coachAsk(chatTopic,Math.min(5,chatL+1));return;}
+  if(/^easier/.test(t)&&chatTopic){coachAsk(chatTopic,Math.max(1,chatL-1));return;}
+  // 2) typed math → solve it with steps
+  if(/[0-9]/.test(t)&&(/=|factor|sqrt|√|log|ln\(|[-+*/^]/.test(t))){
+    var solved=coachSolve(txt);
+    if(solved){
+      pushBot(solved+"<br><br><span class='qchip' onclick=\"chatSend('quiz me on this')\">🎯 Quiz me on this kind</span>",true);
+      var tp=coachTopic(t);if(tp)chatTopic=tp.id;
+      return;
+    }
+  }
+  // 3) mistake autopsy
+  if(/(why|wrong|mistake|missed|mess|last (one|problem|question))/.test(t)&&S.lastCtx&&!S.lastCtx.ok){
+    var c=S.lastCtx,d=skillDef(c.skill);
+    chatTopic=c.skill;
+    pushBot("<b>Let's autopsy it.</b><br><br><b>Problem:</b> "+esc(c.q).slice(0,220)+"<br><b>You said:</b> "+esc(c.ur)+" · <b>Correct:</b> "+esc(c.ans)+(c.work?"<br><b>Your work:</b> "+esc(c.work).slice(0,150):"")+"<br><br><b>The fix:</b> "+c.expl+"<br><br><span class='qchip' onclick=\"chatSend('quiz me on this')\">🎯 Redemption problem</span>"+(d&&WORKED[d.id]?" <span class='qchip' onclick=\"openLesson('"+d.id+"')\">📖 Full worked example</span>":""),true);
+    return;
+  }
+  if(/(why|wrong|mistake)/.test(t)&&(!S.lastCtx||S.lastCtx.ok)){
+    pushBot(S.lastCtx?"Your last answer was actually <b>correct</b> ✅ ("+esc(S.lastCtx.ur)+"). Want a harder one on that skill?<br><br><span class='qchip' onclick=\"chatSend('harder')\">🔥 Harder</span>":"I don't see a missed problem yet — go answer a few and I'll be ready to break down any miss. Or name a topic and I'll teach it.",true);
+    if(S.lastCtx)chatTopic=S.lastCtx.skill;
+    return;
+  }
+  // 4) quiz request
+  if(/(quiz|test me|give me (a|one|some)|practice problem|problem please|try one|ask me)/.test(t)){
+    var tq=coachTopic(t);
+    if(!tq&&/weak/.test(t)){var wk=weakSkills(1);if(wk.length)tq=skillDef(wk[0].d.id);}
+    if(!tq&&chatTopic)tq=skillDef(chatTopic);
+    if(!tq){var wk2=weakSkills(1);tq=wk2.length?skillDef(wk2[0].d.id):skillDef("lin1");}
+    coachAsk(tq.id);return;
+  }
+  // 5) example request
+  if(/(example|show me how|worked|walk me through|how (do|to) (i )?(solve|do))/.test(t)){
+    var te=coachTopic(t)||(chatTopic?skillDef(chatTopic):null);
+    if(te&&WORKED[te.id]){
+      var w=WORKED[te.id],steps="",si;
+      for(si=0;si<w.steps.length;si++)steps+="<br><b>"+(si+1)+".</b> "+w.steps[si][0]+"<br><span class='sub'>"+w.steps[si][1]+"</span>";
+      chatTopic=te.id;
+      pushBot("📖 <b>"+te.name+"</b> — watch:<br><br><b>"+w.p+"</b>"+steps+"<br><br><span class='qchip' onclick=\"chatSend('quiz me on this')\">🎯 Now quiz me</span> <span class='qchip' onclick=\"openLesson('"+te.id+"')\">📖 Interactive version</span>",true);
+      return;
+    }
+  }
+  // 6) strong FAQ hit
+  var fq=coachFAQ(t);
+  if(fq.sc>=4){pushBot(fq.e.a,true);return;}
+  // 7) topic teach
+  var best=coachTopic(t);
+  if(best){
+    chatTopic=best.id;
+    var st=sk(best.id);
+    pushBot("<b>"+best.name+"</b>"+(st.att?" <span class='sub'>(your mastery: "+Math.round(st.m)+"%)</span>":"")+" — the core idea:<br><br>"+(LESSONS[best.id]||"")+"<br><br><span class='qchip' onclick=\"chatSend('show me an example')\">📖 Worked example</span> <span class='qchip' onclick=\"chatSend('quiz me on this')\">🎯 Quiz me</span> <span class='qchip' onclick=\"startPractice('"+best.id+"',true)\">🥊 Full practice</span>",true);
+    return;
+  }
+  // 8) weak FAQ hit
+  if(fq.sc>=2){pushBot(fq.e.a,true);return;}
+  // 9) greetings / thanks
+  if(/^(hi|hey|hello|yo|sup|what'?s up|good (morning|afternoon|evening))\b/.test(t)){
+    pushBot("Yo! Ready to work. Name a topic, paste an equation (try <b>solve 3x+5=17</b>), or hit a chip below. 💪",true);return;
+  }
+  if(/^(thanks|thank you|thx|ty)\b/.test(t)){pushBot("Anytime. Now go earn some XP. 😤<br><br><span class='qchip' onclick=\"chatSend('quiz me')\">🎯 Quiz me</span>",true);return;}
+  // 10) smart default
+  pushBot("I didn't catch a topic in that — but here's what I've got:<br><br>• <b>Type an equation</b> — 'solve 2x+7=15', 'x^2-5x+6=0', 'factor x^2+7x+12', 'sqrt 72', 'log2(32)'<br>• <b>Name any topic</b> — 'how do inverses work', 'what's the discriminant'<br>• <b>'quiz me'</b> — real questions, real XP, right here<br>• <b>'why was I wrong'</b> — after any miss<br><br><span class='qchip' onclick=\"chatSend('quiz me on my weakest skill')\">🎯 Quiz my weakest skill</span> <span class='qchip' onclick=\"go('search')\">🔍 Search everything</span>",true);
 }
 function chatSaveKey(){
   var k=el("keyIn"),m=el("mdlSel");
@@ -3757,9 +4124,9 @@ function renderChat(){
   view="chat";
   var btns=document.querySelectorAll(".nbtn"),bi;
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
-  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 AI Tutor</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Offline coach mode")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️ Settings</button></div>';
+  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 '+(S.chatKey?"AI Tutor":"Coach")+'</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Built-in Coach — solves equations, quizzes for XP, teaches every topic. No internet needed.")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️ Settings</button></div>';
   if(!S.chatKey&&!chatShowSettings){
-    h+='<div class="card" style="border-color:var(--gold)"><div class="row"><div style="font-size:26px">🔑</div><div class="grow"><b>Unlock the full AI tutor</b><div class="sub" style="margin-top:2px">One-time setup (parent job): add a Claude API key from console.anthropic.com. Until then, the offline coach answers from the built-in lessons.</div></div></div><button class="btn wide" style="margin-top:10px" onclick="togChatSettings()">🔑 Add API Key</button></div>';
+    h+='<div class="card" style="border-color:var(--gold)"><div class="row"><div style="font-size:26px">🔑</div><div class="grow"><b>Optional: upgrade to the full AI tutor</b><div class="sub" style="margin-top:2px">The built-in Coach already solves typed equations, quizzes you for XP, and teaches every topic — no internet needed. A Claude API key (one-time parent setup) adds free-form conversation and custom examples.</div></div></div><button class="btn wide" style="margin-top:10px" onclick="togChatSettings()">🔑 Add API Key</button></div>';
   }
   if(chatShowSettings){
     h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).<br><br><b>No-typing shortcut:</b> open this file once with <b>#key=sk-ant-…</b> added to the end of the address — the key installs itself and is scrubbed from the address bar.</div>'+
@@ -3773,21 +4140,21 @@ function renderChat(){
   }
   h+='<div class="chatwrap" id="chatLog">';
   if(!S.chat.length){
-    h+='<div class="msg bot"><div class="who">Tutor</div>Yo! I\'m your personal Algebra 2 tutor. Miss a question? I\'ll find exactly where your thinking broke. Stuck on a topic? I\'ll teach it and build you custom examples. What are we working on?</div>';
+    h+='<div class="msg bot"><div class="who">Coach</div>Yo! I\'m your Algebra 2 coach — and I work with no internet. I can:<br><br>🧮 <b>Solve equations you type</b> — try "solve 3x+5=17" or "x^2-5x+6=0"<br>🎯 <b>Quiz you right here</b> — real XP, counts toward mastery<br>📖 <b>Teach any topic</b> — "how do logs work?"<br>🔎 <b>Autopsy your misses</b> — "why was I wrong?"<br><br>What are we working on?</div>';
   }
   var i;
   for(i=0;i<S.chat.length;i++){
     var m=S.chat[i];
     if(m.r==="u")h+='<div class="msg me">'+esc(m.c)+'</div>';
-    else h+='<div class="msg bot"><div class="who">'+(S.chatKey?"Claude Tutor":"Offline Coach")+'</div>'+(m.h?m.c:fmtBot(m.c))+'</div>';
+    else h+='<div class="msg bot"><div class="who">'+(S.chatKey?"Claude Tutor":"Coach")+'</div>'+(m.h?m.c:fmtBot(m.c))+'</div>';
   }
   if(chatBusy)h+='<div class="msg bot"><div class="typing"><span></span><span></span><span></span></div></div>';
   h+='</div>';
   h+='<div style="margin-top:10px">'+
-    '<span class="qchip" onclick="chatSend(\'Why was my answer wrong on the last problem?\')">Why was I wrong?</span>'+
-    '<span class="qchip" onclick="chatSend(\'Show me a worked example of my weakest skill, then give me one to try.\')">Show me an example</span>'+
-    '<span class="qchip" onclick="chatSend(\'Explain that again, but simpler.\')">Explain simpler</span>'+
-    '<span class="qchip" onclick="chatSend(\'Quiz me: give me one problem on my weakest skill and wait for my answer.\')">Quiz me</span></div>';
+    '<span class="qchip" onclick="chatSend(\'quiz me on my weakest skill\')">🎯 Quiz me</span>'+
+    '<span class="qchip" onclick="chatSend(\'why was I wrong on the last problem?\')">🔎 Why was I wrong?</span>'+
+    '<span class="qchip" onclick="chatSend(\'show me an example\')">📖 Example</span>'+
+    '<span class="qchip" onclick="chatSend(\'solve x^2-5x+6=0\')">🧮 Solve x²−5x+6=0</span></div>';
   h+='<div class="chatbar"><input id="chatIn" placeholder="Ask anything… (e.g. how do logs work?)" autocomplete="off"><button class="btn" onclick="chatSend()">Send</button></div>';
   el("main").innerHTML=h;
   var log=el("chatLog");
