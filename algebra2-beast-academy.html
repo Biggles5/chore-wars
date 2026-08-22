@@ -4131,9 +4131,7 @@ function renderChat(){
   var btns=document.querySelectorAll(".nbtn"),bi;
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
   var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 '+(S.chatKey?"AI Tutor":"Coach")+'</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Built-in Coach — solves equations, quizzes for XP, teaches every topic. No internet needed.")+'</div></div>'+(S.chat.length?'<button class="btn sec sm" style="margin-right:6px" onclick="chatClear()">🗑 New chat</button>':'')+'<button class="btn sec sm" onclick="togChatSettings()">⚙️</button></div>';
-  if(!S.chatKey&&!chatShowSettings){
-    h+='<div class="card" style="border-color:var(--gold)"><div class="row"><div style="font-size:26px">🔑</div><div class="grow"><b>Optional: upgrade to the full AI tutor</b><div class="sub" style="margin-top:2px">The built-in Coach already solves typed equations, quizzes you for XP, and teaches every topic — no internet needed. A Claude API key (one-time parent setup) adds free-form conversation and custom examples.</div></div></div><button class="btn wide" style="margin-top:10px" onclick="togChatSettings()">🔑 Add API Key</button></div>';
-  }
+  // (API key setup lives in ⚙️ Settings — no banner cluttering the chat)
   if(chatShowSettings){
     h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).<br><br><b>No-typing shortcut:</b> open this file once with <b>#key=sk-ant-…</b> added to the end of the address — the key installs itself and is scrubbed from the address bar.</div>'+
       '<input id="keyIn" class="ansin" type="password" placeholder="sk-ant-…" value="'+esc(S.chatKey)+'">'+
