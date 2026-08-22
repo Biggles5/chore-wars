@@ -501,29 +501,57 @@ function radioGo(){
   RADIO.start(b.value);
   togMusicMenu();
 }
+var RADIO_STATIONS=[
+ ["🔥 Today's Hip-Hop","hip hop hits"],
+ ["😈 Phonk","phonk"],
+ ["🎧 Lo-fi Beats","lofi beats"],
+ ["🎤 Pop Hits","pop hits"],
+ ["💪 Rap Workout","workout rap"],
+ ["🎮 Gaming OSTs","video game music"],
+ ["🤠 Country","country hits"],
+ ["🤘 Rock Anthems","rock anthems"],
+ ["🎸 Classic Rock","classic rock"],
+ ["🎷 R&B Vibes","rnb slow jams"],
+ ["🪩 EDM / Dance","edm bangers"],
+ ["⚔️ Anime Openings","anime opening"],
+ ["🎬 Epic Movie Scores","epic movie soundtrack"],
+ ["🙏 Worship","christian worship"],
+ ["🌴 Reggaeton","reggaeton"],
+ ["🇰🇷 K-Pop","kpop hits"],
+ ["🎺 Smooth Jazz","smooth jazz"],
+ ["🎻 Classical Focus","classical study music"]
+];
+function musicPick(){
+  var sel=document.getElementById("musicSel");
+  if(!sel||sel.value==="")return;
+  var v=sel.value;
+  if(v.indexOf("syn:")===0){MUSIC.set(parseInt(v.slice(4),10));togMusicMenu();return;}
+  var st=RADIO_STATIONS[parseInt(v.slice(3),10)];
+  if(st){RADIO.start(st[1],st[0]);togMusicMenu();}
+}
+function musicOff(){MUSIC.set(0,true);RADIO.stop(true);toast("🔇 Music off");togMusicMenu();}
 function togMusicMenu(){
   var ex=document.getElementById("mmenu");
   if(ex){ex.parentNode.removeChild(ex);return;}
   var d=document.createElement("div");
   d.id="mmenu";d.className="mmenu";
-  var h='<div class="msec">🎵 Real Music — 30s previews</div>',i;
-  var PRESETS=[["🔥","Hip-Hop","hip hop hits"],["😈","Phonk","phonk"],["🎧","Lo-fi","lofi beats"],["🤘","Rock","rock anthems"],["🤠","Country","country hits"],["🕹️","Gaming","video game music"]];
-  h+='<div style="margin-bottom:6px">';
-  for(i=0;i<PRESETS.length;i++)
-    h+='<span class="qchip" style="margin:2px 3px 2px 0" onclick="RADIO.start(\''+PRESETS[i][2]+'\',\''+PRESETS[i][1]+'\');togMusicMenu()">'+PRESETS[i][0]+' '+PRESETS[i][1]+'</span>';
-  h+='</div>';
-  h+='<div class="row" style="gap:6px;margin-bottom:4px"><input id="radioTerm" class="ansin" style="padding:8px 10px;font-size:13px" placeholder="Any artist or song…" onkeydown="if(event.key===\'Enter\')radioGo()"><button class="btn sm" onclick="radioGo()">▶</button></div>';
+  var i,h='<div class="msec">🎵 Study Music</div>';
+  h+='<select id="musicSel" class="ansin" style="padding:10px;font-size:14px;width:100%" onchange="musicPick()">';
+  h+='<option value="">— Pick a station —</option>';
+  h+='<optgroup label="🔥 Popular · 30s previews (internet)">';
+  for(i=0;i<RADIO_STATIONS.length;i++)h+='<option value="it:'+i+'">'+RADIO_STATIONS[i][0]+'</option>';
+  h+='</optgroup><optgroup label="🎹 Synth beats (work offline)">';
+  for(i=1;i<MUSIC.list.length;i++)h+='<option value="syn:'+i+'"'+(MUSIC.cur()===i&&!RADIO.playing()?" selected":"")+'>'+MUSIC.list[i].ic+' '+MUSIC.list[i].name+'</option>';
+  h+='</optgroup></select>';
+  h+='<div class="msec" style="margin-top:10px">🔍 Or search any artist / song</div>';
+  h+='<div class="row" style="gap:6px;margin-bottom:6px"><input id="radioTerm" class="ansin" style="padding:9px 10px;font-size:13.5px" placeholder="e.g. Morgan Wallen…" onkeydown="if(event.key===\'Enter\')radioGo()"><button class="btn sm" onclick="radioGo()">▶</button></div>';
   h+='<div id="npRow" style="font-size:12.5px;padding:2px 2px 6px"></div>';
-  if(RADIO.playing())h+='<div class="row" style="gap:6px;margin-bottom:4px"><button class="btn sec sm grow" onclick="RADIO.next();">⏭ Next song</button><button class="btn sec sm grow" onclick="RADIO.stop();togMusicMenu()">⏹ Stop</button></div>';
-  h+='<div class="sub" style="font-size:10px;margin-bottom:8px">Official previews via iTunes Search · needs internet</div>';
-  h+='<div class="msec">🎹 Synth Stations — work offline</div>';
-  for(i=0;i<MUSIC.list.length;i++){
-    var s=MUSIC.list[i];
-    h+='<div class="mrow'+(MUSIC.cur()===i&&!RADIO.playing()?" on":"")+'" onclick="MUSIC.set('+i+');togMusicMenu()">'+s.ic+'  '+s.name+(MUSIC.cur()===i&&!RADIO.playing()?' <span style="float:right">✓</span>':'')+'</div>';
+  if(RADIO.playing()||MUSIC.playing()){
+    h+='<div class="row" style="gap:6px;margin-bottom:6px">'+(RADIO.playing()?'<button class="btn sec sm grow" onclick="RADIO.next()">⏭ Next</button>':'')+'<button class="btn sec sm grow" onclick="musicOff()">🔇 Off</button></div>';
   }
+  h+='<div class="sub" style="font-size:10px">Song previews are official 30-second clips via iTunes Search (free). Synth beats work with no internet.</div>';
   d.innerHTML=h;
   document.body.appendChild(d);
-  // show now-playing immediately if the radio is live
   if(RADIO.playing()){var np=document.getElementById("npRow");if(np)np.innerHTML="▶ <b>Radio playing…</b>";}
 }
 
