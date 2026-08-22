@@ -3694,15 +3694,26 @@ function chatSend(preset){
   if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
   S.tutorMsgs++;save();checkBadges();
   chatBusy=true;renderChat();
-  if(S.chatKey)callClaude();
+  if(S.chatKey)callClaude(txt);
   else setTimeout(function(){offlineTutor(txt);},450);
 }
+/* if the API fails for any reason, the built-in Coach answers instead */
+var coachNotice=null;
+function apiFallback(userTxt,reason){
+  coachNotice="<div class='sub' style='margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)'>⚠️ "+reason+" — the built-in Coach has you covered: <span class='qchip' onclick=\"openTutorSettings()\">⚙️ Fix key</span> <span class='qchip' onclick=\"useCoachOnly()\">Use Coach only</span></div>";
+  offlineTutor(userTxt);
+}
+function useCoachOnly(){
+  S.chatKey="";save();renderChat();
+  toast("🤖 Built-in Coach mode — fully working, no key needed");
+}
 function pushBot(html,isHtml){
+  if(coachNotice&&isHtml){html=coachNotice+html;coachNotice=null;}
   S.chat.push({r:"a",c:html,h:isHtml?1:0});
   if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
   chatBusy=false;save();renderChat();
 }
-function callClaude(){
+function callClaude(userTxt){
   var msgs=[],i,hist=S.chat.slice(-12);
   for(i=0;i<hist.length;i++)msgs.push({role:hist[i].r==="u"?"user":"assistant",content:hist[i].c});
   var headers={
@@ -3720,9 +3731,8 @@ function callClaude(){
     .then(function(r){return r.json();})
     .then(function(j){
       if(j.error){
-        var msg="⚠️ "+(j.error.message||"API error");
-        if(j.error.type==="authentication_error")msg+="\n\nCheck your API key in ⚙️ Settings (it should start with sk-ant-).";
-        pushBot(msg);return;
+        var why=j.error.type==="authentication_error"?"Your API key looks invalid":(j.error.type==="rate_limit_error"?"Claude is rate-limited right now":(j.error.type==="overloaded_error"?"Claude is overloaded right now":"API error: "+(j.error.message||"").slice(0,60)));
+        apiFallback(userTxt,why);return;
       }
       if(j.stop_reason==="refusal"){pushBot("I can't help with that one. Let's get back to the math — what are you working on?");return;}
       var t="",k;
@@ -3730,7 +3740,7 @@ function callClaude(){
       pushBot(t||"(empty response — try rephrasing)");
     })
     .catch(function(e){
-      pushBot("⚠️ Couldn't reach the tutor ("+e.message+"). Check your internet connection — or I can still help offline: try 'why was I wrong' or name a topic.");
+      apiFallback(userTxt,"Couldn't reach Claude (no internet?)");
     });
 }
 /* ============================================================
@@ -4120,7 +4130,12 @@ function offlineTutor(txt){
   }
   // 8) weak FAQ hit
   if(fq.sc>=2){pushBot(fq.e.a,true);return;}
-  // 9) greetings / thanks
+  // 9) bare "help" → friendly menu
+  if(/^(help|help me|i need help|idk|what can you do|what do i do)[?!. ]*$/.test(t)){
+    pushBot("I got you. Pick a lane:<br><br><span class='qchip' onclick=\"chatSend('quiz me on my weakest skill')\">🎯 Quiz my weakest skill</span> <span class='qchip' onclick=\"chatSend('why was I wrong on the last problem?')\">🔎 Break down my last miss</span> <span class='qchip' onclick=\"chatSend('show me an example')\">📖 Show me an example</span><br><br>Or just type it: an equation (<b>solve 3x+5=17</b>), a topic (<b>how do logs work</b>), or a feeling (<b>I'm stuck on factoring</b>).",true);
+    return;
+  }
+  // 10) greetings / thanks
   if(/^(hi|hey|hello|yo|sup|what'?s up|good (morning|afternoon|evening))\b/.test(t)){
     pushBot("Yo! Ready to work. Name a topic, paste an equation (try <b>solve 3x+5=17</b>), or hit a chip below. 💪",true);return;
   }
