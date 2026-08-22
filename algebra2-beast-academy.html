@@ -400,7 +400,7 @@ function blankState(){
     daily:{date:"", xp:0, goal:100, quests:{}},
     beastWins:0, blitzBest:0,
     sessionCorrectRow:0, lastCtx:null,
-    labs:{}, comboBest:0,
+    labs:{}, comboBest:0, justify:{},
     chat:[], chatKey:"", chatModel:"claude-opus-5", tutorMsgs:0
   };
 }
@@ -2041,6 +2041,66 @@ var LABS=[
 ];
 function labById(id){var i;for(i=0;i<LABS.length;i++)if(LABS[i].id===id)return LABS[i];return null;}
 
+/* ============================================================
+   JUSTIFY IT — "explain your answer" mode. A full solution is
+   revealed line by line; the student must name the property or
+   move that justifies EACH step. Self-explanation is the
+   strongest known way to cement mathematical reasoning.
+   lines[i] → lines[i+1] is justified by just[i], explained by why[i].
+   ============================================================ */
+var JUST_POOL=["Distributive property","Combine like terms","Addition property of equality","Subtraction property of equality","Multiplication property of equality","Division property of equality","Zero Product Property","Square Root Property (±)","Factoring a trinomial","Difference of squares","Factoring a perfect square trinomial","Completing the square","Squaring both sides","Definition of absolute value (two cases)","Definition of logarithm","Product rule for logarithms","One-to-one property of exponents","Rewrite with a common base","i² = −1","Multiply by the LCD","Check for extraneous solutions","Domain of a logarithm","Elimination (add the equations)","Substitution","Definition of inverse (swap x and y)","Replace f(x) with y (notation)","Synthetic division","Factor Theorem"];
+var JUSTIFY=[
+ {id:"j_lin",unit:"lin",ic:"📏",name:"Anatomy of a Linear Solve",
+  lines:["3(x − 2) + 4 = 13","3x − 6 + 4 = 13","3x − 2 = 13","3x = 15","x = 5"],
+  just:["Distributive property","Combine like terms","Addition property of equality","Division property of equality"],
+  why:["The 3 multiplies BOTH terms inside the parentheses.","−6 + 4 = −2: constants merge into one term.","Adding 2 to both sides keeps the equation balanced while isolating the x-term.","Dividing both sides by 3 finishes the isolation."]},
+ {id:"j_abs",unit:"lin",ic:"↔️",name:"Absolute Value, Case by Case",
+  lines:["|x − 3| = 7","x − 3 = 7   or   x − 3 = −7","x = 10   or   x = −4"],
+  just:["Definition of absolute value (two cases)","Addition property of equality"],
+  why:["'Distance 7 from zero' means the inside is either 7 or −7 — that's what absolute value MEANS.","Add 3 to both sides in each case."]},
+ {id:"j_quad",unit:"quad",ic:"🎯",name:"Why Factoring Works",
+  lines:["x² − 5x = −6","x² − 5x + 6 = 0","(x − 2)(x − 3) = 0","x − 2 = 0   or   x − 3 = 0","x = 2   or   x = 3"],
+  just:["Addition property of equality","Factoring a trinomial","Zero Product Property","Addition property of equality"],
+  why:["Add 6 to both sides — factoring only helps when one side is ZERO.","Two numbers multiplying to +6, adding to −5: that's −2 and −3.","If a product equals zero, at least one factor MUST be zero. This is the license to split.","Add 2 (or 3) to both sides of each mini-equation."]},
+ {id:"j_cts",unit:"quad",ic:"⬛",name:"Completing the Square, Justified",
+  lines:["x² + 8x − 9 = 0","x² + 8x = 9","x² + 8x + 16 = 25","(x + 4)² = 25","x + 4 = ±5","x = 1   or   x = −9"],
+  just:["Addition property of equality","Completing the square","Factoring a perfect square trinomial","Square Root Property (±)","Subtraction property of equality"],
+  why:["Move the constant out of the way first.","Add (8/2)² = 16 to BOTH sides — the number that makes the left side a perfect square.","x² + 8x + 16 is exactly (x + 4)².","A square equals 25 → the thing squared is 5 or −5. Both roots, always.","Subtract 4: x = −4 + 5 or −4 − 5."]},
+ {id:"j_cplx",unit:"cplx",ic:"🌀",name:"Complex Multiplication Under the Hood",
+  lines:["(2 + 3i)(4 − i)","8 − 2i + 12i − 3i²","8 + 10i − 3i²","8 + 10i + 3","11 + 10i"],
+  just:["Distributive property","Combine like terms","i² = −1","Combine like terms"],
+  why:["FOIL is just distribution: every term times every term.","−2i + 12i = 10i.","THE defining fact of i: i² = −1, so −3i² = +3.","8 + 3 = 11. Standard a + bi form."]},
+ {id:"j_rat",unit:"rat",ic:"➗",name:"Clearing Fractions Legally",
+  lines:["3/x + 1/2 = 2","6 + x = 4x","6 = 3x","x = 2"],
+  just:["Multiply by the LCD","Subtraction property of equality","Division property of equality"],
+  why:["Multiply EVERY term by 2x: (3/x)(2x) = 6, (1/2)(2x) = x, 2(2x) = 4x. One move kills all fractions.","Subtract x from both sides.","Divide by 3 — and note x = 2 doesn't zero any original denominator, so it's valid."]},
+ {id:"j_rad",unit:"rad",ic:"🌱",name:"The Radical Equation Trap",
+  lines:["√(x + 7) = x + 1","x + 7 = x² + 2x + 1","0 = x² + x − 6","0 = (x + 3)(x − 2)","x = −3   or   x = 2","x = 2 only"],
+  just:["Squaring both sides","Subtraction property of equality","Factoring a trinomial","Zero Product Property","Check for extraneous solutions"],
+  why:["Squaring undoes the root — but (x+1)² = x² + 2x + 1, full FOIL.","Subtract x and 7 from both sides to set up against zero.","Product −6, sum +1: +3 and −2.","A zero product splits into cases.","x = −3 gives √4 = 2 but x + 1 = −2. 2 ≠ −2 → squaring INVENTED that root. Always test in the ORIGINAL."]},
+ {id:"j_exp",unit:"exp",ic:"🚀",name:"Same Base, Same Exponent",
+  lines:["9<sup>x</sup> = 27<sup>x − 1</sup>","3<sup>2x</sup> = 3<sup>3(x − 1)</sup>","2x = 3(x − 1)","2x = 3x − 3","x = 3"],
+  just:["Rewrite with a common base","One-to-one property of exponents","Distributive property","Subtraction property of equality"],
+  why:["9 = 3² and 27 = 3³; power of a power multiplies exponents.","Exponentials are one-to-one: equal bases with equal outputs force equal exponents.","3(x − 1) = 3x − 3.","Subtract 2x from both sides: 0 = x − 3, so x = 3."]},
+ {id:"j_log",unit:"exp",ic:"🪵",name:"Log Equation, Fully Justified",
+  lines:["log₂(x) + log₂(x − 2) = 3","log₂(x(x − 2)) = 3","x(x − 2) = 8","x² − 2x − 8 = 0","(x − 4)(x + 2) = 0","x = 4   (reject x = −2)"],
+  just:["Product rule for logarithms","Definition of logarithm","Subtraction property of equality","Factoring a trinomial","Domain of a logarithm"],
+  why:["log(a) + log(b) = log(ab) — sums of logs condense to a log of a product.","log₂(thing) = 3 means thing = 2³ = 8. A log IS an exponent.","Distribute, then subtract 8 to set the quadratic against zero.","Product −8, sum −2: −4 and +2.","log₂(−2) doesn't exist — arguments must be positive. The algebra was fine; the DOMAIN rejects it."]},
+ {id:"j_sys",unit:"sys",ic:"⚖️",name:"Elimination, Move by Move",
+  lines:["x + 2y = 8   and   3x − 2y = 8","4x = 16","x = 4","4 + 2y = 8","2y = 4","y = 2"],
+  just:["Elimination (add the equations)","Division property of equality","Substitution","Subtraction property of equality","Division property of equality"],
+  why:["+2y and −2y are opposites — adding the equations cancels y. (Legal because we're adding equal things to equal things.)","Divide both sides by 4.","Put x = 4 back into the first equation.","Subtract 4 from both sides.","Divide by 2. Solution: (4, 2)."]},
+ {id:"j_inv",unit:"fun",ic:"🔄",name:"Building an Inverse, Justified",
+  lines:["f(x) = 3x − 6","y = 3x − 6","x = 3y − 6","x + 6 = 3y","y = (x + 6)/3"],
+  just:["Replace f(x) with y (notation)","Definition of inverse (swap x and y)","Addition property of equality","Division property of equality"],
+  why:["Pure notation — y and f(x) are the same thing.","An inverse reverses inputs and outputs — swapping x and y IS that reversal, written in algebra.","Add 6 to both sides to free the y-term.","Divide by 3. This y is f⁻¹(x)."]},
+ {id:"j_poly",unit:"poly",ic:"📈",name:"Cracking a Cubic",
+  lines:["f(x) = x³ − 2x² − 5x + 6,   test x = 1","f(1) = 0, so (x − 1) is a factor","f(x) = (x − 1)(x² − x − 6)","f(x) = (x − 1)(x − 3)(x + 2)","Zeros: x = 1, 3, −2"],
+  just:["Factor Theorem","Synthetic division","Factoring a trinomial","Zero Product Property"],
+  why:["f(k) = 0 ⟺ (x − k) divides f. One evaluation proves a factor.","Dividing by the known factor drops the degree: coefficients 1, −1, −6.","Product −6, sum −1: −3 and +2.","Each factor set to zero yields one zero. Degree 3 → exactly 3 zeros."]}
+];
+function justById(id){var i;for(i=0;i<JUSTIFY.length;i++)if(JUSTIFY[i].id===id)return JUSTIFY[i];return null;}
+
 /* ---------- diagnostic blueprint: 2 questions per unit ---------- */
 var DIAG_SPEC=[
  {sk:"lin1",L:2},{sk:"lin3",L:3},
@@ -2560,6 +2620,8 @@ var BADGES=[
  {id:"lab1",n:"Lab Technician",d:"Complete a Practice Lab",ic:"🧪",c:function(){var k,n=0;for(k in S.labs)n++;return n>=1;}},
  {id:"lab11",n:"Mad Scientist",d:"Complete all "+LABS.length+" Practice Labs",ic:"🥼",c:function(){var k,n=0;for(k in S.labs)n++;return n>=LABS.length;}},
  {id:"tutor1",n:"Smart Enough to Ask",d:"Ask the AI tutor a question",ic:"🙋",c:function(){return S.tutorMsgs>=1;}},
+ {id:"just1",n:"Reason Machine",d:"Complete a Justify It case",ic:"⚖️",c:function(){var k,n=0;for(k in S.justify)n++;return n>=1;}},
+ {id:"justAll",n:"Supreme Court",d:"100% on every Justify It case",ic:"🏛️",c:function(){var i;for(i=0;i<JUSTIFY.length;i++)if(S.justify[JUSTIFY[i].id]!==100)return false;return true;}},
  {id:"elite",n:"Top 1%",d:"Overall mastery 90%+",ic:"👑",c:function(){return overallMastery()>=90;}}
 ];
 function checkBadges(){
@@ -2987,6 +3049,9 @@ function renderHome(){
   var nlabs=0,lk;for(lk in S.labs)nlabs++;
   h+='<div class="card click" style="margin:0;border-color:var(--cyan)" onclick="go(\'battle\')"><div style="font-size:22px">🧪</div><h3>Practice Labs</h3><div class="sub">Real-world missions · '+nlabs+'/'+LABS.length+' done</div></div>';
   h+='<div class="card click" style="margin:0;border-color:#3d55b0" onclick="go(\'chat\')"><div style="font-size:22px">🤖</div><h3>AI Tutor</h3><div class="sub">Stuck? Ask anything, anytime</div></div>';
+  var njz=0,jzk;for(jzk in S.justify)njz++;
+  h+='<div class="card click" style="margin:0;border-color:var(--purple)" onclick="go(\'battle\')"><div style="font-size:22px">⚖️</div><h3>Justify It</h3><div class="sub">Defend every step · '+njz+'/'+JUSTIFY.length+'</div></div>';
+  h+='<div class="card click" style="margin:0" onclick="startReview()"><div style="font-size:22px">🔁</div><h3>Review</h3><div class="sub">Spaced repetition — keep it locked in</div></div>';
   h+='</div>';
   h+='<div class="sub center" style="margin-top:10px">Aligned to Missouri Learning Standards · Algebra II EOC · Branson, MO 🎸</div>';
   el("main").innerHTML=h;
@@ -3008,9 +3073,10 @@ function renderTree(){
         var d=u.skills[j],st=sk(d.id);
         h+='<div class="skrow" onclick="openSkill(\''+d.id+'\')"><div class="grow"><div style="font-weight:700;font-size:13.5px">'+d.name+'</div>'+mbar(st.m,st.att)+'</div>'+tierTag(st.m,st.att)+'<span class="chev">▶</span></div>';
       }
-      var ulab=null,li4;
+      var ulab=null,li4,ujust=null;
       for(li4=0;li4<LABS.length;li4++)if(LABS[li4].unit===u.id)ulab=LABS[li4];
-      h+='<div class="row" style="margin-top:10px"><button class="btn sm grow" onclick="startQuiz(\''+u.id+'\')">📚 Unit Quiz</button>'+(ulab?'<button class="btn sm blu grow" onclick="startLab(\''+ulab.id+'\')">🧪 '+ulab.ic+' Lab</button>':'')+'</div>';
+      for(li4=0;li4<JUSTIFY.length;li4++)if(JUSTIFY[li4].unit===u.id&&!ujust)ujust=JUSTIFY[li4];
+      h+='<div class="row" style="margin-top:10px"><button class="btn sm grow" onclick="startQuiz(\''+u.id+'\')">📚 Quiz</button>'+(ulab?'<button class="btn sm blu grow" onclick="startLab(\''+ulab.id+'\')">🧪 Lab</button>':'')+(ujust?'<button class="btn sm sec grow" onclick="startJustify(\''+ujust.id+'\')">⚖️ Justify</button>':'')+'</div>';
     }
     h+='</div>';
   }
@@ -3099,6 +3165,9 @@ function renderLesson(){
           h+='<div class="fb ok" style="margin-top:12px"><b>That\'s the full playbook.</b> Say the steps out loud without looking — if you can narrate it, you own it.</div>';
         }
         h+='<button class="btn wide grn" onclick="startPractice(\''+id+'\',true)">🥊 Your Turn — Real Practice</button>';
+        var lj=null,lji;
+        for(lji=0;lji<JUSTIFY.length;lji++)if(JUSTIFY[lji].unit===d.unit&&!lj)lj=JUSTIFY[lji];
+        if(lj)h+='<div class="center" style="margin-top:8px"><span class="qchip" onclick="startJustify(\''+lj.id+'\')">⚖️ Or defend every step: '+lj.name+'</span></div>';
       }
     }
     h+='</div>';
@@ -3119,6 +3188,15 @@ function renderBattle(){
   for(li3=0;li3<LABS.length;li3++){
     var Lb=LABS[li3];
     h+='<div class="skrow" onclick="startLab(\''+Lb.id+'\')"><div style="font-size:18px">'+Lb.ic+'</div><div class="grow"><div style="font-weight:700;font-size:13.5px">'+Lb.name+'</div><div class="sub" style="font-size:11px">'+unitById(Lb.unit).name+' · '+Lb.stages.length+' parts</div></div>'+labStars(Lb.id)+'<span class="chev">▶</span></div>';
+  }
+  h+='</div>';
+  // justify it (explain-your-answer training)
+  var jd=0,jk;for(jk in S.justify)jd++;
+  h+='<div class="card" style="border-color:var(--purple)"><div class="row"><div style="font-size:28px">⚖️</div><div class="grow"><h3>Justify It — Explain Your Answer</h3><div class="sub">A solution unfolds line by line; you name the property that makes each move legal. Self-explanation is the #1 way to lock in reasoning. '+jd+' / '+JUSTIFY.length+' argued.</div></div></div>';
+  var ji;
+  for(ji=0;ji<JUSTIFY.length;ji++){
+    var Jx=JUSTIFY[ji];
+    h+='<div class="skrow" onclick="startJustify(\''+Jx.id+'\')"><div style="font-size:18px">'+Jx.ic+'</div><div class="grow"><div style="font-weight:700;font-size:13.5px">'+Jx.name+'</div><div class="sub" style="font-size:11px">'+unitById(Jx.unit).name+' · '+Jx.just.length+' steps to defend</div></div>'+justStars(Jx.id)+'<span class="chev">▶</span></div>';
   }
   h+='</div>';
   h+='<div class="card '+(unlockBeast()?'beastcard':'')+'"><div class="row"><div style="font-size:28px">'+(unlockBeast()?'🐲':'🔒')+'</div><div class="grow"><h3>Beast Mode</h3><div class="sub">Multi-topic, non-routine problems: Vieta\'s formulas, error analysis, extraneous traps, optimization. '+(unlockBeast()?'Slain: '+S.beastWins:'Unlocks at 3 units ≥ 60% mastery.')+'</div></div></div>'+(unlockBeast()?'<button class="btn wide red" style="margin-top:10px" onclick="startBeast()">Enter the Arena (+60 XP per kill)</button>':'')+'</div>';
@@ -3430,6 +3508,82 @@ function labStars(id){
 }
 
 /* ============================================================
+   JUSTIFY ENGINE — reveal a solution line, then demand the reason
+   ============================================================ */
+var jz=null;
+function startJustify(id){
+  jz={id:id,step:0,correct:0,picked:-1,fb:false,finished:false,choices:null};
+  view="justify";SFX.click();renderJustify();
+}
+function jzChoices(){
+  var J=justById(jz.id),cor=J.just[jz.step],opts=[cor],pool=shuffle(JUST_POOL),i;
+  for(i=0;i<pool.length&&opts.length<4;i++)if(pool[i]!==cor)opts.push(pool[i]);
+  jz.choices=shuffle(opts);
+}
+function jzPick(i){
+  if(!jz||jz.fb)return;
+  var J=justById(jz.id),cor=J.just[jz.step];
+  jz.picked=i;jz.fb=true;
+  jz.lastOk=(jz.choices[i]===cor);
+  if(jz.lastOk){jz.correct++;addXP(8);}
+  SFX[jz.lastOk?"ok":"bad"]();
+  renderJustify();
+}
+function jzNext(){
+  var J=justById(jz.id);
+  jz.step++;jz.fb=false;jz.picked=-1;jz.choices=null;
+  if(jz.step>=J.just.length){
+    var pct=Math.round(100*jz.correct/J.just.length);
+    if(!S.justify[J.id]||S.justify[J.id]<pct)S.justify[J.id]=pct;
+    jz.finished=true;jz.pct=pct;
+    if(pct===100){addXP(30);confetti();SFX.level();}
+    save();checkBadges();
+  }
+  renderJustify();
+}
+function renderJustify(){
+  var J=justById(jz.id),u=unitById(J.unit),h,i;
+  h='<div class="row" style="margin-bottom:10px"><button class="btn sec sm" onclick="jz=null;go(\'battle\')">← Back</button><div class="grow"></div><span class="chip">'+u.ic+' '+u.name+'</span></div>';
+  if(jz.finished){
+    h+='<div class="card center hero"><div style="font-size:42px">'+(jz.pct===100?"🏛️":"⚖️")+'</div><h2>'+J.name+'</h2>';
+    h+='<div class="big" style="margin:8px 0">'+jz.pct+'%</div>';
+    h+='<div class="sub">'+jz.correct+' / '+J.just.length+' justifications named correctly'+(jz.pct===100?' — flawless reasoning, +30 bonus XP':'')+'</div></div>';
+    if(jz.pct<100)h+='<button class="btn wide" onclick="startJustify(\''+J.id+'\')">🔁 Argue It Again</button>';
+    h+='<button class="btn sec wide" style="margin-top:8px" onclick="jz=null;go(\'battle\')">Back to Battle</button>';
+    el("main").innerHTML=h;window.scrollTo(0,0);return;
+  }
+  h+='<div class="card"><h2>'+J.ic+' '+J.name+'</h2><div class="sub" style="margin-top:4px">Anyone can copy steps. You\'re going to <b>defend</b> each one — name the property that makes the move legal.</div></div>';
+  h+='<div class="card"><div class="wex">';
+  // solution lines revealed so far
+  for(i=0;i<=jz.step+1&&i<J.lines.length;i++){
+    var isNew=(i===jz.step+1);
+    h+='<div class="step'+(isNew?'':' ')+'" style="'+(isNew?'':'opacity:.8')+'"><div class="stepn">'+(i===0?"•":i)+'</div><div><div class="stepm">'+J.lines[i]+'</div>'+
+      (i>0&&i<=jz.step?'<div class="stepw">✅ '+J.just[i-1]+'</div>':'')+
+      '</div></div>';
+  }
+  h+='</div>';
+  if(!jz.choices)jzChoices();
+  h+='<div style="margin:12px 0 8px;font-weight:800;font-size:14.5px">⚖️ What justifies this last move? <span class="sub">(step '+(jz.step+1)+' of '+J.just.length+')</span></div>';
+  var cor=J.just[jz.step];
+  for(i=0;i<jz.choices.length;i++){
+    var cls="";
+    if(jz.fb){cls=jz.choices[i]===cor?"ok":(i===jz.picked?"bad":"");}
+    h+='<button class="mcbtn '+cls+'" '+(jz.fb?'':'onclick="jzPick('+i+')"')+'>'+String.fromCharCode(65+i)+'.  '+jz.choices[i]+'</button>';
+  }
+  if(jz.fb){
+    h+='<div class="fb '+(jz.lastOk?"ok":"bad")+'" style="margin-top:10px"><b>'+(jz.lastOk?"✅ Correct — that's the law being used.":"❌ It was: "+cor)+'</b><div style="margin-top:6px">'+J.why[jz.step]+'</div></div>';
+    h+='<button class="btn wide" onclick="jzNext()">'+(jz.step+1>=J.just.length?"Close the Case →":"Next Step →")+'</button>';
+  }
+  h+='</div>';
+  el("main").innerHTML=h;window.scrollTo(0,0);
+}
+function justStars(id){
+  var p=S.justify[id];
+  if(p===undefined)return '<span class="mtag t0">NEW</span>';
+  return '<span class="mtag t'+(p===100?5:(p>=75?4:(p>=50?2:1)))+'">'+p+'%</span>';
+}
+
+/* ============================================================
    SEARCH
    ============================================================ */
 var SIDX=null;
@@ -3447,6 +3601,8 @@ function buildSearch(){
   }
   for(i=0;i<LABS.length;i++)
     idx.push({l:LABS[i].ic+" Lab: "+LABS[i].name,s:"Practice Lab · "+unitById(LABS[i].unit).name,k:(LABS[i].name+" lab "+LABS[i].intro).toLowerCase(),act:"startLab('"+LABS[i].id+"')"});
+  for(i=0;i<JUSTIFY.length;i++)
+    idx.push({l:"⚖️ Justify: "+JUSTIFY[i].name,s:"Explain-your-answer · "+unitById(JUSTIFY[i].unit).name,k:(JUSTIFY[i].name+" justify explain reason property proof "+unitById(JUSTIFY[i].unit).name).toLowerCase(),act:"startJustify('"+JUSTIFY[i].id+"')"});
   idx.push({l:"🔬 Diagnostic Test",s:"Map your level across all domains",k:"diagnostic test assessment placement level",act:"startDiag()"});
   idx.push({l:"📝 Mock EOC Exam",s:"20 questions, graded like test day",k:"mock test exam eoc missouri practice test",act:"startMock()"});
   idx.push({l:"⚡ Blitz",s:"60-second speed round",k:"blitz speed timed fast round",act:"startBlitz()"});
