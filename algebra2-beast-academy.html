@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Algebra 2 Beast Academy</title>
+<!-- BUILD v9 — Coach-only chat (no API), 24-station music + search + More Like This -->
+<script>var APP_VER="v9";</script>
 <style>
 :root{
   --bg:#0b1020; --bg2:#111832; --card:#161f3d; --card2:#1c2750; --line:#28345f;
@@ -3258,7 +3260,8 @@ function renderHome(){
   h+='<div class="card click" style="margin:0;border-color:var(--purple)" onclick="go(\'battle\')"><div style="font-size:22px">⚖️</div><h3>Justify It</h3><div class="sub">Defend every step · '+njz+'/'+JUSTIFY.length+'</div></div>';
   h+='<div class="card click" style="margin:0" onclick="startReview()"><div style="font-size:22px">🔁</div><h3>Review</h3><div class="sub">Spaced repetition — keep it locked in</div></div>';
   h+='</div>';
-  h+='<div class="sub center" style="margin-top:10px">Aligned to Missouri Learning Standards · Algebra II EOC · Branson, MO 🎸</div>';
+  h+='<div class="card click" onclick="togMusicMenu()" style="margin-top:12px"><div class="row"><div style="font-size:24px">🎵</div><div class="grow"><h3>Study Music</h3><div class="sub">18 real-music stations (30s previews) + 6 offline beats + search any artist</div></div><span class="chev">▶</span></div></div>';
+  h+='<div class="sub center" style="margin-top:10px">Aligned to Missouri Learning Standards · Algebra II EOC · Branson, MO 🎸 · build '+APP_VER+'</div>';
   el("main").innerHTML=h;
 }
 
@@ -3869,8 +3872,8 @@ function doSearch(){
 }
 
 /* ============================================================
-   AI TUTOR CHAT — Claude API (student's own key, stored locally)
-   with a useful offline coach as the no-key fallback.
+   CHAT — powered entirely by the built-in Coach (no accounts, no
+   API, no internet required).
    ============================================================ */
 var chatBusy=false;
 function chatSend(preset){
@@ -4317,7 +4320,6 @@ function renderChat(){
   var btns=document.querySelectorAll(".nbtn"),bi;
   for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
   var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 Coach</h2><div class="sub">Solves equations · quizzes for XP · teaches every topic — all built in.</div></div>'+(S.chat.length?'<button id="clearBtn" class="btn sec sm" style="padding:10px 14px" onclick="chatClear()">🗑 New chat</button>':'')+'</div>';
-  // (API key setup lives in ⚙️ Settings — no banner cluttering the chat)
   h+='<div class="chatwrap" id="chatLog">';
   if(!S.chat.length){
     h+='<div class="msg bot"><div class="who">Coach</div>Yo! I\'m your Algebra 2 coach — and I work with no internet. I can:<br><br>🧮 <b>Solve equations you type</b> — try "solve 3x+5=17" or "x^2-5x+6=0"<br>🎯 <b>Quiz you right here</b> — real XP, counts toward mastery<br>📖 <b>Teach any topic</b> — "how do logs work?"<br>🔎 <b>Autopsy your misses</b> — "why was I wrong?"<br><br>What are we working on?</div>';
