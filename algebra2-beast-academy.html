@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Algebra 2 Beast Academy</title>
-<!-- BUILD v9 — Coach-only chat (no API), 24-station music + search + More Like This -->
-<script>var APP_VER="v9";</script>
+<!-- BUILD v10 — iOS audio unlock + arithmetic "5x2" support -->
+<script>var APP_VER="v10";</script>
 <style>
 :root{
   --bg:#0b1020; --bg2:#111832; --card:#161f3d; --card2:#1c2750; --line:#28345f;
@@ -413,6 +413,12 @@ var MUSIC=(function(){
   return {
     list:ST,
     cur:function(){return cur;},
+    prime:function(){ // unlock WebAudio inside a real user gesture (iOS)
+      if(!c())return;
+      if(ctx.state==="suspended")ctx.resume();
+      try{var o=ctx.createOscillator(),g=ctx.createGain();g.gain.value=0.0001;
+        o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.02);}catch(e){}
+    },
     set:function(i,quiet){
       cur=i;
       if(i>0&&typeof RADIO!=="undefined")RADIO.stop(true);
@@ -428,15 +434,27 @@ var MUSIC=(function(){
    iTunes Search API (no key, no account). Plays clips back-to-back
    like a radio. Needs internet; the synth stations stay offline. ---------- */
 var RADIO=(function(){
-  var audio=null,queue=[],idx=0,live=false,label="";
+  var audio=null,queue=[],idx=0,live=false,label="",blockedToast=false;
+  function silentWav(){ // a beat of silence, built in code — used only to unlock iOS audio
+    var n=16,by=[82,73,70,70,36+n,0,0,0,87,65,86,69,102,109,116,32,16,0,0,0,1,0,1,0,64,31,0,0,64,31,0,0,1,0,8,0,100,97,116,97,n,0,0,0],i;
+    for(i=0;i<n;i++)by.push(128);
+    var s="";for(i=0;i<by.length;i++)s+=String.fromCharCode(by[i]);
+    return "data:audio/wav;base64,"+btoa(s);
+  }
   function ensure(){
     if(!audio){
       audio=new Audio();
       audio.volume=.6;
-      audio.onended=function(){idx++;playCur();};
-      audio.onerror=function(){idx++;if(live)playCur();};
+      audio.onended=function(){if(live){idx++;playCur();}};
+      audio.onerror=function(){if(live){idx++;playCur();}};
     }
     return audio;
+  }
+  function unlock(){ // must run inside a real tap: after this, later play() calls are allowed
+    try{
+      ensure();
+      if(!live){audio.src=silentWav();var p=audio.play();if(p&&p.catch)p.catch(function(){});}
+    }catch(e){}
   }
   function search(term,cb){
     var cbName="itcb"+Math.floor(Math.random()*1e6);
@@ -468,7 +486,9 @@ var RADIO=(function(){
     ensure();
     audio.src=tr.u;
     var pr=audio.play();
-    if(pr&&pr.catch)pr.catch(function(){});
+    if(pr&&pr.catch)pr.catch(function(){
+      if(!blockedToast){blockedToast=true;toast("👆 Tap ⏭ Next in the 🎵 menu to start the sound");}
+    });
     paint(tr);
   }
   function paint(tr){
@@ -478,8 +498,10 @@ var RADIO=(function(){
     if(np)np.innerHTML=live&&tr?("▶ <b>"+esc(tr.t)+"</b><br><span class='sub'>"+esc(tr.a)+" · 30s preview</span> <span class='qchip' onclick=\"RADIO.more()\">🔁 More like this</span>"):"";
   }
   return {
+    unlock:unlock,
     start:function(term,name){
       label=name||term;
+      unlock(); // grab the audio permission NOW, while we're still inside the tap
       toast("🎵 Finding "+label+"…");
       search(term,function(res){
         if(!res||!res.length){toast("😕 No previews found — try an artist or song name (needs internet)");return;}
@@ -489,7 +511,7 @@ var RADIO=(function(){
         toast("🎵 "+label+" — official 30s previews, back to back");
       });
     },
-    next:function(){if(live){idx++;playCur();}},
+    next:function(){if(live){blockedToast=false;idx++;playCur();}},
     more:function(){
       // re-seed the radio from whoever is playing right now
       if(!curTr||!curTr.a){toast("Nothing playing yet — pick a station first");return;}
@@ -4079,6 +4101,8 @@ function coachSolve(raw){
   var t=raw.toLowerCase().replace(/−/g,"-").replace(/²/g,"^2").replace(/³/g,"^3")
     .replace(/\*\*/g,"^").replace(/ times /g,"*").replace(/ plus /g,"+").replace(/ minus /g,"-").replace(/ divided by /g,"/")
     .replace(/\s+/g,"").replace(/^(cansolve|solvethis|solve|whatis|whats|calculate|compute|evaluate|simplify)[:,]?/,"").replace(/[?.!]+$/,"");
+  // "5x2" from a phone keyboard means 5 × 2 (only when it's not an equation)
+  if(t.indexOf("=")<0)t=t.replace(/(\d)x(\d)/g,"$1*$2");
   var fm=raw.toLowerCase().match(/factor[:\s]*([-+0-9x^.\s²³]+)/);
   if(fm){var r1=coachFactor(fm[1].replace(/²/g,"^2").replace(/³/g,"^3").replace(/\s+/g,""));if(r1)return r1;}
   var sm=t.match(/^(?:sqrt|√)\(?(-?\d+)\)?$/);
@@ -4097,9 +4121,9 @@ function coachSolve(raw){
   }
   if(t.indexOf("x")<0&&/\d/.test(t)){
     var v=evalArith(t);
-    if(v!==null)return "🧮 <b>"+esc(t)+" = "+fmtNum(v)+"</b>";
+    if(v!==null)return "🧮 <b>"+esc(t.replace(/\*/g," × "))+" = "+fmtNum(v)+"</b>";
     var am=t.match(/([0-9][-+*/^0-9().√]*)/);
-    if(am){var v2=evalArith(am[1]);if(v2!==null&&/[-+*/^√]/.test(am[1]))return "🧮 <b>"+esc(am[1])+" = "+fmtNum(v2)+"</b>";}
+    if(am){var v2=evalArith(am[1]);if(v2!==null&&/[-+*/^√]/.test(am[1]))return "🧮 <b>"+esc(am[1].replace(/\*/g," × "))+" = "+fmtNum(v2)+"</b>";}
   }
   return null;
 }
@@ -4230,8 +4254,8 @@ function offlineTutor(txt){
   }
   if(/^harder/.test(t)&&chatTopic){coachAsk(chatTopic,Math.min(5,chatL+1));return;}
   if(/^easier/.test(t)&&chatTopic){coachAsk(chatTopic,Math.max(1,chatL-1));return;}
-  // 2) typed math → solve it with steps
-  if(/[0-9]/.test(t)&&(/=|factor|sqrt|√|log|ln\(|[-+*/^]/.test(t))){
+  // 2) typed math → solve it with steps ("5x2", "5 times 2" count as math too)
+  if(/[0-9]/.test(t)&&(/=|factor|sqrt|√|log|ln\(|[-+*/^×÷]|\dx\d|\d ?x ?\d|times|plus|minus|divided/.test(t))){
     var solved=coachSolve(txt);
     if(solved){
       pushBot(solved+"<br><br><span class='qchip' onclick=\"chatSend('quiz me on this')\">🎯 Quiz me on this kind</span>",true);
@@ -4348,6 +4372,18 @@ function renderChat(){
 /* ---------- init ---------- */
 (function(){
   load();
+  // iOS allows sound only after a real tap: unlock both audio engines
+  // on the very first touch anywhere, silently.
+  var primed=false;
+  function primeAudio(){
+    if(primed)return;primed=true;
+    try{MUSIC.prime();}catch(e){}
+    try{RADIO.unlock();}catch(e2){}
+    document.removeEventListener("touchend",primeAudio,true);
+    document.removeEventListener("click",primeAudio,true);
+  }
+  document.addEventListener("touchend",primeAudio,true);
+  document.addEventListener("click",primeAudio,true);
   var btns=document.querySelectorAll(".nbtn"),i;
   for(i=0;i<btns.length;i++){
     (function(b){b.onclick=function(){SFX.click();go(b.getAttribute("data-v"));};})(btns[i]);
