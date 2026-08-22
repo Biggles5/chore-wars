@@ -131,6 +131,37 @@ table.rt th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spac
 .workarea textarea{width:100%;min-height:70px;background:#0a0f24;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font-size:14px;margin-top:8px;font-family:inherit;resize:vertical}
 .workimg{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#0a0f24}
 .workpre{white-space:pre-wrap;font-size:13.5px;background:#0a0f24;border-radius:10px;padding:10px;border:1px solid var(--line)}
+/* top-bar icon buttons */
+.iconbtn{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-size:15px;padding:5px 9px;line-height:1}
+.iconbtn.on{border-color:var(--gold);background:#2a2410}
+/* combo */
+.combo{background:linear-gradient(90deg,#4a1626,#4a2c12);border:1px solid var(--orange);border-radius:999px;padding:4px 10px;font-size:12px;font-weight:900;color:var(--gold);animation:glow 1.6s infinite}
+/* search */
+.searchin{width:100%;background:#0e1530;border:2px solid var(--line);color:var(--txt);border-radius:14px;padding:13px 16px;font-size:16px;outline:none}
+.searchin:focus{border-color:var(--gold)}
+.sres{display:flex;align-items:center;gap:10px;padding:11px 10px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:10px}
+.sres:hover{background:rgba(255,255,255,.04)}
+/* labs */
+.labstage{border-left:3px solid var(--line);padding:8px 0 8px 14px;margin-left:6px}
+.labstage.done{border-color:var(--green);opacity:.75}
+.labstage.now{border-color:var(--gold)}
+.stars{color:var(--gold);letter-spacing:2px}
+/* chat */
+.chatwrap{display:flex;flex-direction:column;gap:10px}
+.msg{max-width:88%;border-radius:16px;padding:11px 14px;font-size:14px;line-height:1.6;animation:fadeIn .25s;white-space:pre-wrap;word-wrap:break-word}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,#2a3a7e,#1d2b63);border:1px solid #3d55b0}
+.msg.bot{align-self:flex-start;background:var(--card2);border:1px solid var(--line)}
+.msg.bot b{color:var(--gold)}
+.msg .who{font-size:10px;font-weight:800;color:var(--dim);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.chatbar{display:flex;gap:8px;margin-top:10px}
+.chatbar input{flex:1;background:#0e1530;border:2px solid var(--line);color:var(--txt);border-radius:12px;padding:12px 14px;font-size:15px;outline:none}
+.chatbar input:focus{border-color:var(--gold)}
+.qchip{display:inline-block;background:#12204a;border:1px solid #27408f;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;margin:3px 4px 3px 0;cursor:pointer;color:#a9c2ff}
+.qchip:hover{border-color:var(--gold)}
+.typing{display:inline-block}
+.typing span{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dim);margin:0 2px;animation:float 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
 .hidden{display:none!important}
 a{color:var(--blue)}
 @media(max-width:480px){.logo{font-size:12.5px}.pill{padding:3px 8px;font-size:10.5px;gap:3px}.topin{gap:5px;padding:8px 8px}}
@@ -142,6 +173,8 @@ a{color:var(--blue)}
   <div class="topin">
     <div class="logo">⚡ A2 BEAST ACADEMY</div>
     <div class="spacer"></div>
+    <button class="iconbtn" id="musicBtn" title="Study beats" onclick="MUSIC.cycle()">🔇</button>
+    <button class="iconbtn" title="Search" onclick="go('search')">🔍</button>
     <div class="pill" id="pillStreak"><span class="ic flame">🔥</span><span>0</span></div>
     <div class="pill" id="pillLvl"><span class="ic">🏅</span><span>Lv 1</span></div>
     <div class="pill" id="pillXp"><span class="ic">⭐</span><span>0 XP</span></div>
@@ -155,6 +188,7 @@ a{color:var(--blue)}
   <button class="nbtn" data-v="home"><span class="nic">🏠</span>Home</button>
   <button class="nbtn" data-v="tree"><span class="nic">🌳</span>Skills</button>
   <button class="nbtn" data-v="battle"><span class="nic">⚔️</span>Battle</button>
+  <button class="nbtn" data-v="chat"><span class="nic">🤖</span>Tutor</button>
   <button class="nbtn" data-v="stats"><span class="nic">📊</span>Stats</button>
   <button class="nbtn" data-v="ref"><span class="nic">📚</span>Study</button>
 </div></div>
@@ -240,6 +274,117 @@ var SFX=(function(){
   };
 })();
 
+/* ---------- study beats: procedural music engine (no audio files) ---------- */
+var MUSIC=(function(){
+  var ctx=null,master=null,noiseBuf=null,timer=null,nextBar=0,barNo=0,station=0;
+  // stations: 0 off, 1 lo-fi chill, 2 synthwave grind
+  var LOFI={bar:2.4,chords:[[53,57,60,64],[45,48,52,55],[50,53,57,60],[43,47,50,53]]};      // Fmaj7 Am7 Dm7 G7 (midi)
+  var SYNTH={bar:1.6,chords:[[45,48,52],[41,45,48],[43,47,50],[40,43,47]]};                  // Am F G Em
+  function hz(m){return 440*Math.pow(2,(m-69)/12);}
+  function c(){
+    if(!ctx){
+      try{ctx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){return null;}
+      master=ctx.createGain();master.gain.value=.5;master.connect(ctx.destination);
+      var len=ctx.sampleRate*2,b=ctx.createBuffer(1,len,ctx.sampleRate),d=b.getChannelData(0),i;
+      for(i=0;i<len;i++)d[i]=Math.random()*2-1;
+      noiseBuf=b;
+    }
+    return ctx;
+  }
+  function env(g,t,a,peak,dur){
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.linearRampToValueAtTime(peak,t+a);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  }
+  function osc(type,f,t,dur,peak,att,filt){
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type;o.frequency.value=f;
+    env(g,t,att,peak,dur);
+    if(filt){var lp=ctx.createBiquadFilter();lp.type="lowpass";lp.frequency.value=filt;o.connect(lp);lp.connect(g);}
+    else o.connect(g);
+    g.connect(master);o.start(t);o.stop(t+dur+.05);
+  }
+  function noise(t,dur,peak,hp){
+    var s=ctx.createBufferSource(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    s.buffer=noiseBuf;s.loop=true;
+    f.type=hp?"highpass":"lowpass";f.frequency.value=hp||1200;
+    env(g,t,.005,peak,dur);
+    s.connect(f);f.connect(g);g.connect(master);
+    s.start(t);s.stop(t+dur+.05);
+  }
+  function kick(t){var o=ctx.createOscillator(),g=ctx.createGain();
+    o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(40,t+.12);
+    env(g,t,.004,.5,.22);o.connect(g);g.connect(master);o.start(t);o.stop(t+.3);}
+  function bar(t){
+    var st=station===1?LOFI:SYNTH,ch=st.chords[barNo%st.chords.length],dur=st.bar,i;
+    if(station===1){ // lo-fi: warm pad, soft bass, dusty hats, vinyl crackle
+      for(i=0;i<ch.length;i++)osc("triangle",hz(ch[i]),t+.02,dur*.95,.05,.5,900);
+      osc("sine",hz(ch[0]-24),t,dur*.9,.14,.02,300);
+      kick(t);kick(t+dur/2);
+      for(i=0;i<4;i++)noise(t+i*dur/4+dur/8,.05,.025,6000);
+      noise(t,dur,.006,0); // crackle bed (lowpass)
+    }else{ // synthwave: arp + driving bass + hats
+      var seq=[0,1,2,1,0,2,1,2];
+      for(i=0;i<8;i++)osc("sawtooth",hz(ch[seq[i]]+12),t+i*dur/8,dur/8*.9,.035,.01,2500);
+      osc("square",hz(ch[0]-12),t,dur*.45,.06,.01,500);
+      osc("square",hz(ch[0]-12),t+dur/2,dur*.45,.06,.01,500);
+      kick(t);kick(t+dur/2);
+      for(i=0;i<8;i++)noise(t+i*dur/8,.03,.02,8000);
+    }
+    barNo++;
+  }
+  function tick(){
+    if(!ctx||station===0)return;
+    var st=station===1?LOFI:SYNTH;
+    while(nextBar<ctx.currentTime+.8){
+      if(nextBar<ctx.currentTime)nextBar=ctx.currentTime+.05;
+      bar(nextBar);nextBar+=st.bar;
+    }
+  }
+  function start(){
+    if(!c())return;
+    if(ctx.state==="suspended")ctx.resume();
+    nextBar=0;barNo=0;
+    if(timer)clearInterval(timer);
+    timer=setInterval(tick,300);tick();
+  }
+  function stop(){if(timer)clearInterval(timer);timer=null;}
+  return {
+    cycle:function(){
+      station=(station+1)%3;
+      var b=document.getElementById("musicBtn");
+      if(station===0){stop();if(b){b.textContent="🔇";b.className="iconbtn";}toast("🔇 Beats off");}
+      else{start();if(b){b.textContent=station===1?"🎧":"🎹";b.className="iconbtn on";}
+        toast(station===1?"🎧 Lo-fi chill — study beats on":"🎹 Synthwave grind — lock in");}
+    },
+    playing:function(){return station!==0;}
+  };
+})();
+
+/* ---------- confetti ---------- */
+function confetti(){
+  var cv=document.createElement("canvas");
+  cv.style.cssText="position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:200";
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  document.body.appendChild(cv);
+  var g=cv.getContext("2d"),parts=[],cols=["#ffb830","#ff7a2f","#3ddc84","#4d9fff","#a78bfa","#ff6bcb"],i;
+  for(i=0;i<90;i++)parts.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.3,
+    vx:(Math.random()-.5)*3,vy:2+Math.random()*4,s:4+Math.random()*5,r:Math.random()*6.28,
+    vr:(Math.random()-.5)*.3,c:cols[i%cols.length]});
+  var t0=Date.now();
+  (function frame(){
+    g.clearRect(0,0,cv.width,cv.height);
+    var j;
+    for(j=0;j<parts.length;j++){
+      var p=parts[j];p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;
+      g.save();g.translate(p.x,p.y);g.rotate(p.r);g.fillStyle=p.c;
+      g.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);g.restore();
+    }
+    if(Date.now()-t0<1800)requestAnimationFrame(frame);
+    else if(cv.parentNode)cv.parentNode.removeChild(cv);
+  })();
+}
+
 /* ---------- persistent state ---------- */
 var SKEY="a2ba_v1";
 var S=null;
@@ -254,7 +399,9 @@ function blankState(){
     tests:[],            // {date, pct, per:{unit:pct}}
     daily:{date:"", xp:0, goal:100, quests:{}},
     beastWins:0, blitzBest:0,
-    sessionCorrectRow:0
+    sessionCorrectRow:0, lastCtx:null,
+    labs:{}, comboBest:0,
+    chat:[], chatKey:"", chatModel:"claude-opus-5", tutorMsgs:0
   };
 }
 function load(){
@@ -331,7 +478,7 @@ function addXP(n){
   S.xp+=n;S.daily.xp+=n;
   var after=lvlInfo().i;
   save();paintTop();
-  if(after>before){SFX.level();toast("🎉 LEVEL UP — "+LVS[after].ic+" "+LVS[after].name+"!");}
+  if(after>before){SFX.level();confetti();toast("🎉 LEVEL UP — "+LVS[after].ic+" "+LVS[after].name+"!");}
 }
 
 /* ---------- mastery engine ---------- */
@@ -1754,6 +1901,146 @@ var BEAST=[
       expl:"A = "+P+"x − 2x² → vertex at x = "+P+"/4 = "+(P/4)+". Width = "+(P/2)+". Max area = "+(P/4)+" × "+(P/2)+" = "+(P*P/8)+" sq ft. Quadratics ARE optimization."});}
 ];
 
+/* ============================================================
+   PRACTICE LABS — guided multi-stage real-world problems
+   (Brilliant-style learn-by-doing: one scenario, built up
+   sub-question by sub-question, feedback at every stage)
+   ============================================================ */
+var LABS=[
+ {id:"lab_lin",unit:"lin",ic:"📱",name:"The Phone Plan Showdown",
+  intro:"Plan A costs $20/month plus $0.50 per GB of data. Plan B costs $35/month plus $0.25 per GB. Which one deserves your money? Let's build the answer piece by piece.",
+  stages:[
+   {q:"Write Plan A's monthly cost for g gigabytes.",type:"mc",choices:["20 + 0.50g","20g + 0.50","0.50 + 20g","(20 + 0.50)g"],ans:"20 + 0.50g",
+    why:"Fixed fee ($20) once, plus $0.50 for EACH gigabyte: 20 + 0.50g. The per-unit rate is the thing multiplied by the variable."},
+   {q:"At how many GB do the two plans cost exactly the same?",type:"num",ans:60,hint:"Set 20 + 0.50g equal to 35 + 0.25g.",
+    why:"20 + 0.50g = 35 + 0.25g → 0.25g = 15 → g = 60 GB. That's the break-even point."},
+   {q:"You use about 80 GB per month. Which plan is cheaper for you?",type:"mc",choices:["Plan B ($55 vs $60)","Plan A ($60 vs $55)","They cost the same","Can't tell without more info"],ans:"Plan B ($55 vs $60)",
+    why:"A: 20 + 0.50(80) = $60. B: 35 + 0.25(80) = $55. Past the break-even point, the lower per-GB rate wins."},
+   {q:"On Plan A with at most $50 to spend, how many GB can you use at most?",type:"num",ans:60,hint:"Solve 20 + 0.50g ≤ 50.",
+    why:"20 + 0.50g ≤ 50 → 0.50g ≤ 30 → g ≤ 60. Inequalities answer 'how much can I afford' questions."}
+  ]},
+ {id:"lab_fun",unit:"fun",ic:"🎮",name:"Coupon vs. Tax: Order Matters",
+  intro:"A game costs x dollars. You have a $5-off coupon: g(x) = x − 5. Checkout adds 8% tax: f(x) = 1.08x. Composition of functions decides how much you actually pay.",
+  stages:[
+   {q:"Coupon applied FIRST, then tax: compute f(g(40)) for a $40 game.",type:"num",ans:37.8,hint:"g(40) = 35 first. Then tax it.",
+    why:"g(40) = 35, then f(35) = 1.08 × 35 = $37.80. Inside function first, always."},
+   {q:"Which expression is f(g(x))?",type:"mc",choices:["1.08(x − 5)","1.08x − 5","(1.08 − 5)x","x − 5(1.08)"],ans:"1.08(x − 5)",
+    why:"Substitute g into f: f(g(x)) = 1.08 · (x − 5). The whole discounted price gets taxed."},
+   {q:"Now tax FIRST, then coupon: compute g(f(40)).",type:"num",ans:38.2,hint:"f(40) = 43.20 first. Then subtract 5.",
+    why:"f(40) = 43.20, then g(43.20) = $38.20. Different order → different function → different price."},
+   {q:"Which order is better for you, and by how much (on any price)?",type:"mc",choices:["Coupon first — saves $0.40 (tax on $5 = 8% × 5)","Tax first — saves $0.40","Same either way","Depends on the price"],ans:"Coupon first — saves $0.40 (tax on $5 = 8% × 5)",
+    why:"f(g(x)) = 1.08x − 5.40 vs g(f(x)) = 1.08x − 5. Coupon-first is always $0.40 cheaper — the tax on the $5 you didn't spend. f∘g ≠ g∘f, proven with money."}
+  ]},
+ {id:"lab_sys",unit:"sys",ic:"🌭",name:"Concession Stand Economics",
+  intro:"Your stand sold 50 items for $180 total. Burgers are $6, drinks are $2. Two facts, two unknowns — a system of equations cracks it.",
+  stages:[
+   {q:"With b burgers and d drinks, which system matches the facts?",type:"mc",choices:["b + d = 50 and 6b + 2d = 180","b + d = 180 and 6b + 2d = 50","6b + d = 50 and b + 2d = 180","b − d = 50 and 6b − 2d = 180"],ans:"b + d = 50 and 6b + 2d = 180",
+    why:"Count fact: b + d = 50. Money fact: 6b + 2d = 180. One equation per fact — that's the translation skill."},
+   {q:"Solve the system: how many burgers?",type:"num",ans:20,hint:"Substitute d = 50 − b into the money equation.",
+    why:"6b + 2(50 − b) = 180 → 4b = 80 → b = 20."},
+   {q:"How many drinks?",type:"num",ans:30,why:"d = 50 − 20 = 30. Check: 6(20) + 2(30) = 120 + 60 = $180 ✓"},
+   {q:"Next game you raise burgers to $7 and sell the same amounts. New revenue?",type:"num",ans:200,hint:"7(20) + 2(30).",
+    why:"7(20) + 2(30) = 140 + 60 = $200. Once the system is solved, every what-if is easy."}
+  ]},
+ {id:"lab_quad",unit:"quad",ic:"💧",name:"Water Balloon Ballistics",
+  intro:"You launch a water balloon off a deck: h(t) = −16t² + 48t + 64 (height in feet, t in seconds). One quadratic tells the balloon's whole life story.",
+  stages:[
+   {q:"How high is the launch point? (Hint: what is h at t = 0?)",type:"num",ans:64,
+    why:"h(0) = 64 ft. The constant term IS the starting height — no algebra needed, just read the model."},
+   {q:"When does it splash down (h = 0)?",type:"num",ans:4,hint:"Divide everything by −16 first, then factor.",
+    why:"−16t² + 48t + 64 = 0 → t² − 3t − 4 = 0 → (t − 4)(t + 1) = 0 → t = 4 s (reject −1)."},
+   {q:"What's its maximum height?",type:"num",ans:100,hint:"Vertex: t = −b/(2a) = 48/32 = 1.5.",
+    why:"t = 1.5 → h = −16(2.25) + 48(1.5) + 64 = −36 + 72 + 64 = 100 ft."},
+   {q:"When does it FIRST reach 96 ft?",type:"num",ans:1,hint:"Set h = 96 and solve; take the earlier time.",
+    why:"−16t² + 48t + 64 = 96 → t² − 3t + 2 = 0 → (t − 1)(t − 2) = 0 → t = 1 or 2. It passes 96 ft going up at t = 1 s and again coming down at t = 2 s."}
+  ]},
+ {id:"lab_cplx",unit:"cplx",ic:"⚡",name:"Impedance: Where i Gets Real",
+  intro:"In AC circuits, resistance is a COMPLEX number called impedance. Two components: Z₁ = 3 + 4i and Z₂ = 1 − 2i. Electrical engineers do this math daily.",
+  stages:[
+   {q:"In series, impedances ADD. Find Z₁ + Z₂.",type:"text",ans:"4+2i",
+    why:"(3 + 4i) + (1 − 2i) = 4 + 2i. Real with real, imaginary with imaginary."},
+   {q:"The MAGNITUDE |Z₁| = √(a² + b²) is what a meter reads. Find |Z₁| for 3 + 4i.",type:"num",ans:5,hint:"3-4-5 triangle.",
+    why:"|3 + 4i| = √(9 + 16) = √25 = 5 ohms. A complex number is a point; magnitude is its distance from 0."},
+   {q:"Multiply: Z₁ · Z₂ = (3 + 4i)(1 − 2i).",type:"text",ans:"11-2i",hint:"FOIL, then i² = −1.",
+    why:"3 − 6i + 4i − 8i² = 3 − 2i + 8 = 11 − 2i."},
+   {q:"Why do complex solutions of real quadratics come in pairs like 2 ± 3i?",type:"mc",choices:["The ± in the quadratic formula splits √(negative) both ways","They don't have to","Because i² = 1","Rounding"],ans:"The ± in the quadratic formula splits √(negative) both ways",
+    why:"x = (−b ± i√|D|)/2a — the ± creates the conjugate pair. Real coefficients can't tell +i from −i apart."}
+  ]},
+ {id:"lab_poly",unit:"poly",ic:"📦",name:"The Box Factory",
+  intro:"Take a 20″ × 16″ sheet of cardboard, cut an x-inch square from each corner, fold up the sides. Volume: V(x) = x(20 − 2x)(16 − 2x). Real products get designed exactly this way.",
+  stages:[
+   {q:"Compute the volume when x = 2 inches.",type:"num",ans:384,hint:"V(2) = 2 · 16 · 12.",
+    why:"V(2) = 2(20 − 4)(16 − 4) = 2 · 16 · 12 = 384 cubic inches."},
+   {q:"What x-values even make sense here (the domain)?",type:"mc",choices:["0 < x < 8","0 < x < 10","x > 0","0 < x < 16"],ans:"0 < x < 8",
+    why:"Each dimension must stay positive: x > 0, 20 − 2x > 0 (x < 10), and 16 − 2x > 0 → x < 8. The tightest constraint wins. Math models inherit real-world limits."},
+   {q:"Try x = 3. What's the volume?",type:"num",ans:420,
+    why:"V(3) = 3 · 14 · 10 = 420 in³ — bigger than 384! Somewhere between the zeros there's a best cut size (calculus finds it exactly; you can hunt it numerically)."},
+   {q:"What do the zeros x = 0, 8, 10 of V(x) MEAN physically?",type:"mc",choices:["Cut sizes where the box flattens — no volume","Maximum-volume cuts","Errors in the model","The box holds exactly 8 or 10 in³"],ans:"Cut sizes where the box flattens — no volume",
+    why:"At x = 0 there are no sides; at x = 8 the width folds to nothing. Zeros of a polynomial model = where the quantity vanishes."}
+  ]},
+ {id:"lab_rat",unit:"rat",ic:"🎂",name:"Cost Per Cake",
+  intro:"Your bake-sale operation: $50 of startup gear plus $2 of ingredients per cake. Average cost per cake: C(x) = (50 + 2x)/x. Rational functions run every business.",
+  stages:[
+   {q:"What's the average cost per cake if you bake 10?",type:"num",ans:7,
+    why:"C(10) = (50 + 20)/10 = $7 per cake. The $50 is spread over only 10 cakes."},
+   {q:"Bake 50 cakes instead. Average cost per cake?",type:"num",ans:3,
+    why:"C(50) = (50 + 100)/50 = $3. Volume dilutes the fixed cost."},
+   {q:"As x grows huge, C(x) approaches which value (the horizontal asymptote)?",type:"num",ans:2,hint:"Equal degrees → ratio of leading coefficients.",
+    why:"y = 2/1 = $2 — the ingredient cost alone. The startup cost per cake fades toward zero but average cost NEVER quite reaches $2. That's what an asymptote is."},
+   {q:"How many cakes to get the average cost down to $2.50?",type:"num",ans:100,hint:"Solve (50 + 2x)/x = 2.5.",
+    why:"50 + 2x = 2.5x → 0.5x = 50 → x = 100 cakes. Check: (50+200)/100 = 2.50 ✓"}
+  ]},
+ {id:"lab_rad",unit:"rad",ic:"🚓",name:"CSI: Skid Marks",
+  intro:"Crash investigators estimate speed from skid marks: s = √(24d), where d is skid length in feet and s is speed in mph. Radicals solve real cases.",
+  stages:[
+   {q:"A car leaves 24 ft of skid marks. How fast was it going (mph)?",type:"num",ans:24,
+    why:"s = √(24 · 24) = √576 = 24 mph. (Coincidence that it matches d — check the next one.)"},
+   {q:"Another car skids 54 feet. Speed?",type:"num",ans:36,hint:"√(24 · 54) = √1296.",
+    why:"s = √1296 = 36 mph. Speed grows with the SQUARE ROOT of distance — doubling the skid doesn't double the speed."},
+   {q:"A driver claims they were doing 48 mph. How long a skid would that leave (ft)?",type:"num",ans:96,hint:"Solve 48 = √(24d) — square both sides.",
+    why:"2304 = 24d → d = 96 ft. Solving radical equations = squaring both sides (then sanity-checking)."},
+   {q:"Squaring both sides of √(x) = −6 gives x = 36. Valid?",type:"mc",choices:["No — √36 = 6 ≠ −6, extraneous","Yes, x = 36 works","Yes, because (−6)² = 36","Only for negative x"],ans:"No — √36 = 6 ≠ −6, extraneous",
+    why:"A principal square root is never negative, so the original equation had NO solution. Squaring created a phantom — always check in the original."}
+  ]},
+ {id:"lab_exp",unit:"exp",ic:"📲",name:"Going Viral",
+  intro:"Your video has 500 views and views are DOUBLING every 6 hours. Exponential growth is why 'suddenly famous' happens overnight.",
+  stages:[
+   {q:"How many views after 24 hours?",type:"num",ans:8000,hint:"24 hours = how many doublings?",
+    why:"24/6 = 4 doublings: 500 → 1000 → 2000 → 4000 → 8000."},
+   {q:"Which model gives views after t hours?",type:"mc",choices:["V = 500 · 2^(t/6)","V = 500 · 2t/6","V = 500 + 2^(t/6)","V = 2 · 500^(t/6)"],ans:"V = 500 · 2^(t/6)",
+    why:"Start × factor^(number of periods). t/6 counts how many 6-hour doubling periods have passed."},
+   {q:"How many HOURS until 32,000 views?",type:"num",ans:36,hint:"32000/500 = 64 = 2^?",
+    why:"Need 2^(t/6) = 64 = 2⁶ → t/6 = 6 → t = 36 hours. Solving for a time in the exponent — that's literally what logarithms do."},
+   {q:"If growth were 50% per 6 hours instead, views after 12 hours?",type:"num",ans:1125,hint:"Factor 1.5, twice.",
+    why:"500 · 1.5² = 500 · 2.25 = 1125. Growth rate r% → multiply by (1 + r) each period."}
+  ]},
+ {id:"lab_seq",unit:"seq",ic:"👟",name:"Sneaker Resale Empire",
+  intro:"You're saving for grails and flipping pairs. Arithmetic sequences model steady saving; geometric ones model reinvested profits.",
+  stages:[
+   {q:"You save $10 in week 1 and add $5 more each week ($10, $15, $20…). How much do you save in week 8?",type:"num",ans:45,hint:"a₈ = 10 + 7(5).",
+    why:"a₈ = 10 + (8−1)·5 = $45. Arithmetic: constant ADD."},
+   {q:"Total saved across all 8 weeks?",type:"num",ans:220,hint:"S = n(first + last)/2.",
+    why:"S₈ = 8(10 + 45)/2 = 4 · 55 = $220. Pair the ends: 10+45 = 15+40 = … Gauss's trick."},
+   {q:"You invest $20 in a flip and DOUBLE your money each flip. After flip 5 you have 20·2⁴. How much?",type:"num",ans:320,
+    why:"20 · 2⁴ = $320. Geometric: constant MULTIPLY. (Flip 1 ends at $40 — the exponent is one less than the flip count.)"},
+   {q:"A ball drops 16 ft and each bounce rises half the previous drop. Total DOWNWARD distance ever traveled: 16 + 8 + 4 + … = ?",type:"num",ans:32,hint:"Infinite geometric: a/(1 − r).",
+    why:"S = 16/(1 − ½) = 32 ft. Infinitely many bounces, finite distance — that's convergence."}
+  ]},
+ {id:"lab_data",unit:"data",ic:"🏀",name:"Free-Throw Clutch",
+  intro:"You're a 50% free-throw shooter (for now). Probability tells you exactly what to expect — and which carnival games to skip.",
+  stages:[
+   {q:"You shoot 4 free throws. P(exactly 2 makes)? Enter a fraction.",type:"num",ans:"3/8",hint:"C(4,2) ways out of 2⁴ outcomes.",
+    why:"C(4,2) = 6 arrangements of 2 makes; 2⁴ = 16 total → 6/16 = 3/8. Not 50%! 'Half of 4' is only the single most likely outcome."},
+   {q:"P(at least one make in 3 shots)? Fraction.",type:"num",ans:"7/8",hint:"Complement: 1 − P(all misses).",
+    why:"P(miss all 3) = (1/2)³ = 1/8, so P(≥1 make) = 7/8. Complements turn hard counts into easy ones."},
+   {q:"Carnival game: pay $3, one throw at 1/5 chance to win $10. Expected value in dollars?",type:"num",ans:-1,hint:"(1/5)(10) − 3.",
+    why:"EV = 2 − 3 = −$1 per play. Play 20 times, expect to lose about $20. EV is why the booth exists."},
+   {q:"You scored 84 where the class mean is 70 (σ = 7); your friend scored 90 where the mean is 80 (σ = 10). Who did better relative to their class?",type:"mc",choices:["You: z = 2 beats z = 1","Friend: 90 > 84","Tie","Not enough info"],ans:"You: z = 2 beats z = 1",
+    why:"Your z = (84−70)/7 = 2; theirs = (90−80)/10 = 1. z-scores put different scales on one ruler."}
+  ]}
+];
+function labById(id){var i;for(i=0;i<LABS.length;i++)if(LABS[i].id===id)return LABS[i];return null;}
+
 /* ---------- diagnostic blueprint: 2 questions per unit ---------- */
 var DIAG_SPEC=[
  {sk:"lin1",L:2},{sk:"lin3",L:3},
@@ -2269,6 +2556,10 @@ var BADGES=[
  {id:"beast1",n:"Beast Blooded",d:"Solve a Beast problem",ic:"🐲",c:function(){return S.beastWins>=1;}},
  {id:"beast10",n:"Beast Slayer",d:"10 Beast problems",ic:"⚔️",c:function(){return S.beastWins>=10;}},
  {id:"blitz10",n:"Speed Demon",d:"10+ in one Blitz",ic:"⚡",c:function(){return S.blitzBest>=10;}},
+ {id:"combo10",n:"Unstoppable",d:"10-answer combo",ic:"🌋",c:function(){return S.comboBest>=10;}},
+ {id:"lab1",n:"Lab Technician",d:"Complete a Practice Lab",ic:"🧪",c:function(){var k,n=0;for(k in S.labs)n++;return n>=1;}},
+ {id:"lab11",n:"Mad Scientist",d:"Complete all "+LABS.length+" Practice Labs",ic:"🥼",c:function(){var k,n=0;for(k in S.labs)n++;return n>=LABS.length;}},
+ {id:"tutor1",n:"Smart Enough to Ask",d:"Ask the AI tutor a question",ic:"🙋",c:function(){return S.tutorMsgs>=1;}},
  {id:"elite",n:"Top 1%",d:"Overall mastery 90%+",ic:"👑",c:function(){return overallMastery()>=90;}}
 ];
 function checkBadges(){
@@ -2276,7 +2567,7 @@ function checkBadges(){
   for(i=0;i<BADGES.length;i++){
     if(!S.badges[BADGES[i].id]&&BADGES[i].c()){
       S.badges[BADGES[i].id]=Date.now();save();
-      SFX.badge();
+      SFX.badge();confetti();
       toast(BADGES[i].ic+" Badge earned: "+BADGES[i].n+"!");
     }
   }
@@ -2421,7 +2712,7 @@ function nextQ(){
   var total=sessLen();
   if(total&&sess.idx>=total){endSess();return;}
   var made=makeQ();
-  sess.cur=made;sess.qo=made.qo;sess.locked=false;sess.mcPick=-1;sess.hintUsed=false;
+  sess.cur=made;sess.qo=made.qo;sess.locked=false;sess.mcPick=-1;sess.hintUsed=false;sess.hintStage=0;
   sess.workImg=null;sess.workTxt="";sess.drew=false;sess.workInit=false;
   renderTrain();
 }
@@ -2446,16 +2737,32 @@ function submitAns(){
   var ok=checkAnswer(qo,input);
   sess.locked=true;sess.lastOk=ok;sess.lastInput=input;
   var skid=sess.cur.sk,L=sess.cur.L;
+  // remember the latest problem so the AI tutor has full context
+  S.lastCtx={q:String(qo.html).replace(/<[^>]*>/g," ").replace(/\s+/g," ").slice(0,300),
+    ur:String(input).slice(0,80),ans:String(qo.ans),ok:ok,skill:skid,
+    expl:String(qo.expl||"").replace(/<[^>]*>/g," ").slice(0,400),
+    work:String(sess.workTxt||"").slice(0,300)};
   var deferred=(sess.mode==="diag"||sess.mode==="mock");
   if(sess.mode!=="diag"){recordAnswer(skid,L,ok);}
   if(ok){sess.cor++;}else{sess.wrong++;if(!deferred)logMistake(skid,qo,input);}
   sess.results.push({sk:skid,L:L,ok:ok,q:qo,input:input});
   questTick(ok);
+  // combo: consecutive correct answers multiply XP (×2 at 5, ×3 at 10)
+  var mult=1;
+  if(!deferred){
+    if(ok){
+      sess.combo=(sess.combo||0)+1;
+      if(sess.combo>S.comboBest){S.comboBest=sess.combo;save();}
+      mult=sess.combo>=10?3:(sess.combo>=5?2:1);
+      if(sess.combo===5){toast("🔥 5 IN A ROW — XP ×2!");SFX.level();}
+      if(sess.combo===10){toast("⚡ 10 STREAK — XP ×3! UNSTOPPABLE!");confetti();SFX.level();}
+    }else sess.combo=0;
+  }
   if(ok){
-    if(sess.mode==="beast"){S.beastWins++;save();addXP(60);}
-    else if(sess.mode==="blitz"){addXP(6);}
+    if(sess.mode==="beast"){S.beastWins++;save();addXP(60*mult);}
+    else if(sess.mode==="blitz"){addXP(6*mult);}
     else if(sess.mode==="diag"){addXP(5);}
-    else addXP(10*L+(sess.hintUsed?-3:0));
+    else addXP((10*L+(sess.hintUsed?-3:0))*mult);
   }else{addXP(2);}
   if(!deferred){SFX[ok?"ok":"bad"]();}
   else{SFX.click();}
@@ -2471,11 +2778,23 @@ function pickMC(i){
   var btns=document.querySelectorAll(".mcbtn"),j;
   for(j=0;j<btns.length;j++)btns[j].className="mcbtn"+(j===i?" pick":"");
 }
+/* progressive hints: strategy first, then the actual setup (Khan-style) */
 function showHint(){
   if(!sess||sess.locked)return;
   sess.hintUsed=true;
-  var h=document.getElementById("hintBox");
-  if(h){h.classList.remove("hidden");}
+  sess.hintStage=(sess.hintStage||0)+1;
+  var h=document.getElementById("hintBox"),qo=sess.qo;
+  if(!h)return;
+  h.classList.remove("hidden");
+  if(sess.hintStage===1){
+    h.innerHTML="💡 "+(qo.hint||"Break it into steps — what's the FIRST move?");
+    var hb=document.getElementById("hintBtn");
+    if(hb&&qo.expl)hb.innerHTML="💡 More help";
+  }else{
+    var setup=String(qo.expl||"").split("→")[0];
+    if(setup.length>140)setup=setup.slice(0,140)+"…";
+    h.innerHTML="💡 "+(qo.hint||"")+"<div style='margin-top:8px;border-top:1px solid #27408f;padding-top:8px'>🧭 <b>Setup:</b> "+setup+"</div>";
+  }
 }
 /* ---------- show-your-work scratchpad ---------- */
 function togWork(){
@@ -2604,6 +2923,8 @@ function go(v){
   else if(v==="battle")renderBattle();
   else if(v==="stats")renderStats();
   else if(v==="ref")renderRef();
+  else if(v==="chat")renderChat();
+  else if(v==="search")renderSearch();
   paintTop();
   window.scrollTo(0,0);
 }
@@ -2663,6 +2984,9 @@ function renderHome(){
   h+='<div class="card click" style="margin:0" onclick="startMock()"><div style="font-size:22px">📝</div><h3>Mock EOC Test</h3><div class="sub">20 questions, graded at the end</div></div>';
   h+='<div class="card click '+(unlockBeast()?'beastcard':'')+'" style="margin:0" onclick="startBeast()"><div style="font-size:22px">'+(unlockBeast()?'🐲':'🔒')+'</div><h3>Beast Mode</h3><div class="sub">'+(unlockBeast()?'Multi-topic monsters. +60 XP each':'Unlock: 3 units at 60%+')+'</div></div>';
   h+='<div class="card click" style="margin:0" onclick="startBlitz()"><div style="font-size:22px">⚡</div><h3>Blitz</h3><div class="sub">60 seconds. Best: '+S.blitzBest+'</div></div>';
+  var nlabs=0,lk;for(lk in S.labs)nlabs++;
+  h+='<div class="card click" style="margin:0;border-color:var(--cyan)" onclick="go(\'battle\')"><div style="font-size:22px">🧪</div><h3>Practice Labs</h3><div class="sub">Real-world missions · '+nlabs+'/'+LABS.length+' done</div></div>';
+  h+='<div class="card click" style="margin:0;border-color:#3d55b0" onclick="go(\'chat\')"><div style="font-size:22px">🤖</div><h3>AI Tutor</h3><div class="sub">Stuck? Ask anything, anytime</div></div>';
   h+='</div>';
   h+='<div class="sub center" style="margin-top:10px">Aligned to Missouri Learning Standards · Algebra II EOC · Branson, MO 🎸</div>';
   el("main").innerHTML=h;
@@ -2684,7 +3008,9 @@ function renderTree(){
         var d=u.skills[j],st=sk(d.id);
         h+='<div class="skrow" onclick="openSkill(\''+d.id+'\')"><div class="grow"><div style="font-weight:700;font-size:13.5px">'+d.name+'</div>'+mbar(st.m,st.att)+'</div>'+tierTag(st.m,st.att)+'<span class="chev">▶</span></div>';
       }
-      h+='<div class="row" style="margin-top:10px"><button class="btn sm grow" onclick="startQuiz(\''+u.id+'\')">📚 Unit Quiz (8 Qs)</button></div>';
+      var ulab=null,li4;
+      for(li4=0;li4<LABS.length;li4++)if(LABS[li4].unit===u.id)ulab=LABS[li4];
+      h+='<div class="row" style="margin-top:10px"><button class="btn sm grow" onclick="startQuiz(\''+u.id+'\')">📚 Unit Quiz</button>'+(ulab?'<button class="btn sm blu grow" onclick="startLab(\''+ulab.id+'\')">🧪 '+ulab.ic+' Lab</button>':'')+'</div>';
     }
     h+='</div>';
   }
@@ -2714,9 +3040,25 @@ function openSkill(id){
 }
 
 /* ---------- LESSON (guided worked example) ---------- */
-var lessonSk=null,lessonStep=1,lessonGated=false;
+var lessonSk=null,lessonStep=1,lessonGated=false,lessonCheck=null;
 function openLesson(id,gated){
-  lessonSk=id;lessonStep=1;lessonGated=!!gated;view="lesson";
+  lessonSk=id;lessonStep=1;lessonGated=!!gated;lessonCheck=null;view="lesson";
+  renderLesson();
+}
+function lcPick(i){if(!lessonCheck||lessonCheck.done)return;lessonCheck.picked=i;SFX.click();renderLesson();}
+function lcSubmit(){
+  var cq=lessonCheck.qo,input;
+  if(cq.type==="mc"){
+    if(lessonCheck.picked<0){toast("Pick an answer!");return;}
+    input=cq.choices[lessonCheck.picked];
+    lessonCheck.ok=(input===cq.ans);
+  }else{
+    var b=el("lcBox");input=b?b.value:"";
+    if(normTxt(input)===""){toast("Type an answer first!");return;}
+    lessonCheck.ok=checkAnswer(cq,input);
+  }
+  lessonCheck.done=true;lessonCheck.input=input;
+  SFX[lessonCheck.ok?"ok":"bad"]();
   renderLesson();
 }
 function lessonNext(){lessonStep++;SFX.click();renderLesson();}
@@ -2736,8 +3078,28 @@ function renderLesson(){
     if(shown<total){
       h+='<div class="row" style="margin-top:12px"><button class="btn grow" onclick="lessonNext()">👉 Show next step ('+shown+'/'+total+')</button><button class="btn sec sm" onclick="lessonAll()">Show all</button></div>';
     }else{
-      h+='<div class="fb ok" style="margin-top:12px"><b>That\'s the full playbook.</b> Before you practice, try to say the steps out loud without looking — if you can narrate it, you own it.</div>';
-      h+='<button class="btn wide grn" onclick="startPractice(\''+id+'\',true)">🥊 Your Turn — Practice Now</button>';
+      // Brilliant-style concept check: one easy question before real practice
+      if(!lessonCheck)lessonCheck={qo:GEN[id]?GEN[id](1):null,picked:-1,done:false,ok:null};
+      var cq=lessonCheck.qo;
+      if(cq&&!lessonCheck.done){
+        h+='<div class="fb hint" style="margin-top:12px"><b>⚡ Quick check</b> — you just watched it done. Now you, with training wheels:</div>';
+        h+='<div class="qcard" style="font-size:15.5px;padding:14px">'+cq.html+'</div>';
+        if(cq.type==="mc"){
+          var ci2;
+          for(ci2=0;ci2<cq.choices.length;ci2++)
+            h+='<button class="mcbtn'+(lessonCheck.picked===ci2?' pick':'')+'" onclick="lcPick('+ci2+')">'+String.fromCharCode(65+ci2)+'.  '+cq.choices[ci2]+'</button>';
+        }else{
+          h+='<input id="lcBox" class="ansin" autocomplete="off" placeholder="Your answer…">';
+        }
+        h+='<button class="btn wide" style="margin-top:10px" onclick="lcSubmit()">Check</button>';
+      }else{
+        if(cq&&lessonCheck.done){
+          h+='<div class="fb '+(lessonCheck.ok?"ok":"bad")+'" style="margin-top:12px"><b>'+(lessonCheck.ok?"✅ You caught it. That's the pattern.":"❌ Close — look:")+'</b>'+(lessonCheck.ok?'':'<div style="margin-top:4px">'+(cq.type!=="mc"?'Answer: <b>'+esc(cq.ans)+'</b> · ':'')+(cq.expl||'')+'</div>')+'</div>';
+        }else{
+          h+='<div class="fb ok" style="margin-top:12px"><b>That\'s the full playbook.</b> Say the steps out loud without looking — if you can narrate it, you own it.</div>';
+        }
+        h+='<button class="btn wide grn" onclick="startPractice(\''+id+'\',true)">🥊 Your Turn — Real Practice</button>';
+      }
     }
     h+='</div>';
   }
@@ -2750,6 +3112,15 @@ function renderLesson(){
 /* ---------- BATTLE ---------- */
 function renderBattle(){
   var h='<div class="card" style="background:none;border:none;padding:0"><h2>⚔️ Battle Modes</h2><div class="sub">Where mastery gets tested under pressure.</div></div>';
+  // practice labs
+  var li2,doneLabs=0;for(li2 in S.labs)doneLabs++;
+  h+='<div class="card" style="border-color:var(--cyan)"><div class="row"><div style="font-size:28px">🧪</div><div class="grow"><h3>Practice Labs</h3><div class="sub">Guided real-world missions — one scenario built up part by part. '+doneLabs+' / '+LABS.length+' complete.</div></div></div>';
+  var li3;
+  for(li3=0;li3<LABS.length;li3++){
+    var Lb=LABS[li3];
+    h+='<div class="skrow" onclick="startLab(\''+Lb.id+'\')"><div style="font-size:18px">'+Lb.ic+'</div><div class="grow"><div style="font-weight:700;font-size:13.5px">'+Lb.name+'</div><div class="sub" style="font-size:11px">'+unitById(Lb.unit).name+' · '+Lb.stages.length+' parts</div></div>'+labStars(Lb.id)+'<span class="chev">▶</span></div>';
+  }
+  h+='</div>';
   h+='<div class="card '+(unlockBeast()?'beastcard':'')+'"><div class="row"><div style="font-size:28px">'+(unlockBeast()?'🐲':'🔒')+'</div><div class="grow"><h3>Beast Mode</h3><div class="sub">Multi-topic, non-routine problems: Vieta\'s formulas, error analysis, extraneous traps, optimization. '+(unlockBeast()?'Slain: '+S.beastWins:'Unlocks at 3 units ≥ 60% mastery.')+'</div></div></div>'+(unlockBeast()?'<button class="btn wide red" style="margin-top:10px" onclick="startBeast()">Enter the Arena (+60 XP per kill)</button>':'')+'</div>';
   h+='<div class="card"><div class="row"><div style="font-size:28px">⚡</div><div class="grow"><h3>Blitz — 60 seconds</h3><div class="sub">Rapid-fire fundamentals. Speed + accuracy = fluency. Personal best: <b>'+S.blitzBest+'</b></div></div></div><button class="btn wide blu" style="margin-top:10px" onclick="startBlitz()">Start Blitz</button></div>';
   var lastT=S.tests.length?S.tests[S.tests.length-1]:null;
@@ -2850,6 +3221,7 @@ function renderTrain(){
   var qo=sess.qo,total=sessLen();
   var d=skillDef(sess.cur.sk),u=d?unitById(d.unit):null;
   var h='<div class="row" style="margin-bottom:10px"><div class="grow"><h2>'+modeTitle()+'</h2></div>';
+  if((sess.combo||0)>=2&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<div class="combo">🔥'+sess.combo+(sess.combo>=5?' ×'+(sess.combo>=10?3:2)+' XP':'')+'</div>';
   if(sess.mode==="blitz")h+='<div class="timer" id="blitzT">'+sess.timeLeft+'s</div>';
   else if(total)h+='<div class="pill">'+Math.min(sess.idx+(sess.locked?0:1),total)+' / '+total+'</div>';
   else h+='<div class="pill">✅ '+sess.cor+' · ❌ '+sess.wrong+'</div>';
@@ -2877,7 +3249,7 @@ function renderTrain(){
     }
     h+='<div class="row" style="margin-top:12px">';
     if(sess.mode!=="blitz")h+='<button id="workBtn" class="btn sec" onclick="togWork()">✏️ '+(sess.workOpen?'Hide':'Show')+' work</button>';
-    if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<button class="btn sec" onclick="showHint()">💡 Hint</button>';
+    if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<button id="hintBtn" class="btn sec" onclick="showHint()">💡 Hint</button>';
     h+='<button class="btn grow" onclick="submitAns()">Submit</button></div>';
   }else{
     // feedback state
@@ -2900,8 +3272,11 @@ function renderTrain(){
     h+='<div class="fb '+(sess.lastOk?"ok":"bad")+'" style="margin-top:12px"><b>'+(sess.lastOk?pick(["✅ Crushed it!","✅ Correct!","✅ Beast move!","✅ Clean."]):"❌ Not this time.")+'</b>';
     if(!sess.lastOk&&qo.type!=="mc")h+='<div style="margin-top:4px">Correct answer: <b>'+esc(qo.ans)+'</b></div>';
     h+='<div style="margin-top:6px">'+(qo.expl||"")+'</div></div>';
-    if(!sess.lastOk&&WORKED[skid]&&(sess.mode==="practice"||sess.mode==="review"||sess.mode==="quiz"))
-      h+='<button class="btn sec wide" style="margin-bottom:8px" onclick="toLesson(\''+skid+'\')">📖 Walk me through a full example</button>';
+    if(!sess.lastOk&&(sess.mode==="practice"||sess.mode==="review"||sess.mode==="quiz")){
+      h+='<div class="row" style="margin-bottom:8px">';
+      if(WORKED[skid])h+='<button class="btn sec grow" onclick="toLesson(\''+skid+'\')">📖 Worked example</button>';
+      h+='<button class="btn blu grow" onclick="askTutorWhy()">🤖 Ask tutor why</button></div>';
+    }
     h+='<button class="btn wide" onclick="nextQ()">Next →</button>';
   }
   el("main").innerHTML=h;
@@ -2965,6 +3340,301 @@ function renderSummary(){
   window.scrollTo(0,0);
 }
 
+/* ============================================================
+   PRACTICE LAB ENGINE
+   ============================================================ */
+var lab=null;
+function startLab(id){
+  lab={id:id,stage:0,correct:0,picked:-1,fb:null,finished:false};
+  view="lab";SFX.click();renderLab();
+}
+function labPick(i){if(!lab||lab.fb)return;lab.picked=i;SFX.click();renderLab();}
+function labHint(){var h=el("labHint");if(h)h.classList.remove("hidden");}
+function labSubmit(){
+  var L=labById(lab.id),st=L.stages[lab.stage],input;
+  if(st.type==="mc"){
+    if(lab.picked<0){toast("Pick an answer first!");return;}
+    input=st.choices[lab.picked];
+  }else{
+    var b=el("labBox");input=b?b.value:"";
+    if(normTxt(input)===""){toast("Type an answer first!");return;}
+  }
+  var ok=st.type==="mc"?input===st.ans:checkAnswer({type:st.type,ans:String(st.ans)},input);
+  if(ok)lab.correct++;
+  lab.fb={ok:ok,input:input};
+  SFX[ok?"ok":"bad"]();
+  renderLab();
+}
+function labNext(){
+  var L=labById(lab.id);
+  lab.stage++;lab.fb=null;lab.picked=-1;
+  if(lab.stage>=L.stages.length){
+    var n=L.stages.length;
+    var stars=lab.correct>=n?3:(lab.correct>=n-1?2:1);
+    if(!S.labs[L.id]||S.labs[L.id]<stars)S.labs[L.id]=stars;
+    lab.finished=true;lab.stars=stars;
+    addXP(30*stars);save();checkBadges();
+    if(stars===3){confetti();SFX.level();}
+  }
+  renderLab();
+}
+function renderLab(){
+  var L=labById(lab.id),u=unitById(L.unit),h,i;
+  h='<div class="row" style="margin-bottom:10px"><button class="btn sec sm" onclick="lab=null;go(\'battle\')">← Labs</button><div class="grow"></div><span class="chip">'+u.ic+' '+u.name+'</span></div>';
+  if(lab.finished){
+    h+='<div class="card center hero"><div style="font-size:42px">'+L.ic+'</div><h2>'+L.name+' — complete!</h2>';
+    h+='<div class="stars" style="font-size:30px;margin:8px 0">'+"★★★".slice(0,lab.stars)+"<span style='opacity:.25'>"+"★★★".slice(lab.stars)+"</span>"+'</div>';
+    h+='<div class="sub">'+lab.correct+' / '+L.stages.length+' first-try correct · +'+(30*lab.stars)+' XP</div></div>';
+    if(lab.stars<3)h+='<button class="btn wide" onclick="startLab(\''+L.id+'\')">🔁 Run It Back for 3 Stars</button>';
+    h+='<button class="btn sec wide" style="margin-top:8px" onclick="lab=null;go(\'battle\')">Back to Labs</button>';
+    el("main").innerHTML=h;window.scrollTo(0,0);return;
+  }
+  h+='<div class="card"><h2>'+L.ic+' '+L.name+'</h2><div class="sub" style="margin-top:6px;line-height:1.6">'+L.intro+'</div></div>';
+  h+='<div class="card">';
+  for(i=0;i<lab.stage;i++){
+    h+='<div class="labstage done"><div class="sub" style="font-size:12px">✅ Part '+(i+1)+': '+L.stages[i].q+'</div></div>';
+  }
+  var st=L.stages[lab.stage];
+  h+='<div class="labstage now"><div style="font-weight:800;margin-bottom:4px">Part '+(lab.stage+1)+' of '+L.stages.length+'</div>';
+  h+='<div style="font-size:15.5px;line-height:1.6;margin-bottom:10px">'+st.q+'</div>';
+  if(!lab.fb){
+    if(st.type==="mc"){
+      for(i=0;i<st.choices.length;i++)
+        h+='<button class="mcbtn'+(lab.picked===i?' pick':'')+'" onclick="labPick('+i+')">'+String.fromCharCode(65+i)+'.  '+st.choices[i]+'</button>';
+    }else{
+      h+='<input id="labBox" class="ansin" autocomplete="off" placeholder="Your answer…">';
+    }
+    if(st.hint)h+='<div id="labHint" class="fb hint hidden" style="margin-top:10px">💡 '+st.hint+'</div>';
+    h+='<div class="row" style="margin-top:12px">';
+    if(st.hint)h+='<button class="btn sec" onclick="labHint()">💡 Hint</button>';
+    h+='<button class="btn grow" onclick="labSubmit()">Check</button></div>';
+  }else{
+    if(st.type==="mc"){
+      for(i=0;i<st.choices.length;i++){
+        var cls=st.choices[i]===st.ans?"ok":(i===lab.picked&&!lab.fb.ok?"bad":"");
+        h+='<button class="mcbtn '+cls+'">'+String.fromCharCode(65+i)+'.  '+st.choices[i]+'</button>';
+      }
+    }else h+='<input class="ansin '+(lab.fb.ok?"ok":"bad")+'" value="'+esc(lab.fb.input)+'" disabled>';
+    h+='<div class="fb '+(lab.fb.ok?"ok":"bad")+'" style="margin-top:10px"><b>'+(lab.fb.ok?"✅ Exactly.":"❌ Not quite — here's the move:")+'</b>';
+    if(!lab.fb.ok&&st.type!=="mc")h+='<div style="margin-top:4px">Answer: <b>'+esc(String(st.ans))+'</b></div>';
+    h+='<div style="margin-top:6px">'+st.why+'</div></div>';
+    h+='<button class="btn wide" onclick="labNext()">'+(lab.stage+1>=L.stages.length?"Finish Lab →":"Next Part →")+'</button>';
+  }
+  h+='</div></div>';
+  el("main").innerHTML=h;
+  var b2=el("labBox");if(b2)b2.focus();
+}
+function labStars(id){
+  var s=S.labs[id]||0;
+  return s?'<span class="stars">'+"★★★".slice(0,s)+"<span style='opacity:.25'>"+"★★★".slice(s)+"</span></span>":'<span class="mtag t0">NEW</span>';
+}
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+var SIDX=null;
+function togUnitGo(uid){openU[uid]=true;go("tree");}
+function buildSearch(){
+  if(SIDX)return SIDX;
+  var idx=[],i,j;
+  for(i=0;i<UNITS.length;i++){
+    var u=UNITS[i];
+    idx.push({l:u.ic+" "+u.name,s:"Unit · "+u.mls,k:(u.name+" "+u.blurb+" "+u.mls).toLowerCase(),act:"togUnitGo('"+u.id+"')"});
+    for(j=0;j<u.skills.length;j++){
+      var d=u.skills[j];
+      idx.push({l:"🎯 "+d.name,s:u.name+" · lesson, worked example, practice",k:(d.name+" "+u.name+" "+(LESSONS[d.id]||"")).toLowerCase(),act:"openSkill('"+d.id+"')"});
+    }
+  }
+  for(i=0;i<LABS.length;i++)
+    idx.push({l:LABS[i].ic+" Lab: "+LABS[i].name,s:"Practice Lab · "+unitById(LABS[i].unit).name,k:(LABS[i].name+" lab "+LABS[i].intro).toLowerCase(),act:"startLab('"+LABS[i].id+"')"});
+  idx.push({l:"🔬 Diagnostic Test",s:"Map your level across all domains",k:"diagnostic test assessment placement level",act:"startDiag()"});
+  idx.push({l:"📝 Mock EOC Exam",s:"20 questions, graded like test day",k:"mock test exam eoc missouri practice test",act:"startMock()"});
+  idx.push({l:"⚡ Blitz",s:"60-second speed round",k:"blitz speed timed fast round",act:"startBlitz()"});
+  idx.push({l:"🐲 Beast Mode",s:"Multi-topic challenge problems",k:"beast mode challenge hard elite",act:"startBeast()"});
+  idx.push({l:"🔁 Review Queue",s:"Spaced review of fading skills",k:"review spaced repetition due queue",act:"startReview()"});
+  idx.push({l:"🤖 AI Tutor",s:"Ask anything, get unstuck",k:"tutor chat help ask question ai claude stuck",act:"go('chat')"});
+  idx.push({l:"📚 Formula Vault",s:"Every formula + the curriculum map",k:"formula reference sheet curriculum standards missouri map",act:"go('ref')"});
+  SIDX=idx;return idx;
+}
+function renderSearch(){
+  var h='<div class="card" style="background:none;border:none;padding:0"><h2>🔍 Search</h2><div class="sub">Skills, lessons, labs, formulas, modes — jump anywhere.</div></div>';
+  h+='<input id="searchBox" class="searchin" placeholder="Try: logarithms, factoring, lab, mock test…" oninput="doSearch()" autocomplete="off">';
+  h+='<div id="sresults" style="margin-top:10px"></div>';
+  el("main").innerHTML=h;
+  var b=el("searchBox");if(b)b.focus();
+  doSearch();
+}
+function doSearch(){
+  var b=el("searchBox"),out=el("sresults");
+  if(!b||!out)return;
+  var qv=b.value.toLowerCase().replace(/^\s+|\s+$/g,""),idx=buildSearch(),res=[],i;
+  if(!qv){
+    out.innerHTML='<div class="card"><div class="sub">Popular jumps:</div>'+
+      ['startDiag()|🔬 Diagnostic',"go('chat')|🤖 Ask the AI Tutor","togUnitGo('quad')|🎯 Quadratics","startLab('lab_quad')|💧 Water Balloon Lab"].map(function(s){var p=s.split("|");return '<span class="qchip" onclick="'+p[0]+'">'+p[1]+'</span>';}).join("")+'</div>';
+    return;
+  }
+  var terms=qv.split(/\s+/);
+  for(i=0;i<idx.length;i++){
+    var e=idx[i],score=0,ok=true,t;
+    for(t=0;t<terms.length;t++){
+      if(e.l.toLowerCase().indexOf(terms[t])>=0)score+=3;
+      else if(e.k.indexOf(terms[t])>=0)score+=1;
+      else{ok=false;break;}
+    }
+    if(ok)res.push({e:e,sc:score});
+  }
+  res.sort(function(a,b2){return b2.sc-a.sc;});
+  var h="",j;
+  for(j=0;j<res.length&&j<12;j++){
+    h+='<div class="sres" onclick="'+res[j].e.act+'"><div class="grow"><div style="font-weight:800;font-size:14px">'+res[j].e.l+'</div><div class="sub" style="font-size:11.5px">'+res[j].e.s+'</div></div><span class="chev">▶</span></div>';
+  }
+  out.innerHTML=h||'<div class="card"><div class="sub">Nothing matched "'+esc(qv)+'". Try a topic word like "logs", "factoring", "asymptote" — or ask the <span style="color:var(--gold);cursor:pointer" onclick="go(\'chat\')">AI Tutor</span>.</div></div>';
+}
+
+/* ============================================================
+   AI TUTOR CHAT — Claude API (student's own key, stored locally)
+   with a useful offline coach as the no-key fallback.
+   ============================================================ */
+var chatBusy=false,chatShowSettings=false;
+function fmtBot(t){ // escape, then light markdown (bold + newlines)
+  var s=esc(t);
+  s=s.replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");
+  return s.replace(/\n/g,"<br>");
+}
+function tutorSystem(){
+  var wk=weakSkills(3),i,names=[];
+  for(i=0;i<wk.length;i++)names.push(skillDef(wk[i].d.id).name+" ("+Math.round(wk[i].m)+"%)");
+  var s="You are the Beast Academy Tutor: an elite, energetic Algebra 2 coach inside a training app used by a 16-year-old student in Branson, Missouri. Teaching style: diagnose the misconception first, explain the concept simply, show ONE short worked example with plain-text math (x^2, sqrt(x), 3/4), then give ONE similar practice problem and STOP so the student can try. Never solve graded schoolwork wholesale. Be direct, encouraging, never condescending. Keep answers under 250 words. Stay on math and study skills.";
+  s+="\n\nSTUDENT SNAPSHOT: Level "+lvlInfo().def.name+", "+S.xp+" XP, overall Algebra 2 mastery "+Math.round(overallMastery())+"%, day streak "+S.streak.count+". Weakest skills: "+(names.join("; ")||"none measured yet")+".";
+  if(S.lastCtx){
+    var c=S.lastCtx;
+    s+="\n\nMOST RECENT PROBLEM (the student may ask about it):\nProblem: "+c.q+"\nStudent's answer: "+c.ur+" ("+(c.ok?"correct":"wrong")+")\nCorrect answer: "+c.ans+"\nSolution: "+c.expl+(c.work?"\nStudent's typed work: "+c.work:"");
+  }
+  return s;
+}
+function chatSend(preset){
+  if(chatBusy)return;
+  var inp=el("chatIn"),txt=preset||(inp?inp.value:"");
+  txt=String(txt).replace(/^\s+|\s+$/g,"");
+  if(!txt)return;
+  S.chat.push({r:"u",c:txt});
+  if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
+  S.tutorMsgs++;save();checkBadges();
+  chatBusy=true;renderChat();
+  if(S.chatKey)callClaude();
+  else setTimeout(function(){offlineTutor(txt);},450);
+}
+function pushBot(html,isHtml){
+  S.chat.push({r:"a",c:html,h:isHtml?1:0});
+  if(S.chat.length>40)S.chat.splice(0,S.chat.length-40);
+  chatBusy=false;save();renderChat();
+}
+function callClaude(){
+  var msgs=[],i,hist=S.chat.slice(-12);
+  for(i=0;i<hist.length;i++)msgs.push({role:hist[i].r==="u"?"user":"assistant",content:hist[i].c});
+  var headers={
+    "content-type":"application/json",
+    "x-api-key":S.chatKey,
+    "anthropic-version":"2023-06-01",
+    "anthropic-dangerous-direct-browser-access":"true"
+  };
+  var body={model:S.chatModel||"claude-opus-5",max_tokens:1500,system:tutorSystem(),messages:msgs};
+  if((body.model||"").indexOf("claude-opus-5")===0){
+    headers["anthropic-beta"]="server-side-fallback-2026-07-01";
+    body.fallbacks="default";
+  }
+  fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:headers,body:JSON.stringify(body)})
+    .then(function(r){return r.json();})
+    .then(function(j){
+      if(j.error){
+        var msg="⚠️ "+(j.error.message||"API error");
+        if(j.error.type==="authentication_error")msg+="\n\nCheck your API key in ⚙️ Settings (it should start with sk-ant-).";
+        pushBot(msg);return;
+      }
+      if(j.stop_reason==="refusal"){pushBot("I can't help with that one. Let's get back to the math — what are you working on?");return;}
+      var t="",k;
+      for(k=0;k<(j.content||[]).length;k++)if(j.content[k].type==="text")t+=j.content[k].text;
+      pushBot(t||"(empty response — try rephrasing)");
+    })
+    .catch(function(e){
+      pushBot("⚠️ Couldn't reach the tutor ("+e.message+"). Check your internet connection — or I can still help offline: try 'why was I wrong' or name a topic.");
+    });
+}
+function offlineTutor(txt){
+  var t=txt.toLowerCase(),i,j;
+  // 1) "why was I wrong" → replay last mistake
+  if(/why|wrong|mistake|missed|help me/.test(t)&&S.lastCtx&&!S.lastCtx.ok){
+    var c=S.lastCtx,d=skillDef(c.skill);
+    pushBot("<b>Let's autopsy that one.</b><br><br><b>The problem:</b> "+esc(c.q).slice(0,220)+"<br><b>You said:</b> "+esc(c.ur)+" · <b>Correct:</b> "+esc(c.ans)+"<br><br><b>The fix:</b> "+c.expl+"<br><br>"+(d&&WORKED[d.id]?"Want the full method? <span class='qchip' onclick=\"openLesson('"+d.id+"')\">📖 Walk through a worked example</span>":""),true);
+    return;
+  }
+  // 2) topic mention → route to that skill's lesson
+  var best=null,bestScore=0,idx=buildSearch();
+  for(i=0;i<UNITS.length;i++)for(j=0;j<UNITS[i].skills.length;j++){
+    var d2=UNITS[i].skills[j],words=d2.name.toLowerCase().split(/[^a-z]+/),sc=0,w;
+    for(w=0;w<words.length;w++)if(words[w].length>3&&t.indexOf(words[w])>=0)sc++;
+    if(sc>bestScore){bestScore=sc;best=d2;}
+  }
+  if(best){
+    pushBot("<b>"+best.name+"</b> — here's the core idea:<br><br>"+(LESSONS[best.id]||"")+"<br><br><span class='qchip' onclick=\"openLesson('"+best.id+"')\">📖 See it solved step-by-step</span> <span class='qchip' onclick=\"startPractice('"+best.id+"',true)\">🥊 Practice it</span>",true);
+    return;
+  }
+  // 3) default
+  pushBot("I'm in <b>offline coach</b> mode right now (add a Claude API key in ⚙️ Settings to unlock the full AI tutor — it can diagnose your exact mistakes and make custom examples).<br><br>Meanwhile I can still help. Try:<br>• \"why was I wrong\" after missing a question<br>• naming a topic — \"logarithms\", \"factoring\", \"asymptotes\"<br>• 🔍 Search to jump anywhere",true);
+}
+function chatSaveKey(){
+  var k=el("keyIn"),m=el("mdlSel");
+  if(k)S.chatKey=k.value.replace(/^\s+|\s+$/g,"");
+  if(m)S.chatModel=m.value;
+  save();chatShowSettings=false;renderChat();
+  toast(S.chatKey?"🔑 Key saved (stored only on this device)":"Key cleared — offline coach mode");
+}
+function chatClear(){if(confirm("Clear the whole conversation?")){S.chat=[];save();renderChat();}}
+function togChatSettings(){chatShowSettings=!chatShowSettings;renderChat();}
+function askTutorWhy(){
+  go("chat");
+  chatSend("Why was my answer wrong on that last problem? Walk me through where my thinking broke, then give me one similar problem to try.");
+}
+function renderChat(){
+  view="chat";
+  var btns=document.querySelectorAll(".nbtn"),bi;
+  for(bi=0;bi<btns.length;bi++)btns[bi].className="nbtn"+(btns[bi].getAttribute("data-v")==="chat"?" on":"");
+  var h='<div class="row" style="margin-bottom:8px"><div class="grow"><h2>🤖 AI Tutor</h2><div class="sub">'+(S.chatKey?"Powered by Claude · your key stays on this device":"Offline coach mode — add a key in ⚙️ for the full AI tutor")+'</div></div><button class="btn sec sm" onclick="togChatSettings()">⚙️</button></div>';
+  if(chatShowSettings){
+    h+='<div class="card"><h3>⚙️ Tutor Settings</h3><div class="sub" style="margin-bottom:8px">Paste a Claude API key from <b>console.anthropic.com</b>. It\'s stored ONLY in this browser\'s localStorage and sent only to Anthropic\'s API. API use is pay-per-message (a parent should set this up).</div>'+
+      '<input id="keyIn" class="ansin" type="password" placeholder="sk-ant-…" value="'+esc(S.chatKey)+'">'+
+      '<div class="row" style="margin-top:8px"><select id="mdlSel" class="ansin" style="flex:1">'+
+      '<option value="claude-opus-5"'+(S.chatModel==="claude-opus-5"?" selected":"")+'>Claude Opus 5 — best teacher</option>'+
+      '<option value="claude-sonnet-5"'+(S.chatModel==="claude-sonnet-5"?" selected":"")+'>Claude Sonnet 5 — fast + cheaper</option>'+
+      '<option value="claude-haiku-4-5"'+(S.chatModel==="claude-haiku-4-5"?" selected":"")+'>Claude Haiku 4.5 — cheapest</option>'+
+      '</select></div>'+
+      '<div class="row" style="margin-top:10px"><button class="btn grow" onclick="chatSaveKey()">Save</button><button class="btn sec" onclick="chatClear()">🗑 Clear chat</button></div></div>';
+  }
+  h+='<div class="chatwrap" id="chatLog">';
+  if(!S.chat.length){
+    h+='<div class="msg bot"><div class="who">Tutor</div>Yo! I\'m your personal Algebra 2 tutor. Miss a question? I\'ll find exactly where your thinking broke. Stuck on a topic? I\'ll teach it and build you custom examples. What are we working on?</div>';
+  }
+  var i;
+  for(i=0;i<S.chat.length;i++){
+    var m=S.chat[i];
+    if(m.r==="u")h+='<div class="msg me">'+esc(m.c)+'</div>';
+    else h+='<div class="msg bot"><div class="who">'+(S.chatKey?"Claude Tutor":"Offline Coach")+'</div>'+(m.h?m.c:fmtBot(m.c))+'</div>';
+  }
+  if(chatBusy)h+='<div class="msg bot"><div class="typing"><span></span><span></span><span></span></div></div>';
+  h+='</div>';
+  h+='<div style="margin-top:10px">'+
+    '<span class="qchip" onclick="chatSend(\'Why was my answer wrong on the last problem?\')">Why was I wrong?</span>'+
+    '<span class="qchip" onclick="chatSend(\'Show me a worked example of my weakest skill, then give me one to try.\')">Show me an example</span>'+
+    '<span class="qchip" onclick="chatSend(\'Explain that again, but simpler.\')">Explain simpler</span>'+
+    '<span class="qchip" onclick="chatSend(\'Quiz me: give me one problem on my weakest skill and wait for my answer.\')">Quiz me</span></div>';
+  h+='<div class="chatbar"><input id="chatIn" placeholder="Ask anything… (e.g. how do logs work?)" autocomplete="off"><button class="btn" onclick="chatSend()">Send</button></div>';
+  el("main").innerHTML=h;
+  var log=el("chatLog");
+  window.scrollTo(0,document.body.scrollHeight);
+  var ci=el("chatIn");
+  if(ci){ci.onkeydown=function(e){if(e.key==="Enter"){chatSend();}};}
+}
+
 /* ---------- init ---------- */
 (function(){
   load();
@@ -2973,11 +3643,12 @@ function renderSummary(){
     (function(b){b.onclick=function(){SFX.click();go(b.getAttribute("data-v"));};})(btns[i]);
   }
   document.addEventListener("keydown",function(e){
-    if(view!=="train"||!sess)return;
+    if(e.key!=="Enter")return;
     if(e.target&&e.target.tagName==="TEXTAREA")return; // typing steps in the work pad
-    if(e.key==="Enter"){
-      if(sess.locked)nextQ();else submitAns();
-    }
+    if(e.target&&e.target.id==="chatIn")return;        // chat input has its own handler
+    if(view==="train"&&sess){if(sess.locked)nextQ();else submitAns();}
+    else if(view==="lab"&&lab&&!lab.finished){if(lab.fb)labNext();else labSubmit();}
+    else if(view==="lesson"&&lessonCheck&&lessonCheck.qo&&!lessonCheck.done)lcSubmit();
   });
   go("home");
 })();
