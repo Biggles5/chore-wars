@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Algebra 2 Beast Academy</title>
-<!-- BUILD v11 — music search via fetch (JSONP fallback) + one-tap Popular Mix -->
-<script>var APP_VER="v11";</script>
+<!-- BUILD v12 — 5-layer music transport: Netlify proxy + Apple + Deezer -->
+<script>var APP_VER="v12";</script>
 <style>
 :root{
   --bg:#0b1020; --bg2:#111832; --card:#161f3d; --card2:#1c2750; --line:#28345f;
@@ -456,7 +456,7 @@ var RADIO=(function(){
       if(!live){audio.src=silentWav();var p=audio.play();if(p&&p.catch)p.catch(function(){});}
     }catch(e){}
   }
-  function parseResults(data){
+  function parseItunes(data){
     var res=[],i;
     for(i=0;i<((data&&data.results)||[]).length;i++){
       var r=data.results[i];
@@ -464,34 +464,66 @@ var RADIO=(function(){
     }
     return res;
   }
-  function search(term,cb){
-    // Primary: direct fetch (iTunes Search API supports CORS).
-    // Fallback: JSONP script tag, in case fetch is blocked.
-    var handled=false;
-    function finish(res){if(handled)return;handled=true;cb(res);}
-    var base="https://itunes.apple.com/search?term="+encodeURIComponent(term)+"&media=music&entity=song&limit=25";
-    function viaJsonp(){
-      var cbName="itcb"+Math.floor(Math.random()*1e6);
-      window[cbName]=function(data){
-        try{delete window[cbName];}catch(e){window[cbName]=undefined;}
-        finish(parseResults(data));
-      };
-      var s=document.createElement("script");
-      s.src=base+"&callback="+cbName;
-      s.onerror=function(){finish(null);};
-      document.body.appendChild(s);
-      setTimeout(function(){
-        if(s.parentNode)s.parentNode.removeChild(s);
-        finish(null);
-      },8000);
+  function parseDeezer(data){
+    var res=[],i;
+    for(i=0;i<((data&&data.data)||[]).length;i++){
+      var r=data.data[i];
+      if(r.preview)res.push({t:r.title||"?",a:(r.artist&&r.artist.name)||"",u:r.preview});
     }
+    return res;
+  }
+  function jsonFetch(url,parse,next,ms){
+    var fin=false;
+    function once(v){if(fin)return;fin=true;next(v);}
+    setTimeout(function(){once(null);},ms||4000);
     try{
-      fetch(base)
+      fetch(url)
         .then(function(r){if(!r.ok)throw 0;return r.json();})
-        .then(function(j){finish(parseResults(j));})
-        .catch(function(){viaJsonp();});
-      setTimeout(function(){if(!handled)viaJsonp();},6000);
-    }catch(e){viaJsonp();}
+        .then(function(j){once(parse(j));})
+        .catch(function(){once(null);});
+    }catch(e){once(null);}
+  }
+  function jsonpLoad(url,cbParam,parse,next,ms){
+    var fin=false;
+    function once(v){if(fin)return;fin=true;next(v);}
+    var cbName="mcb"+Math.floor(Math.random()*1e6);
+    window[cbName]=function(data){
+      try{delete window[cbName];}catch(e){window[cbName]=undefined;}
+      once(parse(data));
+    };
+    var s=document.createElement("script");
+    s.src=url+"&"+cbParam+"="+cbName;
+    s.onerror=function(){once(null);};
+    document.body.appendChild(s);
+    setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s);once(null);},ms||5000);
+  }
+  function search(term,cb){
+    // Transport chain — first one to return songs wins:
+    // 1+2. same-origin /itunes and /deezer (Netlify proxies via the
+    //      _redirects file — immune to CORS and content blockers)
+    // 3.   direct fetch to Apple   4. Apple JSONP   5. Deezer JSONP
+    var q=encodeURIComponent(term),hosted=(location.protocol==="http:"||location.protocol==="https:");
+    var itQ="/search?term="+q+"&media=music&entity=song&limit=25";
+    var dzQ="/search?q="+q+"&limit=25";
+    var chain=[];
+    if(hosted){
+      chain.push(function(next){jsonFetch("/itunes"+itQ,parseItunes,next,4000);});
+      chain.push(function(next){jsonFetch("/deezer"+dzQ,parseDeezer,next,4000);});
+    }
+    chain.push(function(next){jsonFetch("https://itunes.apple.com"+itQ,parseItunes,next,4000);});
+    chain.push(function(next){jsonpLoad("https://itunes.apple.com"+itQ,"callback",parseItunes,next,5000);});
+    chain.push(function(next){jsonpLoad("https://api.deezer.com"+dzQ+"&output=jsonp","callback",parseDeezer,next,5000);});
+    var ci=0,handled=false;
+    function step(){
+      if(handled)return;
+      if(ci>=chain.length){handled=true;cb(null);return;}
+      chain[ci++](function(res){
+        if(handled)return;
+        if(res&&res.length){handled=true;cb(res);}
+        else step();
+      });
+    }
+    step();
   }
   /* one-tap Popular Mix: pulls previews from artists teens actually play */
   var POP_ARTISTS=["Morgan Wallen","Drake","Taylor Swift","SZA","Zach Bryan","Billie Eilish","Post Malone","Travis Scott","Olivia Rodrigo","Kendrick Lamar","The Weeknd","Sabrina Carpenter","Luke Combs","Doja Cat","21 Savage","Noah Kahan","Chappell Roan","Jelly Roll"];
@@ -510,7 +542,7 @@ var RADIO=(function(){
             playCur();
             toast("🎵 Popular Mix — "+all.length+" hot songs, 30s each");
           }else{
-            toast("😕 Couldn't load songs. Check internet — and if you use a content blocker, allow itunes.apple.com");
+            toast("😕 Couldn't load songs from any music source. If you deployed to Netlify, make sure the _redirects file is uploaded next to this page.");
           }
         }
       });
@@ -544,7 +576,7 @@ var RADIO=(function(){
       unlock(); // grab the audio permission NOW, while we're still inside the tap
       toast("🎵 Finding "+label+"…");
       search(term,function(res){
-        if(!res||!res.length){toast("😕 Couldn't load songs. Check internet — and if you use a content blocker, allow itunes.apple.com");return;}
+        if(!res||!res.length){toast("😕 Couldn't load songs from any music source. If you deployed to Netlify, make sure the _redirects file is uploaded next to this page.");return;}
         MUSIC.set(0,true);
         queue=shuffle(res);idx=0;live=true;
         playCur();
