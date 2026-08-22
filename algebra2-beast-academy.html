@@ -115,6 +115,22 @@ table.rt th{color:var(--dim);font-size:11px;text-transform:uppercase;letter-spac
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes glow{0%,100%{box-shadow:0 0 10px rgba(255,122,47,.35)}50%{box-shadow:0 0 26px rgba(255,122,47,.7)}}
 .beastcard{border:1px solid #6b3a12;background:linear-gradient(135deg,#2a1408,#3a1c0a);animation:glow 2.4s infinite}
+/* lesson steps */
+.wex{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.wexp{font-family:"Cambria Math",Georgia,serif;font-size:19px;font-weight:700;padding:10px 12px;background:#0e1530;border:1px solid var(--line);border-radius:10px;margin-bottom:12px}
+.steps{margin-left:13px;border-left:2px solid var(--line)}
+.step{position:relative;padding:7px 0 7px 22px;animation:fadeIn .35s}
+.stepn{position:absolute;left:-13px;top:10px;width:24px;height:24px;border-radius:50%;background:var(--card);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--gold)}
+.stepm{font-family:"Cambria Math",Georgia,serif;font-size:17px;line-height:1.5}
+.stepw{color:var(--dim);font-size:12.5px;line-height:1.5;margin-top:2px}
+.step.final .stepn{background:var(--gold);color:#1a1200}
+.coach{background:linear-gradient(90deg,#12204a,#1a1a3e);border:1px solid #3d55b0;border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:13.5px;line-height:1.5;animation:fadeIn .3s}
+/* show-your-work */
+.workarea{background:#0e1530;border:1px dashed #3a4a85;border-radius:14px;padding:10px;margin-top:12px}
+.workarea canvas{width:100%;height:240px;background:#0a0f24;border-radius:10px;touch-action:none;cursor:crosshair;display:block}
+.workarea textarea{width:100%;min-height:70px;background:#0a0f24;border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:10px;font-size:14px;margin-top:8px;font-family:inherit;resize:vertical}
+.workimg{max-width:100%;border-radius:10px;border:1px solid var(--line);background:#0a0f24}
+.workpre{white-space:pre-wrap;font-size:13.5px;background:#0a0f24;border-radius:10px;padding:10px;border:1px solid var(--line)}
 .hidden{display:none!important}
 a{color:var(--blue)}
 @media(max-width:480px){.logo{font-size:12.5px}.pill{padding:3px 8px;font-size:10.5px;gap:3px}.topin{gap:5px;padding:8px 8px}}
@@ -1817,6 +1833,334 @@ var LESSONS={
  data5:"z = (x−μ)/σ counts standard deviations from the mean — it lets you compare scores from different scales. Empirical rule for normal data: 68% within 1σ, 95% within 2σ, 99.7% within 3σ."
 };
 
+/* ---------- worked examples: every skill gets a full "watch me do it
+   first" walkthrough, revealed one step at a time ---------- */
+var WORKED={
+ lin1:{p:"Solve:  3(x − 2) + 4 = 13",steps:[
+  ["3(x − 2) + 4 = 13","The goal: get x completely alone. Order of attack: parentheses → combine → move constants → divide."],
+  ["3x − 6 + 4 = 13","Distribute the 3 to BOTH terms inside the parentheses (3·x and 3·(−2))."],
+  ["3x − 2 = 13","Combine like terms on the left: −6 + 4 = −2."],
+  ["3x = 15","Add 2 to both sides. Whatever you do to one side, do to the other."],
+  ["x = 5","Divide both sides by 3."],
+  ["Check: 3(5 − 2) + 4 = 9 + 4 = 13 ✓","Substitute back in. A 10-second check catches almost every mistake."]]},
+ lin2:{p:"Solve  A = P + Prt  for t",steps:[
+  ["A = P + Prt","t is buried on the right. Treat every other letter (A, P, r) exactly like a number."],
+  ["A − P = Prt","Subtract P from both sides — peel away everything that isn't attached to t."],
+  ["(A − P)/(Pr) = t","t is MULTIPLIED by Pr, so divide both sides by Pr in one move."],
+  ["t = (A − P)/(Pr)","Done. Same moves as a normal equation — subtraction first, then division."]]},
+ lin3:{p:"Solve:  |2x − 1| = 7",steps:[
+  ["|2x − 1| = 7","The inside is some number whose distance from 0 is 7 — so the inside is 7 or −7. Two cases."],
+  ["Case 1:  2x − 1 = 7  →  2x = 8  →  x = 4","First case: the inside equals +7."],
+  ["Case 2:  2x − 1 = −7  →  2x = −6  →  x = −3","Second case: the inside equals −7. Never skip this one."],
+  ["Check: |2(4) − 1| = |7| = 7 ✓  and  |2(−3) − 1| = |−7| = 7 ✓","Both survive the check → x = 4 or x = −3."]]},
+ lin4:{p:"Solve:  |x + 3| ≤ 5",steps:[
+  ["|x + 3| ≤ 5","'Distance from 0 is at most 5' → the inside is trapped between −5 and 5. LESS-thAND."],
+  ["−5 ≤ x + 3 ≤ 5","Write it as a sandwich (an AND statement)."],
+  ["−8 ≤ x ≤ 2","Subtract 3 from ALL THREE parts at once."],
+  ["Number line: a solid segment from −8 to 2","If it had been |x + 3| ≥ 5, it would SPLIT: x + 3 ≤ −5 or x + 3 ≥ 5 (great-OR)."]]},
+ lin5:{p:"Solve:  −7 < 2x + 1 ≤ 9",steps:[
+  ["−7 < 2x + 1 ≤ 9","Three-part inequality: whatever you do, do to all three parts."],
+  ["−8 < 2x ≤ 8","Subtract 1 everywhere."],
+  ["−4 < x ≤ 4","Divide everywhere by 2. (Dividing by a NEGATIVE would flip both symbols.)"],
+  ["Answer: −4 < x ≤ 4","Open circle at −4, closed circle at 4. The ≤ vs < distinction matters."]]},
+ fun1:{p:"f(x) = x² − 3x + 1.  Find f(−2).",steps:[
+  ["f(−2) = (−2)² − 3(−2) + 1","Replace EVERY x with (−2) — always in parentheses. This one habit kills most sign errors."],
+  ["= 4 + 6 + 1","(−2)² = +4 (a square is never negative), and −3(−2) = +6."],
+  ["f(−2) = 11","f(−2) = 11 means: input −2, output 11 — the point (−2, 11) is on the graph."]]},
+ fun2:{p:"Find the domain of  f(x) = √(2x − 6) / (x − 5)",steps:[
+  ["Two danger zones: the √ and the fraction","Domain = every input that doesn't break the function. Square roots need inside ≥ 0; denominators can't be 0."],
+  ["2x − 6 ≥ 0  →  x ≥ 3","The square root's inside must be zero or positive."],
+  ["x − 5 ≠ 0  →  x ≠ 5","The denominator can never be zero."],
+  ["Domain: x ≥ 3 and x ≠ 5","Combine BOTH conditions. In interval notation: [3, 5) ∪ (5, ∞)."]]},
+ fun3:{p:"f(x) = 2x + 1,  g(x) = x².  Find (f ∘ g)(3).",steps:[
+  ["(f ∘ g)(3) means f(g(3))","Read right-to-left: g acts FIRST, then f eats g's output."],
+  ["g(3) = 3² = 9","Inner function first."],
+  ["f(9) = 2(9) + 1 = 19","Feed 9 into f. So (f ∘ g)(3) = 19."],
+  ["Compare: (g ∘ f)(3) = g(7) = 49","Order matters! f(g(x)) = 2x² + 1 but g(f(x)) = (2x + 1)². Totally different functions."]]},
+ fun4:{p:"Find the inverse of  f(x) = 3x − 6",steps:[
+  ["y = 3x − 6","Write f(x) as y. The inverse swaps the roles of input and output."],
+  ["x = 3y − 6","SWAP x and y — that's the whole idea of an inverse."],
+  ["x + 6 = 3y  →  y = (x + 6)/3","Now solve for y: add 6, divide by 3."],
+  ["f⁻¹(x) = (x + 6)/3","Note f⁻¹ is NOT 1/f. Verify: f(2) = 0 and f⁻¹(0) = 2 ✓ — the inverse undoes f."]]},
+ fun5:{p:"Describe  y = −2(x + 1)² + 3  compared to y = x²",steps:[
+  ["Template: y = a(x − h)² + k","Read a, h, k. Here a = −2, and (x + 1) = (x − (−1)) so h = −1, k = 3."],
+  ["a = −2: flip + stretch","Negative → reflected over the x-axis (opens down). |−2| = 2 → vertically stretched ×2 (narrower)."],
+  ["(x + 1): shift LEFT 1","Inside changes act horizontally and 'backwards': +1 inside moves left."],
+  ["+3: shift UP 3","Outside changes act vertically and intuitively."],
+  ["Vertex: (−1, 3), opening down","One glance at vertex form tells you the whole graph."]]},
+ fun6:{p:"f(x) = x + 5 if x < 2;  f(x) = x² if x ≥ 2.  Find f(2) and f(0).",steps:[
+  ["Which rule owns the input?","A piecewise function is a machine with a gatekeeper: check the condition BEFORE computing."],
+  ["f(2): is 2 < 2? No. Is 2 ≥ 2? Yes → use x²","Boundary values go to the piece whose inequality includes equals."],
+  ["f(2) = 2² = 4","Apply only that rule."],
+  ["f(0): 0 < 2 → use x + 5 → f(0) = 5","Different input, different piece. That's the whole game."]]},
+ sys1:{p:"Solve:  x + 2y = 8  and  3x − 2y = 8",steps:[
+  ["x + 2y = 8\n3x − 2y = 8","Spot the +2y and −2y — they're opposites. Elimination will be instant."],
+  ["Add the equations:  4x = 16","The y-terms cancel: 2y + (−2y) = 0. That's the whole point of elimination."],
+  ["x = 4","Divide by 4."],
+  ["4 + 2y = 8  →  2y = 4  →  y = 2","Back-substitute x = 4 into either original equation."],
+  ["Check in the OTHER equation: 3(4) − 2(2) = 12 − 4 = 8 ✓","Solution (4, 2) — the point where the two lines cross."]]},
+ sys2:{p:"Solve:  x+y+z = 6,   x−y+z = 2,   x+y−z = 0",steps:[
+  ["Label them ① ② ③","Strategy: eliminate one variable from two different PAIRS → a 2-variable system."],
+  ["① + ②:  2x + 2z = 8  →  x + z = 4","Adding ① and ② kills y."],
+  ["① + ③:  2x + 2y = 6  →  x + y = 3","Adding ① and ③ kills z. Now two small equations."],
+  ["① − ②:  2y = 4  →  y = 2","Subtracting ② from ① isolates y directly."],
+  ["x = 3 − y = 1,  z = 4 − x = 3","Back-substitute up the chain."],
+  ["Check ②: 1 − 2 + 3 = 2 ✓","(x, y, z) = (1, 2, 3). Organization beats cleverness in 3-variable systems."]]},
+ sys3:{p:"Where do  y = x² − 1  and  y = 2x + 2  intersect?",steps:[
+  ["x² − 1 = 2x + 2","Both equal y, so set them equal to each other (substitution)."],
+  ["x² − 2x − 3 = 0","Move everything to one side — always solve quadratics against 0."],
+  ["(x − 3)(x + 1) = 0  →  x = 3 or x = −1","Factor: product −3, sum −2 → −3 and +1."],
+  ["y = 2(3)+2 = 8;  y = 2(−1)+2 = 0","Plug each x into the LINE (easier) to get y."],
+  ["Intersections: (3, 8) and (−1, 0)","Two solutions = the line cuts the parabola twice. The discriminant predicted that."]]},
+ sys4:{p:"Adult tickets $9, child tickets $5. 120 tickets sold for $880. How many adult?",steps:[
+  ["Let a = adult, c = child","Define variables with words FIRST. Every word problem starts here."],
+  ["a + c = 120","Fact #1: total count."],
+  ["9a + 5c = 880","Fact #2: total money. Two facts → two equations."],
+  ["c = 120 − a  →  9a + 5(120 − a) = 880","Substitute so only one variable remains."],
+  ["9a + 600 − 5a = 880  →  4a = 280  →  a = 70","Distribute, combine, solve."],
+  ["Check: 70 adults ($630) + 50 kids ($250) = $880 ✓","Answer the actual question: 70 adult tickets."]]},
+ quad1:{p:"Factor completely:  3x² − 48",steps:[
+  ["3x² − 48","Step 1 of ALL factoring: pull the GCF. Both terms divide by 3."],
+  ["3(x² − 16)","Factor out 3. Now look again at what's left."],
+  ["x² − 16 = x² − 4²","Difference of squares pattern: a² − b² = (a + b)(a − b)."],
+  ["3(x + 4)(x − 4)","'Completely' means keep factoring until nothing factors."],
+  ["Check: (x+4)(x−4) = x² − 16, times 3 ✓","Multiply back out — factoring is just multiplication in reverse."]]},
+ quad2:{p:"Factor:  x² − 5x − 24",steps:[
+  ["Need two numbers: multiply to −24, add to −5","For x² + bx + c, hunt a pair with product c and sum b."],
+  ["Pairs of −24: (−1,24)(−2,12)(−3,8)(−4,6)(−6,4)(−8,3)…","Product is negative → the pair has OPPOSITE signs. List systematically."],
+  ["−8 and 3:  (−8)(3) = −24,  −8 + 3 = −5 ✓","Found it. The bigger absolute value takes the sign of b."],
+  ["x² − 5x − 24 = (x − 8)(x + 3)","Drop the pair straight into the factors."],
+  ["FOIL check: x² + 3x − 8x − 24 = x² − 5x − 24 ✓","For ax² + bx + c (a ≠ 1): same idea with product a·c, then split the middle and group."]]},
+ quad3:{p:"Solve:  x² + 3x − 10 = 0",steps:[
+  ["x² + 3x − 10 = 0","One side must be ZERO before factoring — the Zero Product Property needs it."],
+  ["(x + 5)(x − 2) = 0","Product −10, sum +3 → +5 and −2."],
+  ["x + 5 = 0  or  x − 2 = 0","If a product is zero, one of the factors MUST be zero."],
+  ["x = −5  or  x = 2","Two roots — where the parabola crosses the x-axis."],
+  ["Check x = 2: 4 + 6 − 10 = 0 ✓","Always test at least one."]]},
+ quad4:{p:"Solve by completing the square:  x² + 6x − 7 = 0",steps:[
+  ["x² + 6x = 7","Move the constant out of the way."],
+  ["Half of 6 is 3; 3² = 9","The magic number: (b/2)². This is what makes a perfect square."],
+  ["x² + 6x + 9 = 7 + 9","Add 9 to BOTH sides."],
+  ["(x + 3)² = 16","The left side is now a perfect square — that was the whole point."],
+  ["x + 3 = ±4","Square-root both sides. NEVER forget the ±."],
+  ["x = 1  or  x = −7","x = −3 + 4 or −3 − 4. This method also derives vertex form and the quadratic formula."]]},
+ quad5:{p:"Find the vertex of  y = x² − 4x + 1",steps:[
+  ["h = −b/(2a) = 4/2 = 2","The vertex's x-coordinate has a formula. Here a = 1, b = −4."],
+  ["k = f(2) = 4 − 8 + 1 = −3","Plug h back in to get the y-coordinate."],
+  ["Vertex: (2, −3)","Axis of symmetry: x = 2. Since a > 0, it opens up → (2, −3) is the MINIMUM."],
+  ["Vertex form: y = (x − 2)² − 3","Expand it to confirm: x² − 4x + 4 − 3 = x² − 4x + 1 ✓"]]},
+ quad6:{p:"Solve:  2x² + 3x − 2 = 0",steps:[
+  ["a = 2,  b = 3,  c = −2","Write these down FIRST, signs included. Most formula errors are bookkeeping errors."],
+  ["D = b² − 4ac = 9 − 4(2)(−2) = 9 + 16 = 25","Compute the discriminant separately. −4·2·(−2) = +16."],
+  ["x = (−3 ± √25)/(2·2) = (−3 ± 5)/4","Drop into x = (−b ± √D)/2a."],
+  ["x = 2/4 = 1/2   or   x = −8/4 = −2","Split the ± into its two roots and simplify."],
+  ["Check x = −2: 2(4) − 6 − 2 = 0 ✓","D was a perfect square → rational roots (it would have factored too)."]]},
+ quad7:{p:"How many solutions does  x² − 4x + 5 = 0  have?",steps:[
+  ["a = 1,  b = −4,  c = 5","Only the discriminant is needed to COUNT solutions — no solving."],
+  ["D = (−4)² − 4(1)(5) = 16 − 20 = −4","Careful: (−4)² = +16."],
+  ["D < 0 → no real solutions","The parabola never touches the x-axis."],
+  ["Two complex roots: x = (4 ± 2i)/2 = 2 ± i","Counting complex numbers, EVERY quadratic has exactly 2 roots (Fundamental Theorem of Algebra). D > 0 → 2 real; D = 0 → 1 repeated; D < 0 → complex conjugate pair."]]},
+ quad8:{p:"h(t) = −16t² + 32t + 48. When does the ball land, and how high does it get?",steps:[
+  ["Landing: set h(t) = 0","'Hits the ground' translates to height = 0."],
+  ["−16(t² − 2t − 3) = 0","Factor out −16 to shrink the numbers."],
+  ["(t − 3)(t + 1) = 0  →  t = 3 or t = −1","Factor: product −3, sum −2."],
+  ["t = 3 seconds","Reject t = −1 — time can't be negative. Word problems demand a sanity filter."],
+  ["Peak: t = −b/2a = −32/−32 = 1","Max height happens at the vertex."],
+  ["h(1) = −16 + 32 + 48 = 64 ft","Vertex (1, 64): up for 1 second, peak 64 ft, lands at t = 3."]]},
+ cplx1:{p:"Simplify:  i¹⁸",steps:[
+  ["The cycle: i¹ = i,  i² = −1,  i³ = −i,  i⁴ = 1","Powers of i repeat every 4 steps, forever."],
+  ["18 ÷ 4 = 4 remainder 2","Only the REMAINDER matters — the full cycles are just 1s."],
+  ["i¹⁸ = i² = −1","Any iⁿ collapses via n mod 4. (Remainder 0 means i⁴ = 1.)"]]},
+ cplx2:{p:"Simplify:  (3 + 2i) − (5 − 4i)",steps:[
+  ["(3 + 2i) − (5 − 4i)","The minus distributes to BOTH terms of the second number."],
+  ["= 3 + 2i − 5 + 4i","−(−4i) becomes +4i — the classic trap."],
+  ["= (3 − 5) + (2 + 4)i","Group real with real, imaginary with imaginary — just like combining like terms."],
+  ["= −2 + 6i","Standard form a + bi. Done."]]},
+ cplx3:{p:"Multiply:  (2 + 3i)(4 − i)",steps:[
+  ["FOIL: 2·4 + 2·(−i) + 3i·4 + 3i·(−i)","Multiply complex numbers exactly like binomials."],
+  ["= 8 − 2i + 12i − 3i²","Four products, watch the signs."],
+  ["= 8 + 10i − 3(−1)","THE key move: i² = −1. That −3i² becomes +3."],
+  ["= 11 + 10i","Combine: reals 8 + 3 = 11, imaginary −2i + 12i = 10i."]]},
+ cplx4:{p:"Divide:  (3 + 2i)/(1 − 4i)",steps:[
+  ["Multiply top and bottom by (1 + 4i)","The CONJUGATE of the denominator (flip the imaginary sign). ×(1+4i)/(1+4i) is just ×1."],
+  ["Bottom: (1 − 4i)(1 + 4i) = 1 + 16 = 17","Conjugates multiply to a² + b² — the i's vanish. That's why this works."],
+  ["Top: (3 + 2i)(1 + 4i) = 3 + 12i + 2i + 8i² = −5 + 14i","FOIL the numerator; 8i² = −8."],
+  ["= −5/17 + (14/17)i","Split into standard a + bi form."]]},
+ cplx5:{p:"Solve:  x² − 4x + 13 = 0",steps:[
+  ["D = 16 − 52 = −36","Discriminant first: negative → the roots will be complex."],
+  ["x = (4 ± √(−36))/2","Quadratic formula as usual."],
+  ["√(−36) = √36 · √(−1) = 6i","Pull the negative out as i. This is the only new move."],
+  ["x = (4 ± 6i)/2 = 2 ± 3i","Divide BOTH parts by 2. Complex roots always arrive as conjugate pairs: 2 + 3i and 2 − 3i."]]},
+ poly1:{p:"Simplify:  (2x² − 3x + 1) − (x² + 4x − 5)",steps:[
+  ["(2x² − 3x + 1) − (x² + 4x − 5)","The −1 multiplies EVERY term in the second parentheses."],
+  ["= 2x² − 3x + 1 − x² − 4x + 5","Flip all three signs: −x², −4x, +5."],
+  ["= (2x² − x²) + (−3x − 4x) + (1 + 5)","Group like terms by degree."],
+  ["= x² − 7x + 6","Forgetting to distribute the minus is the #1 polynomial error in existence."]]},
+ poly2:{p:"Divide:  (x³ − 2x² − 5x + 6) ÷ (x − 3)  by synthetic division",steps:[
+  ["Write 3 | 1  −2  −5  6","Use k = 3 (from x − 3) and just the coefficients, in order, no gaps."],
+  ["Bring down the 1","The lead coefficient drops straight down."],
+  ["1×3 = 3;  −2 + 3 = 1","The rhythm: multiply by k, add to the next coefficient."],
+  ["1×3 = 3;  −5 + 3 = −2","Repeat."],
+  ["−2×3 = −6;  6 + (−6) = 0","Bottom row: 1, 1, −2, remainder 0."],
+  ["Quotient: x² + x − 2 = (x + 2)(x − 1)","Remainder 0 means (x − 3) is a FACTOR — and the cubic fully factors: (x−3)(x+2)(x−1)."]]},
+ poly3:{p:"f(x) = x³ − 4x + 1. Find the remainder of f(x) ÷ (x − 2).",steps:[
+  ["Remainder Theorem: remainder = f(2)","No division needed — just evaluate at k."],
+  ["f(2) = 2³ − 4(2) + 1","Substitute 2 for every x."],
+  ["= 8 − 8 + 1 = 1","Remainder is 1."],
+  ["Bonus: f(2) ≠ 0 → (x − 2) is NOT a factor","If f(k) = 0 the remainder is 0 and (x − k) divides evenly — that's the Factor Theorem."]]},
+ poly4:{p:"x = 1 is a zero of  f(x) = x³ − 2x² − 5x + 6. Find ALL zeros.",steps:[
+  ["Verify: f(1) = 1 − 2 − 5 + 6 = 0 ✓","A given zero is a gift: it means (x − 1) is a factor."],
+  ["Synthetic divide by 1:  1 | 1 −2 −5 6","Use the zero to DROP THE DEGREE."],
+  ["Bottom row: 1, −1, −6, 0","Quotient is x² − x − 6."],
+  ["x² − x − 6 = (x − 3)(x + 2)","A quadratic — now factor (or use the formula)."],
+  ["Zeros: x = 1, 3, −2","Degree 3 → exactly 3 zeros. f(x) = (x−1)(x−3)(x+2)."]]},
+ poly5:{p:"Describe the end behavior of  f(x) = −2x³ + 5x² − x + 7",steps:[
+  ["Only the leading term matters: −2x³","For huge |x|, the biggest power swamps everything else. Ignore the rest."],
+  ["Degree 3 = odd → the ends point OPPOSITE ways","Odd powers keep the sign of the input: (−big)³ is −big."],
+  ["Leading coefficient −2 < 0 → flip","x³ normally goes down-left/up-right; the negative flips it."],
+  ["Rises left, falls right (up–down)","As x → −∞, f → +∞; as x → +∞, f → −∞. Even degree would make both ends match instead."]]},
+ poly6:{p:"Build the monic polynomial with a DOUBLE zero at 2 and a zero at −1",steps:[
+  ["f(x) = (x − 2)²(x + 1)","Each zero r gives a factor (x − r); multiplicity = the exponent."],
+  ["(x − 2)² = x² − 4x + 4","Expand the square first."],
+  ["(x² − 4x + 4)(x + 1) = x³ − 3x² + 4","Distribute: x³ + x² − 4x² − 4x + 4x + 4."],
+  ["Graph: TOUCHES at x = 2, CROSSES at x = −1","Even multiplicity bounces off the axis; odd passes through. Degree 3 = 2 + 1 (multiplicities add)."]]},
+ rat1:{p:"Simplify:  (x² − 9)/(x² + 5x + 6)",steps:[
+  ["Factor top: x² − 9 = (x + 3)(x − 3)","ALWAYS factor before canceling. Difference of squares."],
+  ["Factor bottom: x² + 5x + 6 = (x + 2)(x + 3)","Product 6, sum 5 → 2 and 3."],
+  ["Cancel the common FACTOR (x + 3)","You may only cancel whole factors — never terms. Crossing off the x²'s would be illegal."],
+  ["= (x − 3)/(x + 2),  x ≠ −3, −2","x = −3 stays excluded even though it canceled (it's a hole in the graph)."]]},
+ rat2:{p:"Divide:  (x² − 4)/(x + 3)  ÷  (x − 2)/(x + 3)",steps:[
+  ["Flip the second fraction and multiply","Dividing by a fraction = multiplying by its reciprocal. Same rule as 5th grade, fancier costumes."],
+  ["(x² − 4)/(x + 3) · (x + 3)/(x − 2)","Now it's a multiplication problem."],
+  ["= (x + 2)(x − 2)(x + 3) / [(x + 3)(x − 2)]","Factor x² − 4 = (x+2)(x−2), then line everything up."],
+  ["= x + 2","Cancel (x + 3) and (x − 2). Excluded: x ≠ −3, 2."]]},
+ rat3:{p:"Add:  2/(x + 1) + 3/x",steps:[
+  ["LCD = x(x + 1)","Different denominators — build the least common denominator from every factor."],
+  ["= 2x/[x(x + 1)] + 3(x + 1)/[x(x + 1)]","Multiply each fraction, top AND bottom, by whatever it's missing."],
+  ["= [2x + 3(x + 1)] / [x(x + 1)]","One denominator → combine the numerators."],
+  ["= (2x + 3x + 3)/[x(x + 1)] = (5x + 3)/[x(x + 1)]","Distribute and combine. If it were subtraction, that minus would distribute over the WHOLE second numerator."]]},
+ rat4:{p:"Solve:  3/x + 1/2 = 2",steps:[
+  ["Note the restriction: x ≠ 0","Before touching anything, record what x can't be."],
+  ["Multiply EVERY term by the LCD, 2x","This nukes all the fractions at once."],
+  ["6 + x = 4x","2x·(3/x) = 6;  2x·(1/2) = x;  2x·2 = 4x."],
+  ["6 = 3x  →  x = 2","Ordinary linear equation now."],
+  ["Check: 3/2 + 1/2 = 2 ✓ and 2 ≠ 0","Survives the restriction → valid. Any answer that zeroes a denominator gets thrown out (extraneous)."]]},
+ rat5:{p:"Find the asymptotes of  f(x) = (2x + 1)/(x − 3)",steps:[
+  ["Vertical: set the denominator = 0","The graph blows up where the bottom dies: x − 3 = 0."],
+  ["VA: x = 3","(First confirm nothing cancels — a canceled factor would be a hole, not an asymptote.)"],
+  ["Horizontal: compare degrees (1 vs 1)","Equal degrees → HA is the ratio of leading coefficients."],
+  ["HA: y = 2/1 = 2","As x → ±∞, f flattens toward y = 2. (Bottom degree bigger → y = 0; top bigger → no HA, slant instead.)"]]},
+ rad1:{p:"Simplify:  √72",steps:[
+  ["Hunt the biggest perfect square inside 72","Perfect squares: 4, 9, 16, 25, 36, 49… and 36 divides 72."],
+  ["√72 = √(36 · 2)","Split into perfect square × leftover."],
+  ["= √36 · √2","√(ab) = √a·√b — roots split over multiplication."],
+  ["= 6√2","6√2 ≈ 8.49. If you'd used 4·18 you'd get 2√18 — not done, since 18 still hides a 9. Biggest square first saves work."]]},
+ rad2:{p:"Evaluate:  16^(3/4)",steps:[
+  ["b^(m/n) = (ⁿ√b)^m","Bottom of the fraction = the root, top = the power."],
+  ["⁴√16 = 2","Root FIRST — it keeps the numbers tiny. 2⁴ = 16."],
+  ["2³ = 8","Then the power. 16^(3/4) = 8."],
+  ["Contrast: 16^(−3/4) = 1/8","A negative exponent just flips it to the reciprocal. Never makes anything negative."]]},
+ rad3:{p:"Simplify:  √50 + 3√2",steps:[
+  ["√50 = √(25·2) = 5√2","They don't look alike yet — simplify each radical first."],
+  ["5√2 + 3√2","NOW they're like radicals — same number under the root."],
+  ["= 8√2","Add coefficients exactly like 5x + 3x = 8x."],
+  ["Warning: √50 + √2 ≠ √52","Roots do NOT split over addition. Only like radicals combine."]]},
+ rad4:{p:"Solve:  √(x + 7) = x + 1",steps:[
+  ["Radical is already isolated → square both sides","(√(x+7))² = (x+1)². Squaring is powerful but can create fake solutions — we'll check later."],
+  ["x + 7 = x² + 2x + 1","(x + 1)² = x² + 2x + 1, NOT x² + 1. FOIL it."],
+  ["x² + x − 6 = 0  →  (x + 3)(x − 2) = 0","Gather to one side, factor."],
+  ["Candidates: x = −3 and x = 2","Both solve the SQUARED equation. But do they solve the original?"],
+  ["Test −3: √4 = 2, but x + 1 = −2 ✗","2 ≠ −2 → EXTRANEOUS. The squaring invented it."],
+  ["Test 2: √9 = 3 and 2 + 1 = 3 ✓ → x = 2","Only x = 2 survives. The check is not optional — it's part of the method (MLS A2.NQ.A.4)."]]},
+ exp1:{p:"Simplify:  (x³ · x⁵)/x²   and   2⁻³",steps:[
+  ["x³ · x⁵ = x⁸","Same base multiplied → ADD exponents (x·x·x times x·x·x·x·x is 8 x's)."],
+  ["x⁸/x² = x⁶","Division → SUBTRACT exponents."],
+  ["2⁻³ = 1/2³ = 1/8","Negative exponent = reciprocal — it never makes the value negative."],
+  ["Also: (x³)⁵ = x¹⁵, and x⁰ = 1","Power to a power multiplies. Every rule here is just counting factors."]]},
+ exp2:{p:"A $20,000 truck loses 15% of its value each year. Value after 2 years?",steps:[
+  ["Losing 15% = keeping 85%","Decay factor b = 1 − 0.15 = 0.85. This one conversion is the whole battle."],
+  ["V(t) = 20000(0.85)ᵗ","Exponential model: start × factor^time."],
+  ["V(2) = 20000(0.85)² = 20000(0.7225)","Two years = multiply by 0.85 twice."],
+  ["= $14,450","NOT the same as losing 30% once ($14,000) — each year's loss hits a smaller amount. That's exponential."]]},
+ exp3:{p:"Convert  2⁵ = 32  to log form (and back)",steps:[
+  ["A logarithm IS an exponent","log₂32 asks: '2 to what power gives 32?' The answer is the exponent."],
+  ["2⁵ = 32  ⟺  log₂32 = 5","Base stays the base; the exponent and the result trade places."],
+  ["Memory anchor: base^(log answer) = argument","log_b(x) = y ⟺ bʸ = x. Going back and forth fluently unlocks every log equation."],
+  ["Quick checks: log₁₀1000 = 3;  log₇7 = 1;  log₉1 = 0","Because 10³ = 1000, 7¹ = 7, 9⁰ = 1."]]},
+ exp4:{p:"Evaluate:  log₃81   and   log₅(1/25)",steps:[
+  ["log₃81: '3 to what power is 81?'","Translate to the exponential question first — always."],
+  ["3⁴ = 81 → log₃81 = 4","Count: 3, 9, 27, 81."],
+  ["log₅(1/25): '5 to what power is 1/25?'","1/25 is a reciprocal → expect a NEGATIVE exponent."],
+  ["5⁻² = 1/25 → log₅(1/25) = −2","Inputs between 0 and 1 give negative logs. And log₉3 = 1/2 since 9^(1/2) = 3 — roots give fractions."]]},
+ exp5:{p:"Expand  log(x³y)  and condense  2log a − log b",steps:[
+  ["log(x³y) = log x³ + log y","Product inside → SUM outside."],
+  ["= 3log x + log y","Power rule: the exponent slides down front."],
+  ["2log a = log a²","Condensing runs the rules backwards: coefficient → exponent."],
+  ["log a² − log b = log(a²/b)","Subtraction → division inside one log. These mirror the exponent rules exactly — a log IS an exponent."]]},
+ exp6:{p:"Solve:  9ˣ = 27^(x − 1)",steps:[
+  ["Both sides are powers of 3","9 = 3², 27 = 3³. Same-base is the fastest weapon — look for it first."],
+  ["3^(2x) = 3^(3(x − 1))","Rewrite each side: (3²)ˣ = 3^2x and (3³)^(x−1) = 3^(3x−3)."],
+  ["2x = 3x − 3","Same base, equal results → the exponents must be equal."],
+  ["x = 3","Solve the linear equation. Check: 9³ = 729 and 27² = 729 ✓"]]},
+ exp7:{p:"Solve:  log₂(x) + log₂(x − 2) = 3",steps:[
+  ["log₂[x(x − 2)] = 3","Two logs, same base, added → condense into ONE log (product rule)."],
+  ["x(x − 2) = 2³ = 8","Convert to exponential form — the log is gone."],
+  ["x² − 2x − 8 = 0  →  (x − 4)(x + 2) = 0","Standard quadratic: factor it."],
+  ["Candidates: x = 4 and x = −2","Both solve the quadratic. But logs have a domain..."],
+  ["x = −2 makes log₂(x) undefined → reject","You can't take the log of a negative. EXTRANEOUS."],
+  ["x = 4 ✓  (log₂4 + log₂2 = 2 + 1 = 3)","Checking arguments are positive is mandatory, not polite."]]},
+ seq1:{p:"Arithmetic sequence: a₁ = 7, d = 4. Find a₁₀.",steps:[
+  ["The pattern: 7, 11, 15, 19, …","Arithmetic = ADD the same d each step."],
+  ["aₙ = a₁ + (n − 1)d","From a₁ to a₁₀ you take 9 steps — that's the (n − 1)."],
+  ["a₁₀ = 7 + 9(4)","n = 10 → nine jumps of 4."],
+  ["= 7 + 36 = 43","Sanity check with a smaller case: a₃ = 7 + 2(4) = 15 ✓ matches the pattern."]]},
+ seq2:{p:"Geometric sequence: 3, 6, 12, … Find a₆.",steps:[
+  ["r = 6/3 = 2","Geometric = MULTIPLY by the same r. Find r by dividing neighbors."],
+  ["aₙ = a₁ · rⁿ⁻¹","From term 1 to term 6: five multiplications — hence the n − 1."],
+  ["a₆ = 3 · 2⁵ = 3 · 32","Exponent BEFORE multiplication (order of operations)."],
+  ["= 96","Check the chain: 3, 6, 12, 24, 48, 96 ✓"]]},
+ seq3:{p:"a₁ = 2,  aₙ₊₁ = 3aₙ − 1.  Find a₄.",steps:[
+  ["Recursive = each term built from the last","No shortcut formula — march forward one term at a time."],
+  ["a₂ = 3(2) − 1 = 5","Feed a₁ into the rule."],
+  ["a₃ = 3(5) − 1 = 14","Feed a₂ in."],
+  ["a₄ = 3(14) − 1 = 41","Label each term as you go — losing track of which term you're on is the main error."]]},
+ seq4:{p:"Find the sum:  4 + 7 + 10 + … + 31",steps:[
+  ["First find n: 31 = 4 + (n − 1)(3)","How many terms? Use the nth-term formula backwards."],
+  ["27 = 3(n − 1) → n = 10","Ten terms."],
+  ["Sₙ = n(a₁ + aₙ)/2","Gauss's trick: pair first+last (35), second+second-to-last (35)… every pair sums the same."],
+  ["S₁₀ = 10(4 + 31)/2 = 5 · 35 = 175","'Number of terms × average of the ends.' That's the whole formula."]]},
+ seq5:{p:"Sum:  5 + 10 + 20 + … (6 terms).  Then:  8 + 4 + 2 + 1 + … forever.",steps:[
+  ["Finite: Sₙ = a₁(rⁿ − 1)/(r − 1)","Here a₁ = 5, r = 2, n = 6."],
+  ["S₆ = 5(2⁶ − 1)/(2 − 1) = 5(63) = 315","Check the scale: last term is 160, sum 315 — plausible."],
+  ["Infinite: r = 1/2, |r| < 1 → it CONVERGES","Terms shrink fast enough that the total stays finite."],
+  ["S = a₁/(1 − r) = 8/(1 − ½) = 16","8 + 4 + 2 + 1 + ½ + … walks halfway to 16 forever. If |r| ≥ 1, no infinite sum exists."]]},
+ data1:{p:"From 7 runners: medals (1st/2nd) vs. picking 2 for a team",steps:[
+  ["The one question: does ORDER matter?","Medals: silver vs gold differs → order matters. A team of 2: swapping them changes nothing."],
+  ["Medals: P(7,2) = 7 × 6 = 42","Permutation: 7 choices for gold, then 6 for silver."],
+  ["Team: C(7,2) = 42/2 = 21","Combination: each pair was counted twice in the 42 (AB and BA), so divide by 2! = 2."],
+  ["General: C(n,k) = P(n,k)/k!","Combinations = permutations with the orderings divided out. That's the entire relationship."]]},
+ data2:{p:"Bag: 3 red, 5 blue, 2 green. P(not blue)?  P(two reds, no replacement)?",steps:[
+  ["P(not blue) = 1 − P(blue) = 1 − 5/10 = 1/2","Complements are the fast lane: count the opposite, subtract from 1."],
+  ["Two reds without replacement: first draw 3/10","3 favorable out of 10 total."],
+  ["Second draw: 2/9","One red is GONE — numerator and denominator both shrink."],
+  ["P = (3/10)(2/9) = 6/90 = 1/15","Multiply along the path. 'Without replacement' means the second fraction always changes."]]},
+ data3:{p:"A fair coin is flipped 4 times. P(exactly 2 heads)?",steps:[
+  ["Total outcomes: 2⁴ = 16","Each flip doubles the possibilities."],
+  ["Ways to place 2 heads among 4 flips: C(4,2) = 6","HHTT, HTHT, HTTH, THHT, THTH, TTHH — the combination counts WHICH flips are heads."],
+  ["P = 6/16 = 3/8","Favorable over total."],
+  ["General: C(n,k) pᵏ(1−p)ⁿ⁻ᵏ","With an unfair coin the arrangements each cost pᵏ(1−p)ⁿ⁻ᵏ instead of 1/2ⁿ — same counting, different weights."]]},
+ data4:{p:"Raffle: 50 tickets at $2. One prize: $60. Expected value of a ticket?",steps:[
+  ["EV = Σ (value × probability)","The long-run average per play — the casino's favorite number."],
+  ["Expected winnings: (1/50)($60) = $1.20","One chance in 50 at $60."],
+  ["Subtract the cost: 1.20 − 2 = −$0.80","You pay $2 no matter what."],
+  ["EV = −$0.80 per ticket","Buy 100 tickets, expect to lose ≈ $80. Negative EV: fine as a donation, bad as a strategy."]]},
+ data5:{p:"Scores: normal, μ = 100, σ = 15. How unusual is 130?",steps:[
+  ["z = (x − μ)/σ = (130 − 100)/15","The z-score counts standard deviations from the mean."],
+  ["z = 2","130 sits exactly 2σ above average."],
+  ["Empirical rule: 95% lies within 2σ","So 5% lies beyond ±2σ — split between the two tails."],
+  ["≈ 2.5% score above 130","z-scores also let you compare different scales fairly: z = 2 beats z = 1.4, whatever the raw points were."]]}
+};
+
 /* ---------- formula reference ---------- */
 var REFS=[
  {u:"quad",items:["Quadratic formula: x = [−b ± √(b²−4ac)] / 2a","Discriminant: D = b²−4ac (D&gt;0 two real; D=0 one; D&lt;0 two complex)","Vertex: x = −b/2a; vertex form y = a(x−h)²+k","Complete the square: add (b/2)²"]},
@@ -1962,7 +2306,9 @@ function questTick(ok){
 
 /* ---------- mistake journal ---------- */
 function logMistake(skillId,qo,userAns){
-  S.journal.unshift({t:Date.now(),sk:skillId,q:qo.html,ur:String(userAns).slice(0,60),ans:qo.type==="mc"?qo.ans:qo.ans});
+  var wk="";
+  if(sess&&sess.mode!=="mock"&&sess.mode!=="diag"&&sess.workTxt)wk=String(sess.workTxt).slice(0,240);
+  S.journal.unshift({t:Date.now(),sk:skillId,q:qo.html,ur:String(userAns).slice(0,60),ans:qo.ans,wk:wk});
   if(S.journal.length>40)S.journal.length=40;
   save();
 }
@@ -1977,9 +2323,20 @@ function unlockBeast(){
   for(i=0;i<UNITS.length;i++)if(unitMastery(UNITS[i].id)>=60)n++;
   return n>=3;
 }
-function startPractice(skillId){
+function startPractice(skillId,force){
+  if(!force&&sk(skillId).att===0&&WORKED[skillId]){
+    openLesson(skillId,true);
+    toast("📖 New skill — watch how it's done first. (You can skip ahead.)");
+    return;
+  }
   sess={mode:"practice",skillId:skillId,idx:0,cor:0,wrong:0,results:[],hintUsed:false};
   nextQ();
+}
+/* leave a running session to go study the worked example */
+function toLesson(id){
+  if(sess&&sess.timerId)clearInterval(sess.timerId);
+  sess=null;
+  openLesson(id);
 }
 function startQuiz(unitId){
   var u=unitById(unitId),items=[],i;
@@ -2065,6 +2422,7 @@ function nextQ(){
   if(total&&sess.idx>=total){endSess();return;}
   var made=makeQ();
   sess.cur=made;sess.qo=made.qo;sess.locked=false;sess.mcPick=-1;sess.hintUsed=false;
+  sess.workImg=null;sess.workTxt="";sess.drew=false;sess.workInit=false;
   renderTrain();
 }
 function submitAns(){
@@ -2077,6 +2435,13 @@ function submitAns(){
     var box=document.getElementById("ansBox");
     input=box?box.value:"";
     if(normTxt(input)===""){toast("Type an answer first!");return;}
+  }
+  // capture scratch work before the re-render wipes the canvas
+  if(sess.mode!=="blitz"){
+    var wcv=document.getElementById("workCv");
+    if(wcv&&sess.drew){try{sess.workImg=wcv.toDataURL("image/png");}catch(e2){}}
+    var wtx=document.getElementById("workTx");
+    if(wtx)sess.workTxt=wtx.value;
   }
   var ok=checkAnswer(qo,input);
   sess.locked=true;sess.lastOk=ok;sess.lastInput=input;
@@ -2111,6 +2476,43 @@ function showHint(){
   sess.hintUsed=true;
   var h=document.getElementById("hintBox");
   if(h){h.classList.remove("hidden");}
+}
+/* ---------- show-your-work scratchpad ---------- */
+function togWork(){
+  if(!sess)return;
+  var wa=document.getElementById("workArea");if(!wa)return;
+  sess.workOpen=!sess.workOpen;
+  var b=document.getElementById("workBtn");
+  if(b)b.innerHTML="✏️ "+(sess.workOpen?"Hide":"Show")+" work";
+  if(sess.workOpen){wa.classList.remove("hidden");initWorkArea();}
+  else{wa.classList.add("hidden");}
+  SFX.click();
+}
+function initWorkArea(){
+  var cv=document.getElementById("workCv");if(!cv||!sess)return;
+  if(sess.workInit)return;
+  var w=cv.parentNode.clientWidth-20;
+  if(w<50)return;
+  sess.workInit=true;
+  cv.width=w;cv.height=240;
+  var ctx=cv.getContext("2d");
+  ctx.strokeStyle="#ffd97a";ctx.lineWidth=2.5;ctx.lineCap="round";ctx.lineJoin="round";ctx.fillStyle="#ffd97a";
+  var drawing=false,px=0,py=0;
+  function pos(e){var r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*(cv.width/r.width),y:(e.clientY-r.top)*(cv.height/r.height)};}
+  cv.onpointerdown=function(e){drawing=true;sess.drew=true;var p=pos(e);px=p.x;py=p.y;
+    ctx.beginPath();ctx.arc(px,py,1.2,0,6.3);ctx.fill();
+    try{cv.setPointerCapture(e.pointerId);}catch(err){}
+    e.preventDefault();};
+  cv.onpointermove=function(e){if(!drawing)return;var p=pos(e);
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(p.x,p.y);ctx.stroke();
+    px=p.x;py=p.y;e.preventDefault();};
+  cv.onpointerup=cv.onpointercancel=function(){drawing=false;};
+}
+function clearWork(){
+  var cv=document.getElementById("workCv");
+  if(cv){var ctx=cv.getContext("2d");ctx.clearRect(0,0,cv.width,cv.height);}
+  if(sess){sess.drew=false;sess.workImg=null;}
+  var tx=document.getElementById("workTx");if(tx)tx.value="";
 }
 function endSess(){
   if(!sess)return;
@@ -2212,7 +2614,9 @@ function recommend(){
   var w=weakSkills(1);
   if(w.length&&w[0].m<75){
     var d=skillDef(w[0].d.id);
-    return {label:"🎯 Train: "+d.name,act:"startPractice('"+d.id+"')",why:"Your weakest skill right now ("+Math.round(w[0].m)+"%). Attack weaknesses first."};
+    if(w[0].m<50&&WORKED[d.id])
+      return {label:"📖 Re-learn: "+d.name,act:"openLesson('"+d.id+"')",why:"Your weakest skill ("+Math.round(w[0].m)+"%). Watch a worked example first, then drill it."};
+    return {label:"🎯 Train: "+d.name,act:"startPractice('"+d.id+"',true)",why:"Your weakest skill right now ("+Math.round(w[0].m)+"%). Attack weaknesses first."};
   }
   if(unlockBeast())return {label:"🐲 Beast Mode",act:"startBeast()",why:"You're strong — time for non-routine problems."};
   var u=UNITS[ri(0,UNITS.length-1)];
@@ -2296,11 +2700,51 @@ function openSkill(id){
   var h='<div class="card" style="background:none;border:none;padding:0"><div class="row"><button class="btn sec sm" onclick="go(\'tree\')">← Back</button><div class="grow"></div><span class="chip">'+u.ic+' '+u.name+'</span></div></div>';
   h+='<div class="card"><h2>'+d.name+'</h2><div class="row" style="margin:8px 0">'+tierTag(st.m,st.att)+'<div class="grow">'+mbar(st.m,st.att)+'</div></div>';
   h+='<div class="grid3" style="margin-top:10px"><div class="stat"><div class="sv">'+st.att+'</div><div class="sl">ATTEMPTS</div></div><div class="stat"><div class="sv">'+acc+'%</div><div class="sl">ACCURACY</div></div><div class="stat"><div class="sv">L'+(st.att?pickLevel(id):1)+'</div><div class="sl">NEXT LEVEL</div></div></div></div>';
-  h+='<div class="card"><h3>📖 Study Notes</h3><div class="sub" style="font-size:13.5px;color:var(--txt);line-height:1.7">'+(LESSONS[id]||"Practice makes the lesson.")+'</div></div>';
-  h+='<div class="card"><h3>🎚️ Difficulty Ladder</h3><div class="sub">L1 Foundation → L2 Fluency → L3 Advanced → L4 Beast → L5 Elite. The engine adapts automatically: hot streaks push you up, struggles step you down and re-teach.</div></div>';
-  h+='<button class="btn wide" onclick="startPractice(\''+id+'\')">🥊 Practice This Skill</button>';
+  h+='<div class="card"><h3>📖 Study Notes</h3><div class="sub" style="font-size:13.5px;color:var(--txt);line-height:1.7">'+(LESSONS[id]||"Practice makes the lesson.")+'</div>'+(WORKED[id]?'<div class="sub" style="margin-top:8px">Includes a full step-by-step worked example in the lesson. 👇</div>':'')+'</div>';
+  h+='<div class="card"><h3>🎚️ How training works here</h3><div class="sub" style="line-height:1.7"><b>1. Learn</b> — walk through a solved example, one step at a time, with the reasoning behind every move.<br><b>2. Practice</b> — fresh problems that adapt: L1 Foundation → L5 Elite. Hot streaks push you up; struggles step you down and re-teach.<br><b>3. Show your work</b> — open the ✏️ scratchpad on any question to write out your steps before answering.</div></div>';
+  if(st.att===0&&WORKED[id]){
+    h+='<button class="btn wide" onclick="openLesson(\''+id+'\')">📖 Learn This Skill First</button>';
+    h+='<button class="btn sec wide" style="margin-top:8px" onclick="startPractice(\''+id+'\',true)">🥊 Skip Straight to Practice</button>';
+  }else{
+    h+='<button class="btn wide" onclick="startPractice(\''+id+'\',true)">🥊 Practice This Skill</button>';
+    if(WORKED[id])h+='<button class="btn sec wide" style="margin-top:8px" onclick="openLesson(\''+id+'\')">📖 Review the Worked Example</button>';
+  }
   el("main").innerHTML=h;
   window.scrollTo(0,0);
+}
+
+/* ---------- LESSON (guided worked example) ---------- */
+var lessonSk=null,lessonStep=1,lessonGated=false;
+function openLesson(id,gated){
+  lessonSk=id;lessonStep=1;lessonGated=!!gated;view="lesson";
+  renderLesson();
+}
+function lessonNext(){lessonStep++;SFX.click();renderLesson();}
+function lessonAll(){lessonStep=999;renderLesson();}
+function renderLesson(){
+  var id=lessonSk,d=skillDef(id),u=unitById(d.unit),w=WORKED[id];
+  var h='<div class="row" style="margin-bottom:10px"><button class="btn sec sm" onclick="openSkill(\''+id+'\')">← Skill</button><div class="grow"></div><span class="chip">'+u.ic+' '+u.name+'</span></div>';
+  h+='<div class="card"><h2>📖 '+d.name+'</h2><div class="sub" style="font-size:13.5px;color:var(--txt);line-height:1.75;margin-top:6px">'+(LESSONS[id]||"")+'</div></div>';
+  if(w){
+    var total=w.steps.length,shown=Math.min(lessonStep,total),i;
+    h+='<div class="card"><h3>👀 Watch one get solved</h3><div class="sub" style="margin-bottom:10px">Tap through the steps. Read the <i>why</i> under each line — that\'s where the skill lives.</div>';
+    h+='<div class="wex"><div class="wexp">'+w.p+'</div><div class="steps">';
+    for(i=0;i<shown;i++){
+      h+='<div class="step'+(i===total-1?' final':'')+'"><div class="stepn">'+(i+1)+'</div><div><div class="stepm">'+w.steps[i][0].replace(/\n/g,"<br>")+'</div><div class="stepw">'+w.steps[i][1]+'</div></div></div>';
+    }
+    h+='</div>';
+    if(shown<total){
+      h+='<div class="row" style="margin-top:12px"><button class="btn grow" onclick="lessonNext()">👉 Show next step ('+shown+'/'+total+')</button><button class="btn sec sm" onclick="lessonAll()">Show all</button></div>';
+    }else{
+      h+='<div class="fb ok" style="margin-top:12px"><b>That\'s the full playbook.</b> Before you practice, try to say the steps out loud without looking — if you can narrate it, you own it.</div>';
+      h+='<button class="btn wide grn" onclick="startPractice(\''+id+'\',true)">🥊 Your Turn — Practice Now</button>';
+    }
+    h+='</div>';
+  }
+  if(lessonGated&&(!w||lessonStep<((w&&w.steps.length)||0)))
+    h+='<div class="center sub" style="margin-top:4px"><span style="cursor:pointer;color:var(--blue)" onclick="startPractice(\''+id+'\',true)">I already know this — skip to practice →</span></div>';
+  el("main").innerHTML=h;
+  window.scrollTo(0,document.body.scrollHeight>0&&lessonStep>1?document.body.scrollHeight:0);
 }
 
 /* ---------- BATTLE ---------- */
@@ -2357,7 +2801,7 @@ function renderStats(){
   if(!S.journal.length)h+='<div class="sub">No mistakes logged yet. Go make some — that\'s how you grow. 😄</div>';
   for(i=0;i<S.journal.length&&i<8;i++){
     var m=S.journal[i],dj=skillDef(m.sk);
-    h+='<div style="border-top:1px solid var(--line);padding:8px 0"><div class="sub" style="font-size:11px">'+(dj?unitById(dj.unit).ic+' '+dj.name:m.sk)+'</div><div style="font-size:13px;margin:4px 0">'+m.q+'</div><div class="sub">You said: <span style="color:var(--red)">'+esc(m.ur)+'</span> · Correct: <span style="color:var(--green)">'+esc(m.ans)+'</span> <span style="cursor:pointer;color:var(--blue)" onclick="startPractice(\''+m.sk+'\')">Drill this →</span></div></div>';
+    h+='<div style="border-top:1px solid var(--line);padding:8px 0"><div class="sub" style="font-size:11px">'+(dj?unitById(dj.unit).ic+' '+dj.name:m.sk)+'</div><div style="font-size:13px;margin:4px 0">'+m.q+'</div>'+(m.wk?'<div class="workpre" style="margin:4px 0;font-size:12px">'+esc(m.wk)+'</div>':'')+'<div class="sub">You said: <span style="color:var(--red)">'+esc(m.ur)+'</span> · Correct: <span style="color:var(--green)">'+esc(m.ans)+'</span>'+(WORKED[m.sk]?' · <span style="cursor:pointer;color:var(--gold)" onclick="openLesson(\''+m.sk+'\')">📖 Re-learn</span>':'')+' · <span style="cursor:pointer;color:var(--blue)" onclick="startPractice(\''+m.sk+'\',true)">Drill →</span></div></div>';
   }
   h+='</div>';
   h+='<div class="card"><h3>⚠️ Danger Zone</h3><button class="btn sec sm" onclick="resetAll()">Reset ALL progress</button></div>';
@@ -2371,6 +2815,7 @@ function resetAll(){
 /* ---------- REFERENCE / CURRICULUM ---------- */
 function renderRef(){
   var h='<div class="card" style="background:none;border:none;padding:0"><h2>📚 Study Center</h2><div class="sub">Formula vault + the official curriculum map.</div></div>';
+  h+='<div class="card click" onclick="go(\'tree\')" style="border-color:var(--gold)"><div class="row"><div style="font-size:24px">📖</div><div class="grow"><h3>Worked Example Library</h3><div class="sub">Every one of the '+(function(){var n=0,k;for(k in WORKED)n++;return n;})()+' skills has a full step-by-step solved example with the reasoning behind each move. Open any skill in the tree and tap <b>Learn</b>.</div></div><span class="chev">▶</span></div></div>';
   var i,j;
   for(i=0;i<REFS.length;i++){
     var u=unitById(REFS[i].u);
@@ -2413,7 +2858,12 @@ function renderTrain(){
   if(u)h+='<span class="chip">'+u.ic+' '+d.name+'</span>';
   h+='<span class="chip">Level '+sess.cur.L+' — '+["","Foundation","Fluency","Advanced","Beast","Elite"][sess.cur.L]+'</span>';
   h+='</div>'+qo.html+'</div>';
+  var skid=sess.cur.sk;
   if(!sess.locked){
+    // coach steps in after repeated misses on a skill
+    if(sess.mode==="practice"&&sk(skid).wrongRow>=2&&WORKED[skid]){
+      h='<div class="coach">🧑‍🏫 <b>Coach:</b> two misses in a row on this skill — that\'s a signal, not a failure. Let\'s watch one get solved, then come back.<div style="margin-top:8px"><button class="btn sm" onclick="toLesson(\''+skid+'\')">📖 Walk me through an example</button></div></div>'+h;
+    }
     if(qo.type==="mc"){
       var i;
       for(i=0;i<qo.choices.length;i++)h+='<button class="mcbtn" onclick="pickMC('+i+')">'+String.fromCharCode(65+i)+'.  '+qo.choices[i]+'</button>';
@@ -2421,7 +2871,12 @@ function renderTrain(){
       h+='<input id="ansBox" class="ansin" autocomplete="off" autocapitalize="off" placeholder="Your answer…">';
     }
     if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<div id="hintBox" class="fb hint hidden">💡 '+qo.hint+'</div>';
+    // show-your-work scratchpad (not in Blitz — too fast)
+    if(sess.mode!=="blitz"){
+      h+='<div id="workArea" class="workarea'+(sess.workOpen?'':' hidden')+'"><div class="row" style="margin-bottom:8px"><div class="sub grow">✏️ Work it out — draw with a finger/stylus, or type your steps.</div><button class="btn sec sm" onclick="clearWork()">Clear</button></div><canvas id="workCv"></canvas><textarea id="workTx" placeholder="Type your steps here… e.g.&#10;3x − 6 + 4 = 13&#10;3x = 15&#10;x = 5"></textarea></div>';
+    }
     h+='<div class="row" style="margin-top:12px">';
+    if(sess.mode!=="blitz")h+='<button id="workBtn" class="btn sec" onclick="togWork()">✏️ '+(sess.workOpen?'Hide':'Show')+' work</button>';
     if(qo.hint&&sess.mode!=="diag"&&sess.mode!=="mock")h+='<button class="btn sec" onclick="showHint()">💡 Hint</button>';
     h+='<button class="btn grow" onclick="submitAns()">Submit</button></div>';
   }else{
@@ -2435,12 +2890,22 @@ function renderTrain(){
     }else{
       h+='<input class="ansin '+(sess.lastOk?"ok":"bad")+'" value="'+esc(sess.lastInput)+'" disabled>';
     }
+    // show the work they wrote/drew alongside the verdict
+    if(sess.workImg||((sess.workTxt||"").replace(/\s/g,"")!=="")){
+      h+='<div class="card" style="margin-top:12px;margin-bottom:0"><h3>✏️ Your work</h3>';
+      if(sess.workImg)h+='<img class="workimg" src="'+sess.workImg+'" alt="your scratch work">';
+      if((sess.workTxt||"").replace(/\s/g,"")!=="")h+='<div class="workpre" style="margin-top:8px">'+esc(sess.workTxt)+'</div>';
+      h+='<div class="sub" style="margin-top:6px">Compare your steps against the solution below — find exactly where the paths split.</div></div>';
+    }
     h+='<div class="fb '+(sess.lastOk?"ok":"bad")+'" style="margin-top:12px"><b>'+(sess.lastOk?pick(["✅ Crushed it!","✅ Correct!","✅ Beast move!","✅ Clean."]):"❌ Not this time.")+'</b>';
     if(!sess.lastOk&&qo.type!=="mc")h+='<div style="margin-top:4px">Correct answer: <b>'+esc(qo.ans)+'</b></div>';
     h+='<div style="margin-top:6px">'+(qo.expl||"")+'</div></div>';
+    if(!sess.lastOk&&WORKED[skid]&&(sess.mode==="practice"||sess.mode==="review"||sess.mode==="quiz"))
+      h+='<button class="btn sec wide" style="margin-bottom:8px" onclick="toLesson(\''+skid+'\')">📖 Walk me through a full example</button>';
     h+='<button class="btn wide" onclick="nextQ()">Next →</button>';
   }
   el("main").innerHTML=h;
+  if(!sess.locked&&sess.workOpen)initWorkArea();
   var box=el("ansBox");
   if(box)box.focus();
   window.scrollTo(0,0);
@@ -2509,6 +2974,7 @@ function renderSummary(){
   }
   document.addEventListener("keydown",function(e){
     if(view!=="train"||!sess)return;
+    if(e.target&&e.target.tagName==="TEXTAREA")return; // typing steps in the work pad
     if(e.key==="Enter"){
       if(sess.locked)nextQ();else submitAns();
     }
