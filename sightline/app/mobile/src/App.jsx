@@ -5,6 +5,9 @@ import React, { useState } from "react";
 import { useLive, useSite } from "./api.js";
 import Home from "./screens/Home.jsx";
 import EventScreen from "./screens/Event.jsx";
+import Ask from "./screens/Ask.jsx";
+import Scenes from "./screens/Scenes.jsx";
+import Setup from "./screens/Setup.jsx";
 
 const TABS = [
   { id: "home", label: "Home", ico: "⌂" },
@@ -13,23 +16,13 @@ const TABS = [
   { id: "setup", label: "Setup", ico: "✚" },
 ];
 
-function Stub({ name }) {
-  return (
-    <main>
-      <div className="empty" style={{ paddingTop: 80 }}>
-        {name} ships in Sprint 3.
-      </div>
-    </main>
-  );
-}
-
 export default function App() {
   const { stories, byId, events, connected } = useLive();
   const site = useSite();
   const [tab, setTab] = useState("home");
   const [storyId, setStoryId] = useState(null);
 
-  const inStory = tab === "home" && storyId;
+  const inStory = (tab === "home" || tab === "ask") && storyId;
   const armed = site ? site.scenario.armed : false;
 
   return (
@@ -52,9 +45,9 @@ export default function App() {
         <Home site={site} stories={stories} events={events}
           openStory={id => setStoryId(id)} />}
       {inStory && <EventScreen site={site} story={byId[storyId]} />}
-      {tab === "ask" && <Stub name="Ask (chat over event memory)" />}
-      {tab === "scenes" && <Stub name="Scenes (paint zones, deter rules)" />}
-      {tab === "setup" && <Stub name="Onboarding and Scan-to-Quote" />}
+      {tab === "ask" && !inStory && <Ask openStory={id => setStoryId(id)} />}
+      {tab === "scenes" && <Scenes site={site} />}
+      {tab === "setup" && <Setup />}
 
       <nav className="tabbar">
         {TABS.map(t => (

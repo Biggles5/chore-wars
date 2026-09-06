@@ -23,6 +23,14 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from core import Correlator, HistReID  # noqa: E402
+from ask import answer as ask_answer  # noqa: E402
+
+_QUOTE = Path(__file__).resolve().parents[2] / "agents" / "quote"
+sys.path.insert(0, str(_QUOTE))
+try:
+    from quote import quote as quote_engine  # noqa: E402
+except ImportError:
+    quote_engine = None
 
 _AGENTS = Path(__file__).resolve().parents[2] / "agents" / "narrator"
 sys.path.insert(0, str(_AGENTS))
@@ -118,6 +126,7 @@ def _mqtt_loop():
                          client_id="sightline-correlator")
     client.on_connect = on_connect
     client.on_message = on_message
+    state.mqtt_client = client
     while True:
         try:
             client.connect(MQTT_HOST, MQTT_PORT, keepalive=30)
@@ -196,11 +205,101 @@ def story(story_id: str):
 def deter_now(site_id: str):
     """Manual deter from the app's Deter Now button. Publishes the command
     on the bus when a broker is connected; always logs the intent."""
-    cmd = {"pattern": "zone-follow-strobe", "segments": ["all"],
-           "source": "app.manual", "site_id": site_id}
+    cmd = {"pattern": "zone-follow-strobe", "zone": "driveway",
+           "segments": ["all"], "source": "app.manual", "site_id": site_id}
     state._push("deter_cmd", cmd)
-    return {"ok": True, "cmd": cmd,
-            "note": "published to bus when broker connected; sim obeys in Sprint 3"}
+    published = False
+    client = getattr(state, "mqtt_client", None)
+    if client is not None and state.mqtt_status.startswith("connected"):
+        try:
+            client.publish(f"sightline/{site_id}/deter/cmd", json.dumps(cmd), qos=1)
+            published = True
+        except Exception:
+            pass
+    return {"ok": True, "cmd": cmd, "published_mqtt": published}
+
+
+@app.post("/ask")
+def ask(body: dict):
+    """Chat over event memory. Mock by default; SIGHTLINE_ASK_MODE=claude
+    with an API key upgrades retrieval-grounded answers."""
+    question = (body or {}).get("question", "").strip()
+    if not question:
+        raise HTTPException(422, "question required")
+    with state.lock:
+        stories = state.correlator.story_list()
+    return ask_answer(question, stories)
+
+
+@app.post("/quote")
+def quote(body: dict):
+    """Scan-to-quote: roofline_ft, corners, eave_heights_ft, brand."""
+    if quote_engine is None:
+        raise HTTPException(503, "quote agent unavailable")
+    try:
+        return quote_engine(
+            roofline_ft=float(body["roofline_ft"]),
+            corners=int(body.get("corners", 4)),
+            eave_heights_ft=[float(x) for x in body.get("eave_heights_ft", [10])],
+            brand=body.get("brand", "gemstone"),
+            led_load_w_per_terminal=float(body.get("led_load_w_per_terminal", 40)),
+            node_run_ft=float(body.get("node_run_ft", 50)),
+        )
+    except (KeyError, ValueError) as e:
+        raise HTTPException(422, f"bad input: {e}")
+
+
+DEFAULT_SCENES = [
+    {"name": "Night", "armed": True, "deter_zones": ["driveway", "porch", "front-walk", "side-yard-w", "back-yard"],
+     "notify": "alerts", "quiet_lights": True},
+    {"name": "Away", "armed": True, "deter_zones": ["driveway", "porch", "front-walk", "side-yard-w", "back-yard"],
+     "notify": "everything", "quiet_lights": False},
+    {"name": "Home", "armed": False, "deter_zones": [], "notify": "alerts", "quiet_lights": False},
+    {"name": "Party", "armed": False, "deter_zones": [], "notify": "none", "quiet_lights": False},
+    {"name": "Package watch", "armed": True, "deter_zones": ["porch"], "notify": "alerts", "quiet_lights": True},
+]
+PRIVACY_MASKS = [
+    {"node_id": "node-fl", "label": "neighbor window (west)", "poly_rel": [[0.0, 0.1], [0.18, 0.1], [0.18, 0.5], [0.0, 0.5]], "enforced": True},
+    {"node_id": "node-rear", "label": "neighbor yard (north fence line)", "poly_rel": [[0.6, 0.0], [1.0, 0.0], [1.0, 0.35], [0.6, 0.35]], "enforced": True},
+]
+_scenes_store = {"scenes": DEFAULT_SCENES, "active": "Night", "masks": PRIVACY_MASKS}
+
+
+@app.get("/scenes")
+def get_scenes():
+    return _scenes_store
+
+
+@app.post("/scenes")
+def set_scenes(body: dict):
+    if "active" in body:
+        names = [s["name"] for s in _scenes_store["scenes"]]
+        if body["active"] not in names:
+            raise HTTPException(422, "unknown scene")
+        _scenes_store["active"] = body["active"]
+    if "scenes" in body and isinstance(body["scenes"], list):
+        _scenes_store["scenes"] = body["scenes"]
+    return _scenes_store
+
+
+@app.post("/scenes/design")
+def design_scene(body: dict):
+    """Natural-language scene designer, deterministic mock parse."""
+    text = (body or {}).get("text", "").lower()
+    if not text:
+        raise HTTPException(422, "text required")
+    zones = [z for z in ("driveway", "porch", "front-walk", "side-yard-w", "back-yard")
+             if z.replace("-", " ") in text or z in text]
+    scene = {
+        "name": (body.get("name") or "Custom").strip()[:24],
+        "armed": not any(k in text for k in ("disarm", "off", "welcome", "greet")),
+        "deter_zones": zones or ["driveway", "porch"],
+        "notify": "none" if "quiet" in text and "notif" in text else
+                  ("everything" if "everything" in text else "alerts"),
+        "quiet_lights": any(k in text for k in ("quiet hours", "dim", "subtle", "low key")),
+    }
+    return {"scene": scene, "mode": "mock",
+            "note": "parsed deterministically; Claude mode refines wording in a later sprint"}
 
 
 @app.websocket("/ws")

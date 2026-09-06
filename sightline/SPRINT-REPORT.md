@@ -1,3 +1,40 @@
+# SPRINT-REPORT: Sprint 3
+
+Date: 2026-09-06. Gate: full demo script clean, tests green. **Gate met: `make demo` boots correlator + sim + app in one command, 48 tests green.**
+
+## What works
+
+- `make demo`: one command, three services, port-guarded, clean teardown on Ctrl-C. The 2:14 AM scenario produces a narrated verified event in the app about 35 to 40 s after boot (under the 60 s definition-of-done budget).
+- All four app screens live: Home, Verified Event, Ask (cited answers with tappable story chips), Scenes (active scene, tap-to-paint deter zones, natural-language scene designer, enforced privacy mask list), Setup (scan inputs to kit, price, per-terminal power check, DORI coverage rings). Browser-verified with Playwright.
+- Quote agent: 160 ft Gemstone home lands $1,701 installed (in the SKU 1 band), 110 ft home $1,343; long runs and heavy LED terminals correctly flag injection kits; 48V rail quotes 2.9 hr install with 47.8% supply headroom. All numbers marked estimates, all math from the shared modules.
+- Power module: 12W at 12V over 75 ft of 18 AWG computes 0.96V drop (the audited rule holds); the 9 to 56V buck window guards absurd runs; one-node-per-terminal enforced.
+- WLED deter pack + HA automation: zone to segment mapping, strobe vs quiet-hours by clock, hold-then-all-clear, welcome scene on disarmed arrivals.
+- Firmware skeleton: schema-exact payloads, watchdog, OTA hook, provisioning AP, motion state machine, camera gated for CI.
+
+## What's mocked or deferred
+
+- Firmware compile is CI-verified by the shipped workflow template, not verified in this container: the build environment's proxy blocks the PlatformIO registry (D-019). `pio run` with pinned espressif32@6.7.0 is the command; the workflow runs it on every firmware change once activated.
+- Ask and scene-designer are deterministic keyword engines in mock mode; Claude modes exist as gateway env switches and were not exercised in CI (no key).
+- Zone painting is tap-to-toggle on named zones, not freehand polygons (called in Sprint 2 risks; scope held).
+- HA automation is authored and packaged but not executed against a live HA in this environment (no Docker daemon).
+
+## Exact commands
+
+```bash
+cd sightline && make setup
+make demo                     # everything: correlator + sim (2:14 AM loop) + app
+make test                     # 48 tests
+make sim SCENARIO=quiet-night # any scenario into the same stack
+```
+
+## Top 3 risks going into Sprint 4
+
+1. **The Sprint 4 gate is a stranger test.** Clone, run, print, order. Every doc has to carry its own context; the repo currently assumes the reader watched it get built. The guides need to be written against the artifacts, not from memory.
+2. **CAD without a physical Gemstone channel in hand.** The 30mm channel interface dimensions come from published specs (est.); the parametric models must expose every mating dimension as a named parameter so the first test print calibrates fast.
+3. **BOM realism.** Bench BOM prices drift; production BOM at $33 to $47 needs honest cost-down notes, not hand-waving, or the pitch assets inherit fiction.
+
+---
+
 # SPRINT-REPORT: Sprint 2
 
 Date: 2026-09-06. Gate: car-prowler-0214 renders a full story in the app with deter firing in the sim view. **Gate met, verified in a real browser.**

@@ -1,0 +1,31 @@
+{
+  "description": "Quote agent eval fixtures: inputs plus assertions on the deterministic engine output. All prices are estimates.",
+  "cases": [
+    {
+      "name": "typical-gemstone-retrofit",
+      "input": {"roofline_ft": 160, "corners": 4, "eave_heights_ft": [20, 10], "brand": "gemstone"},
+      "expect": {"track_nodes": 3, "door_nodes": 1, "in_sku1_band": true,
+                 "injection_kits": 0, "rail_v": 12}
+    },
+    {
+      "name": "small-trimlight-home",
+      "input": {"roofline_ft": 110, "corners": 4, "eave_heights_ft": [10], "brand": "trimlight"},
+      "expect": {"track_nodes": 2, "in_sku1_band": true, "injection_kits": 0}
+    },
+    {
+      "name": "long-run-forces-injection",
+      "input": {"roofline_ft": 160, "corners": 4, "eave_heights_ft": [20], "brand": "gemstone", "node_run_ft": 90},
+      "expect": {"injection_kits": 3, "note_contains": "inject"}
+    },
+    {
+      "name": "heavy-led-terminal-forces-injection",
+      "input": {"roofline_ft": 160, "corners": 4, "eave_heights_ft": [20], "brand": "gemstone", "led_load_w_per_terminal": 55},
+      "expect": {"injection_kits": 3, "note_contains": "exceeds"}
+    },
+    {
+      "name": "sku2-48v-rail",
+      "input": {"roofline_ft": 160, "corners": 4, "eave_heights_ft": [20], "brand": "sightline48"},
+      "expect": {"under_3hr_target": true, "headroom_meets_45pct": true, "rail_v": 48}
+    }
+  ]
+}

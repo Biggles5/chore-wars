@@ -1,0 +1,43 @@
+{
+  "_comment": "SightLine WLED preset pack. Import via WLED UI or push with wled_push.py. Segment ids map to roofline segments in the site scan (seg-front=0, seg-east=1, seg-rear-e=2, seg-rear-n=3, seg-west=4 for the demo house). (c) 2026 Ryan Brown / SightLine. Proprietary.",
+  "1": {
+    "n": "SL Deter Strobe",
+    "_comment": "Zone-follow red/white strobe. The HA automation enables ONLY the segments for the triggering zone; everything else stays off.",
+    "on": true,
+    "bri": 255,
+    "transition": 0,
+    "seg": [
+      {"id": 0, "fx": 25, "sx": 255, "ix": 255, "col": [[255, 0, 0], [255, 255, 255], [0, 0, 0]], "pal": 0, "on": true}
+    ]
+  },
+  "2": {
+    "n": "SL Deter Quiet Hours",
+    "_comment": "Quiet-hours variant: amber sweep instead of strobe, 60% brightness. Startles less, still unmistakably reactive.",
+    "on": true,
+    "bri": 153,
+    "transition": 2,
+    "seg": [
+      {"id": 0, "fx": 92, "sx": 200, "ix": 200, "col": [[255, 120, 0], [255, 200, 80], [0, 0, 0]], "pal": 0, "on": true}
+    ]
+  },
+  "3": {
+    "n": "SL Welcome",
+    "_comment": "Warm welcome sweep for disarmed arrivals (party scene).",
+    "on": true,
+    "bri": 180,
+    "transition": 7,
+    "seg": [
+      {"id": 0, "fx": 42, "sx": 120, "ix": 128, "col": [[255, 180, 90], [255, 220, 160], [0, 0, 0]], "pal": 6, "on": true}
+    ]
+  },
+  "4": {
+    "n": "SL All Clear",
+    "_comment": "Return to the homeowner's ambient scene after a deter hold.",
+    "on": true,
+    "bri": 100,
+    "transition": 10,
+    "seg": [
+      {"id": 0, "fx": 0, "col": [[255, 190, 120], [0, 0, 0], [0, 0, 0]], "on": true}
+    ]
+  }
+}

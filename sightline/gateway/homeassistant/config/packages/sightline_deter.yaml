@@ -1,0 +1,76 @@
+# SightLine deter package: camera zone -> LED segment range, zone-follow
+# strobe with quiet-hours variant, all driven by the correlator's MQTT
+# deter commands. Requires the MQTT integration pointed at the gateway
+# broker and a WLED device named "sightline_track".
+# Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved.
+
+# Zone -> WLED segment ids (demo house scan; regenerate per site scan)
+# driveway    -> seg-front(0), seg-east(1)
+# porch       -> seg-front(0)
+# front-walk  -> seg-front(0), seg-west(4)
+# side-yard-w -> seg-west(4)
+# back-yard   -> seg-rear-e(2), seg-rear-n(3)
+
+input_number:
+  sightline_deter_hold_s:
+    name: Deter hold seconds
+    initial: 20
+    min: 5
+    max: 120
+    step: 5
+
+automation:
+  - id: sightline_deter_zone_follow
+    alias: "SightLine: zone-follow deter"
+    mode: queued
+    trigger:
+      - platform: mqtt
+        topic: "sightline/+/deter/cmd"
+    variables:
+      zone: "{{ trigger.payload_json.zone | default('driveway') }}"
+      quiet: >-
+        {{ is_state('input_boolean.sightline_armed', 'on')
+           and now().hour >= 22 or now().hour < 7 }}
+      segmap:
+        driveway: [0, 1]
+        porch: [0]
+        front-walk: [0, 4]
+        side-yard-w: [4]
+        back-yard: [2, 3]
+    action:
+      - service: mqtt.publish
+        data:
+          topic: "wled/sightline_track/api"
+          payload: >-
+            {"on":true,"bri":{{ 153 if quiet else 255 }},
+             "seg":[{% for s in segmap.get(zone, [0]) %}
+               {"id":{{ s }},"on":true,"fx":{{ 92 if quiet else 25 }},
+                "sx":255,"col":[[255,{{ 120 if quiet else 0 }},0],[255,255,255]]}
+               {{ "," if not loop.last }}{% endfor %}]}
+      - delay:
+          seconds: "{{ states('input_number.sightline_deter_hold_s') | int }}"
+      - service: mqtt.publish
+        data:
+          topic: "wled/sightline_track/api"
+          payload: '{"ps": 4}'
+
+  - id: sightline_welcome
+    alias: "SightLine: welcome scene on disarmed arrival"
+    mode: single
+    trigger:
+      - platform: mqtt
+        topic: "sightline/+/+/event"
+    condition:
+      - condition: state
+        entity_id: input_boolean.sightline_armed
+        state: "off"
+      - condition: template
+        value_template: >-
+          {{ trigger.payload_json.type == 'detection.start'
+             and trigger.payload_json.object.class == 'person'
+             and trigger.payload_json.geometry.zone in ['porch', 'front-walk'] }}
+    action:
+      - service: mqtt.publish
+        data:
+          topic: "wled/sightline_track/api"
+          payload: '{"ps": 3}'

@@ -3,6 +3,7 @@
 
 PY ?= python3
 SCENARIO ?= quiet-night
+DEMO_SCENARIO ?= car-prowler-0214
 SIM_DIR = sim/perimeter-sim
 
 .PHONY: setup demo sim sim-headless correlator app gateway gateway-down test clean
@@ -17,7 +18,11 @@ setup:
 	$(PY) -m pip install -q fastapi uvicorn paho-mqtt jsonschema pytest
 
 demo:
-	@echo "SightLine demo: quiet-night scenario, live view at http://localhost:8090"
+	@echo "SightLine full demo: correlator :8091, sim :8090, app :5173"
+	$(PY) scripts/demo_all.py $(DEMO_SCENARIO)
+
+demo-sim-only:
+	@echo "SightLine sim-only demo: quiet-night, live view at http://localhost:8090"
 	cd $(SIM_DIR) && $(PY) -m perimeter_sim serve --scenario quiet-night
 
 sim:

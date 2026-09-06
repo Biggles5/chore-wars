@@ -1,0 +1,28 @@
+# CI workflow template: the python test suite and the app build.
+# Copy to .github/workflows/ when SightLine moves to its own repository.
+# Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved.
+name: tests
+on:
+  push:
+    paths: ["sightline/**"]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        working-directory: sightline
+        run: make setup && pip install httpx
+      - name: Tests
+        working-directory: sightline
+        run: make test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: App build
+        working-directory: sightline/app/mobile
+        run: npm ci --no-fund --no-audit || npm install --no-fund --no-audit && npm run build

@@ -1,0 +1,21 @@
+# CI workflow template: compile the node firmware with no hardware.
+# Copy to .github/workflows/ when SightLine moves to its own repository.
+# Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved.
+name: firmware-build
+on:
+  push:
+    paths: ["sightline/firmware/node/**"]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install PlatformIO
+        run: pip install platformio
+      - name: Build (esp32-s3, no hardware)
+        working-directory: sightline/firmware/node
+        run: pio run

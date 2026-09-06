@@ -57,5 +57,19 @@ Beat generation keyed on per-entity level transitions flapped when multiple node
 ### D-018: uvicorn needs the `websockets` package for WS routes
 FastAPI's `@app.websocket` silently 404s under uvicorn without the `websockets` (or wsproto) protocol package. Pinned in requirements. Found in live testing, invisible in TestClient.
 
+## 2026-09-06 (Sprint 3)
+
+### D-019: Firmware compile is CI-verified, not container-verified
+This build environment's network policy blocks api.registry.platformio.org (proxy 403), so the espressif32 toolchain cannot download here. The firmware pins platform espressif32@6.7.0 and libraries, and `ci/firmware-build.yml` is a ready GitHub Actions workflow that runs `pio run` on every firmware change. The claim is "compiles in CI with no hardware"; the workflow is the proof mechanism, activated when SightLine gets its own repo (workflows are shipped as templates in `ci/`, not enabled on this shared repo).
+
+### D-020: Quote agent price book tuned to the playbook bands
+Track node $279, door node $179, gateway $199, retrofit install $249 + $79/node (all est.). These land the reference homes inside the SKU 1 $1,299 to $1,799 installed band and the 48V rail under 3 install hours for a 160 ft single story. The engine flags every output as estimates; the BOM cost-down work in Sprint 4 owns reconciling these retail targets against the $33 to $47 production BOM.
+
+### D-021: 48V LED load estimated at 0.85 duty for headroom math
+Lights are duty-cycle oversubscribed by every incumbent's design; cameras never are (counted at full continuous draw). The 45% headroom target computes LED load at 0.85 duty (est.) and cameras at 100%. Worst-case all-white-all-on is still within supply, just below the 45% comfort target, and the quote surfaces both.
+
+### D-022: Ask and scene-designer agents run gateway-side
+The app calls `/ask` and `/scenes/design` on the correlator rather than shipping agent logic client-side: the gateway owns event memory (Core plan: nothing leaves the house), so the answering has to happen where the data lives. Claude modes are gateway env switches (SIGHTLINE_ASK_MODE, SIGHTLINE_NARRATOR_MODE); the app UI is identical in both modes.
+
 ### D-013: Deter logic lives in the sim for Sprint 1, moves to the correlator in Sprint 2
 The view needs to show deter zones firing now. The sim carries a placeholder rule (person or vehicle dwelling inside the identify ring during armed hours triggers zone-follow deter). Sprint 2 replaces this with the correlator issuing deter commands over `sightline/<site>/deter/cmd`, and the sim just obeys the bus. The topic and payload are already final so nothing downstream changes.
