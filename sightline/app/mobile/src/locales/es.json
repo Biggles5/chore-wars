@@ -1,0 +1,22 @@
+{
+  "tab.home": "Inicio",
+  "tab.ask": "Preguntar",
+  "tab.scenes": "Escenas",
+  "tab.setup": "Instalar",
+  "chip.armed": "ARMADO",
+  "chip.home": "EN CASA",
+  "chip.live": "EN VIVO",
+  "chip.offline": "SIN CONEXION",
+  "home.narrator": "Narrador",
+  "home.perimeter": "Perimetro",
+  "home.scenes": "Escenas",
+  "home.live": "En vivo",
+  "home.recent": "Recientes",
+  "home.quiet": "Todo tranquilo. Nada en el perimetro necesito tu atencion.",
+  "event.deter_now": "Disuadir ahora",
+  "event.share": "Compartir clip",
+  "event.monitoring": "Enviar a monitoreo",
+  "event.timeline": "Cronologia",
+  "badge.verified": "Verificado",
+  "badge.live": "En vivo"
+}

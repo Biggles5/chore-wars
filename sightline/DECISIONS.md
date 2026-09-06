@@ -31,8 +31,8 @@ No image libraries, no binary assets, fully deterministic, tiny in git. Each eve
 ### D-009: Correlator is a skeleton in Sprint 1
 Sprint 1's gate needs the gateway to boot, not to stitch stories. The correlator ships as a FastAPI service with health, ingest, recent-events, and an MQTT subscriber, with the track/story interfaces stubbed and typed so Sprint 2 fills them in without moving files.
 
-### D-010: CAD language decision deferred to Sprint 4, leaning CadQuery
-CAD work is a Sprint 4 deliverable. Current lean: CadQuery over OpenSCAD because it exports real STEP (ODMs need STEP; OpenSCAD does not export STEP natively) and parametric python fits the rest of the toolchain. Final call recorded here when the first housing file lands.
+### D-010: CadQuery (decided in Sprint 4, as leaned)
+CadQuery 2.8 over OpenSCAD: native STEP export (ODMs need STEP; OpenSCAD cannot produce it natively) and python parametrics that share the repo toolchain. `hardware/cad/sightline_cad.py` builds all four part families and exports STL + STEP; the exports in `hardware/cad/exports/` are real CadQuery output, committed so a stranger can print without installing the CAD stack. Channel mating dimensions are published-data estimates exposed as named parameters; the first test print calibrates them.
 
 ### D-011: Python 3.11 stdlib + 5 pinned deps for the whole Sprint 1 runtime
 fastapi, uvicorn, paho-mqtt, jsonschema, pytest. Nothing else. Keeps `make setup` under 30 seconds and the offline story honest.
@@ -56,6 +56,17 @@ Beat generation keyed on per-entity level transitions flapped when multiple node
 
 ### D-018: uvicorn needs the `websockets` package for WS routes
 FastAPI's `@app.websocket` silently 404s under uvicorn without the `websockets` (or wsproto) protocol package. Pinned in requirements. Found in live testing, invisible in TestClient.
+
+## 2026-09-06 (Sprint 4)
+
+### D-023: Audio-law matrix treats mixed and unsettled states as all-party
+Where state audio-consent law is mixed or unsettled (Connecticut, Delaware, Michigan, Nevada, Oregon, Vermont), the in-app behavior uses the strictest reading (all-party warning). Legal exposure is asymmetric: over-warning costs nothing, under-warning costs everything. The matrix is informational input for counsel, not legal advice, and says so.
+
+### D-024: Cloud API is a contract skeleton with in-memory stores
+`cloud/api/main.py` defines the routes, auth shape, plan gating (Core cannot sync by 403 AND by absence of a client, defense in depth), and the verified-alerts-only monitoring dispatch. Real persistence, real auth, and the mTLS webhook come with the first cloud deployment; the tests pin the contract now so the gateway sync client can be written against it.
+
+### D-025: i18n ships as a working stub, not a full extraction
+`src/i18n.js` + `locales/es.json` prove the mechanism (tab bar and status chips localize by browser language). Full string extraction across screens is scheduled work; doing it now would churn every screen file while the UI is still moving.
 
 ## 2026-09-06 (Sprint 3)
 

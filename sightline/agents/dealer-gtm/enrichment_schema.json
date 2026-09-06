@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sightline.gtm.lead.v1",
+  "title": "Dealer lead enrichment record",
+  "description": "The pipeline contract for Mabry-style enrichment agents. Required fields gate sequence rendering. (c) 2026 Ryan Brown / SightLine. Proprietary.",
+  "type": "object",
+  "required": ["first_name", "company", "brand_installed", "city"],
+  "properties": {
+    "first_name": { "type": "string" },
+    "last_name": { "type": "string" },
+    "company": { "type": "string" },
+    "role": { "type": "string", "description": "owner, ops manager, sales lead" },
+    "segment": { "type": "string", "enum": ["trimlight-dealer", "gemstone-dealer", "jellyfish-dealer", "christmas-light-installer", "other"] },
+    "brand_installed": { "type": "string", "description": "Trimlight, Gemstone, JellyFish, Oelo, EverLights, multiple" },
+    "city": { "type": "string" },
+    "state": { "type": "string" },
+    "homes_estimate": { "type": "string", "description": "installed-base estimate; from reviews, permits, or the dealer map" },
+    "crew_size": { "type": "integer" },
+    "installs_per_year": { "type": "integer" },
+    "email": { "type": "string", "format": "email" },
+    "linkedin_url": { "type": "string" },
+    "source": { "type": "string", "description": "dealer-map scrape, review mining, permit records, referral" },
+    "hoa_density": { "type": "string", "enum": ["low", "medium", "high"], "description": "HOA-heavy metros first" },
+    "notes": { "type": "string" }
+  }
+}

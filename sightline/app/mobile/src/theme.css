@@ -120,6 +120,15 @@ main { flex: 1; padding: 14px 16px 90px; }
 }
 .btn.primary { background: var(--red); border-color: var(--red); color: #fff; grid-column: 1 / -1; }
 .btn:active { transform: translateY(1px); }
+/* accessibility: visible focus everywhere, WCAG-friendly targets (44px min
+   heights are set on .btn, .tabbar button, inputs) */
+button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid var(--blue); outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
 .deter-banner {
   background: #FDF1F1; border: 1px solid var(--red); color: var(--red);
   border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 600; margin-bottom: 10px;

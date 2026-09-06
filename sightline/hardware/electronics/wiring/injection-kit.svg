@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360" font-family="monospace">
+  <!-- SightLine power injection kit.
+       (c) 2026 Ryan Brown / SightLine. Proprietary. -->
+  <rect width="860" height="360" fill="#FAF9F5"/>
+  <text x="20" y="30" font-size="18" fill="#1B2434" font-weight="bold">INJECTION KIT (long runs or full terminals)</text>
+
+  <!-- existing run -->
+  <rect x="20" y="80" width="160" height="70" fill="#fff" stroke="#1B2434" stroke-width="2"/>
+  <text x="32" y="105" font-size="12" fill="#1B2434">LIGHT CONTROLLER</text>
+  <text x="32" y="122" font-size="11" fill="#C24545">terminal at budget,</text>
+  <text x="32" y="137" font-size="11" fill="#C24545">or run &gt; 75 ft</text>
+
+  <line x1="180" y1="100" x2="560" y2="100" stroke="#C24545" stroke-width="4"/>
+  <line x1="180" y1="120" x2="560" y2="120" stroke="#1B2434" stroke-width="4"/>
+  <line x1="180" y1="140" x2="330" y2="140" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <text x="330" y="92" font-size="11" fill="#6E7480">LED power + data continue to the track, untouched</text>
+
+  <!-- injection supply -->
+  <rect x="330" y="200" width="180" height="80" fill="#fff" stroke="#C07A10" stroke-width="2"/>
+  <text x="345" y="225" font-size="13" fill="#C07A10">INJECTION SUPPLY</text>
+  <text x="345" y="242" font-size="11" fill="#6E7480">12V/24V Class 2 brick</text>
+  <text x="345" y="258" font-size="11" fill="#6E7480">at nearest outlet/soffit</text>
+  <text x="345" y="274" font-size="11" fill="#6E7480">WAGO 221 splice</text>
+
+  <!-- node fed locally -->
+  <rect x="600" y="180" width="220" height="110" fill="#1B2434"/>
+  <text x="618" y="208" font-size="13" fill="#FAF9F5" font-weight="bold">SIGHTLINE NODE</text>
+  <text x="618" y="228" font-size="11" fill="#C07A10">fed by injection, NOT the terminal</text>
+  <text x="618" y="246" font-size="11" fill="#1E8A63">LED DATA still passes through</text>
+  <text x="618" y="262" font-size="11" fill="#1E8A63">the node's buffer as usual</text>
+  <text x="618" y="280" font-size="11" fill="#FAF9F5">grounds bonded at the splice</text>
+
+  <line x1="510" y1="230" x2="600" y2="230" stroke="#C07A10" stroke-width="4"/>
+  <line x1="510" y1="250" x2="600" y2="250" stroke="#1B2434" stroke-width="4"/>
+  <line x1="330" y1="140" x2="310" y2="140" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="310" y1="140" x2="310" y2="235" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="310" y1="235" x2="330" y2="235" stroke="#1D7FB0" stroke-width="0"/>
+  <line x1="310" y1="235" x2="600" y2="310" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="600" y1="310" x2="640" y2="290" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+
+  <text x="20" y="330" font-size="12" fill="#C24545">Decision tree: power.md. When in doubt, inject: a dedicated Class 2 brick near the node beats a marginal 75 ft run every time.</text>
+  <text x="20" y="348" font-size="12" fill="#C24545">Never splice into mains. Never share a neutral with anything. Class 2 low voltage only.</text>
+</svg>

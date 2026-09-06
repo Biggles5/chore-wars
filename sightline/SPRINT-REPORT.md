@@ -1,3 +1,44 @@
+# SPRINT-REPORT: Sprint 4
+
+Date: 2026-09-06. Gate: a stranger can clone, run the demo, print the housing, and order the bench BOM using only the repo. **Gate met on this machine's evidence: demo runs from 3 commands, printable STL + ODM STEP are committed artifacts, the bench BOM is an orderable line-item CSV, and every procedure has a guide.**
+
+## Definition of done, audited
+
+- `make demo` boots sim + gateway (correlator) + app: yes, verified, one command.
+- 2:14 AM scenario produces a narrated verified event in the app in under 60 s: yes, ~35 to 40 s measured.
+- Every doc in section 3 of the build spec exists: architecture (7 + Matter roadmap), hardware (spec, DORI math, thermal, CAD, BOMs, wiring SVGs), firmware (node + deter), gateway, sim, app, agents (4, each with 5 eval fixtures), guides (8), section I extras (OTA, telemetry dashboard, RMA, HOA packet, monitoring spec, insurance, trademarks, patent notes, accessibility + es stub), compliance (checklists, privacy policy, audio matrix), pitch (one-pager, dealer, HOA), website demo page, cloud skeleton.
+- DECISIONS.md explains every assumption: 25 numbered decisions, dated.
+- Zero em dashes in the docs: repo-wide sweep clean (the only occurrences are the two test assertions that enforce the ban).
+- 63 tests green in ~3 s.
+
+## What a stranger gets
+
+```bash
+git clone <repo> && cd sightline
+make setup && make demo          # the 2:14 AM story, live, no hardware
+make test                        # 63 tests
+python3 hardware/cad/sightline_cad.py   # rebuild CAD (exports already committed)
+# print hardware/cad/exports/track_node_housing_gemstone.stl
+# order hardware/bom/bench_bom.csv (~$754 est.)
+# follow docs/guides/bench-build.md
+```
+
+## Honest limits (carry into Phase 1)
+
+- Firmware compile is CI-verified by the shipped workflow, not run here (registry blocked by this environment's network policy, D-019).
+- Docker gateway stack (Frigate + HA) is configured and compose-validated but was never booted in this environment (no Docker daemon); the no-Docker path is the verified one.
+- Channel mating dimensions in CAD are published-spec estimates awaiting the first calibration print on the real Gemstone track Ryan owns.
+- Claude modes for narrator/ask exist behind env switches, untested without a key; mocks pass the same eval assertions.
+- Re-ID is the histogram stub; the interface is ready for a real embedding model.
+
+## Top 3 risks for Phase 1 (the physical world)
+
+1. **The first calibration print.** Every mechanical assumption meets the real channel at once. Budget a full day on the dev house track and expect two reprint cycles.
+2. **Night ISP quality decides the SoC.** The DORI math says the pixels are there; whether the edge SoC's ISP keeps them usable at 850nm is the EVT question that picks the BOM's biggest line.
+3. **Dealer pilot economics.** The $1,299 to $1,799 band and sub-3-hour install are modeled, not lived. The first 10 dealer installs will reprice both; the quote agent makes repricing a config change, not a rewrite.
+
+---
+
 # SPRINT-REPORT: Sprint 3
 
 Date: 2026-09-06. Gate: full demo script clean, tests green. **Gate met: `make demo` boots correlator + sim + app in one command, 48 tests green.**

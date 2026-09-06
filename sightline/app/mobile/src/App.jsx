@@ -8,12 +8,13 @@ import EventScreen from "./screens/Event.jsx";
 import Ask from "./screens/Ask.jsx";
 import Scenes from "./screens/Scenes.jsx";
 import Setup from "./screens/Setup.jsx";
+import { t } from "./i18n.js";
 
 const TABS = [
-  { id: "home", label: "Home", ico: "⌂" },
-  { id: "ask", label: "Ask", ico: "?" },
-  { id: "scenes", label: "Scenes", ico: "◧" },
-  { id: "setup", label: "Setup", ico: "✚" },
+  { id: "home", label: t("tab.home"), ico: "⌂" },
+  { id: "ask", label: t("tab.ask"), ico: "?" },
+  { id: "scenes", label: t("tab.scenes"), ico: "◧" },
+  { id: "setup", label: t("tab.setup"), ico: "✚" },
 ];
 
 export default function App() {
@@ -33,11 +34,11 @@ export default function App() {
           : null}
         <span className="brand">SIGHTLINE</span>
         <span style={{ flex: 1 }} />
-        <span className={"chip " + (armed ? "armed" : "disarmed")}>
-          {armed ? "ARMED" : "HOME"}
+        <span className={"chip " + (armed ? "armed" : "disarmed")} role="status">
+          {armed ? t("chip.armed") : t("chip.home")}
         </span>
-        <span className={"chip " + (connected ? "live" : "offline")}>
-          {connected ? "LIVE" : "OFFLINE"}
+        <span className={"chip " + (connected ? "live" : "offline")} role="status">
+          {connected ? t("chip.live") : t("chip.offline")}
         </span>
       </div>
 

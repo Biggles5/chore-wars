@@ -1,0 +1,15 @@
+item,qty_per_node,cost_25k_usd,cost_down_notes
+edge-AI SoC (NDAA-eligible; see docs/hardware/node-spec.md),1,9.80,"(est.) SigmaStar SSC377DE-class or Ingenic alt; 2nd source qualified by EVT; volume pricing at 100k drops ~18%"
+8MP wide sensor + 110deg lens module,1,6.40,"(est.) OS08A10-class; lens+sensor as one AA'd module from the ODM"
+12MP identity sensor + 60deg lens module,1,8.90,"(est.) IMX515-class; the single most expensive line; consider 8MP narrow variant for a cost-down SKU at -2.60"
+850nm IR array + diffuser,1,1.10,(est.) integrated on main PCB flex
+PCBA (4-layer + flex; radios; PMIC),1,7.20,"(est.) includes wide-input buck stage at 0.90; panelized; ICT+FCT in fixture"
+microSD 64GB high endurance,1,3.10,"(est.) eMMC option at 128GB adds 1.40 but kills a connector; decide at EVT on field RMA data"
+housing set (PC/ASA; gasket; glands; clip),1,3.60,"(est.) 2-cavity tool amortized; family mold with door node saves 0.40"
+thermal pad + heater film,1,0.90,(est.) heater only in cold-climate SKU saves 0.55 in temperate SKU
+connector set (blind-mate bus or tap harness),1,1.60,"(est.) 48V blind-mate is 2.10; tap harness 1.10; blended at mix"
+antenna + misc RF,1,0.70,(est.)
+assembly + test + pack,1,3.20,"(est.) CN assembly; MX alt adds 0.60 but derisks tariffs; auto-AA the identity cant"
+TOTAL node,,46.50,"target band 33 to 47 at 25k units; hits 38.90 with the 8MP-narrow cost-down and temperate SKU"
+gateway (N100-class bare + case + PSU),per site,62.00,"(est.) off-the-shelf until 5k sites; custom carrier at 10k saves 14"
+door node,per site,17.80,"(est.) single sensor; shares SoC + housing family"

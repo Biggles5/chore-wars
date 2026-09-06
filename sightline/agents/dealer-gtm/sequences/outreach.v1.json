@@ -1,0 +1,24 @@
+{
+  "version": "v1",
+  "voice_rules": "Ryan's voice: tight, direct, no filler, no em dashes, no exclamation marks, no 'hope this finds you well'. Facts and math over adjectives.",
+  "touches": [
+    {
+      "day": 0,
+      "channel": "email",
+      "subject": "cameras inside the {brand_installed} track",
+      "body": "{first_name}, you have {brand_installed} on {homes_estimate} homes around {city}. Every one of those rooflines can carry a camera nobody can see from the street: dual-sensor nodes that live inside the track, deter with the lights themselves, and produce verified events police actually respond to.\n\nFor {company} that is a $1,299 to $1,799 ticket (est.) on installs you already sold, at dealer margin, with no new trades: it is all Class 2.\n\nWorth 20 minutes? I will show you a live break-in scenario end to end and run a real quote on one of your past installs."
+    },
+    {
+      "day": 3,
+      "channel": "linkedin",
+      "subject": "",
+      "body": "{first_name}, sent you a note about putting cameras inside the {brand_installed} tracks you install. The short version: the roofline you already own is the best camera real estate on the house, and nobody is selling it. 20 minutes and I will demo the 2:14 AM scenario live."
+    },
+    {
+      "day": 7,
+      "channel": "email",
+      "subject": "the math for {company}",
+      "body": "{first_name}, last one from me. The math I would want if I ran {company}:\n\n- attach one SightLine kit to half your installs: 20+ tickets a year at $500+ dealer margin each (est.)\n- recurring share on the $9.99/$19.99 plans (est. 30%)\n- install adds under 2 hours on a track you are already on\n- the scan-to-quote agent prices the kit in 5 minutes, off your existing measurements\n\nIf the answer is no, tell me and I am gone. If it is maybe, 20 minutes: reply with a day that works in {city} time."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+item,qty,unit_price_usd,ext_price_usd,example_vendor,example_part,notes
+ESP32-S3 camera dev board (OV5640),2,19.95,39.90,Seeed / Amazon,XIAO ESP32S3 Sense,firmware target + spare; all prices (est.)
+8MP PoE reference camera,1,89.00,89.00,Amazon,Reolink RLC-810A,wide-channel reference for Frigate + DORI validation
+N100 mini PC 8GB/256GB,1,159.00,159.00,Amazon,Beelink S12 Mini,gateway: broker + Frigate + correlator + HA
+Coral USB TPU,1,59.99,59.99,Coral.ai / Mouser,G950-06809-01,Frigate edge inference
+9-56V to 5V/3A buck (wide input),3,12.95,38.85,Pololu,D24V22F5-class,the universal tap regulator; surge + reverse input
+WLED controller (ESP32),1,24.99,24.99,Amazon / QuinLED,QuinLED Dig-Uno,deter pack target
+WS2811 12V pixel string 50ct,2,16.99,33.98,Amazon / Ray Wu,12V WS2811 bullet,bench roofline stand-in
+xConnect pigtail set,1,12.99,12.99,Ray Wu store,3-core xConnect M/F,matches DIY ecosystem
+Ray Wu 3-core pigtails 10pk,1,9.99,9.99,Ray Wu store,18AWG 3-core,tap harness stock
+WAGO 221 assortment (413/415),1,21.99,21.99,Amazon,WAGO 221-413/415 kit,every splice in the guides
+18 AWG 2-core outdoor wire 50ft,1,18.99,18.99,Amazon,UL2464 18/2,power runs
+12V 5A Class 2 supply,2,13.99,27.98,Amazon,LRS-60-12-class w/ Class 2 listing,bench rail + injection stand-in
+M12 cable glands 10pk,1,8.99,8.99,Amazon,PG7/M12 IP68,housing entries
+850nm IR illuminator module,1,15.99,15.99,Amazon,4-LED 850nm board,night DORI tests
+microSD 128GB high endurance,2,17.99,35.98,Amazon,Samsung PRO Endurance,72h loop testing
+PETG filament 1kg,2,22.99,45.98,Amazon,Prusament/Overture PETG,housings + fixtures
+VHB tape 4991 roll,1,17.50,17.50,Amazon,3M VHB 4991,seal only; never structure
+Multimeter + clamp attachment,1,49.99,49.99,Amazon,Kaiweets/Klein,power validation
+USB power meter,1,12.99,12.99,Amazon,UM25C,node draw measurement
+Assorted M3 hardware kit,1,15.99,15.99,Amazon,M3 screws/inserts/standoffs,fixture + housings
+Heat-set insert kit M3,1,12.99,12.99,Amazon,ruthex M3,housing bosses
+TOTAL,,,754.06,,,target band 650 to 900 USD; every price an estimate

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.4.0 (2026-09-06) Sprint 4
+
+- CAD: CadQuery parametric models with real committed exports (STL + STEP): track node housing (Gemstone 30mm channel), universal retrofit clips for three brand profiles, door node, bench fixture.
+- BOMs: orderable bench_bom.csv (~$754 est.) and production_bom.csv ($33 to $47 at 25K with cost-down notes).
+- Wiring SVGs: 12V retrofit tap, 48V blind-mate bus, injection kit.
+- Architecture docs complete: system (with the 2:14 sequence + latency budgets), power, data, network, security, evidence-policy (Puloka, chain of custody), privacy; Matter bridge roadmap.
+- All 8 guides: bench build, house pilot (30-night protocol), 48V dealer install (175 min flow), 12V retrofit per brand, homeowner setup, integrations, test plans (incl. re-ID bias gate), compliance path.
+- Compliance: FCC/ETL/NDAA/IP66 checklists, privacy + retention policy, 50-state + DC audio-consent matrix.
+- Pitch: investor one-pager, dealer pitch, HOA approval packet template.
+- Ops + IP docs: OTA pipeline with rollback, telemetry dashboard spec, RMA + serial scheme, monitoring-center payload spec, insurance one-pager, trademark alternates + knockout search, provisional patent notes (5 claim areas).
+- Agents: support triage (telemetry-first rules, safety escalation) and dealer GTM (ICP, enrichment schema, 3-touch sequences in Ryan's voice, booking flow), 5 evals each.
+- Cloud API skeleton: plans, Core sync refusal, Plus/Shield sync, verified-alerts-only monitoring dispatch, tested.
+- Website demo page embedding the live sim + app. App accessibility pass (focus rings, reduced motion, 44px targets) + Spanish i18n stub.
+- 63 tests green.
+
 ## 0.3.0 (2026-09-06) Sprint 3
 
 - Quote agent: deterministic scan-to-kit engine over shared power_budget + dori_placement modules; SKU 1 band and 48V sub-3-hour checks; 5 eval fixtures.

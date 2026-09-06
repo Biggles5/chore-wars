@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 420" font-family="monospace">
+  <!-- SightLine 12V retrofit tap. Power only, buffered data pass-through.
+       (c) 2026 Ryan Brown / SightLine. Proprietary. -->
+  <rect width="860" height="420" fill="#FAF9F5"/>
+  <text x="20" y="30" font-size="18" fill="#1B2434" font-weight="bold">12V RETROFIT TAP (power only, buffered data pass-through)</text>
+
+  <!-- controller -->
+  <rect x="20" y="70" width="150" height="90" fill="#fff" stroke="#1B2434" stroke-width="2"/>
+  <text x="35" y="95" font-size="13" fill="#1B2434">LIGHT CONTROLLER</text>
+  <text x="35" y="112" font-size="11" fill="#6E7480">(Gemstone Hub / etc.)</text>
+  <text x="35" y="140" font-size="11" fill="#C24545">TERMINAL: 5A / 60W</text>
+
+  <!-- wires to junction -->
+  <line x1="170" y1="95" x2="330" y2="95" stroke="#C24545" stroke-width="4"/>
+  <text x="220" y="88" font-size="11" fill="#C24545">+12V (18 AWG)</text>
+  <line x1="170" y1="120" x2="330" y2="120" stroke="#1B2434" stroke-width="4"/>
+  <text x="220" y="136" font-size="11" fill="#1B2434">GND</text>
+  <line x1="170" y1="145" x2="330" y2="145" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <text x="205" y="161" font-size="11" fill="#1D7FB0">DATA (WS2811 family)</text>
+
+  <!-- WAGO junction -->
+  <rect x="330" y="75" width="90" height="90" fill="#fff" stroke="#C07A10" stroke-width="2"/>
+  <text x="342" y="95" font-size="12" fill="#C07A10">WAGO 221</text>
+  <text x="342" y="110" font-size="10" fill="#6E7480">+12V: 3-way</text>
+  <text x="342" y="124" font-size="10" fill="#6E7480">GND: 3-way</text>
+  <text x="342" y="138" font-size="10" fill="#6E7480">DATA: passes</text>
+  <text x="342" y="152" font-size="10" fill="#6E7480">THROUGH node</text>
+
+  <!-- to LED string -->
+  <line x1="420" y1="95" x2="620" y2="95" stroke="#C24545" stroke-width="4"/>
+  <line x1="420" y1="120" x2="620" y2="120" stroke="#1B2434" stroke-width="4"/>
+  <rect x="620" y="70" width="200" height="70" fill="#fff" stroke="#1B2434" stroke-width="2"/>
+  <text x="635" y="95" font-size="13" fill="#1B2434">LED TRACK</text>
+  <text x="635" y="112" font-size="11" fill="#6E7480">run continues unchanged</text>
+  <text x="635" y="128" font-size="11" fill="#6E7480">&lt;= 75 ft total on 18 AWG</text>
+
+  <!-- node -->
+  <rect x="300" y="230" width="260" height="130" fill="#1B2434"/>
+  <text x="320" y="255" font-size="14" fill="#FAF9F5" font-weight="bold">SIGHTLINE TRACK NODE</text>
+  <text x="320" y="275" font-size="11" fill="#C07A10">9-56V wide-input buck, 5V/3A out</text>
+  <text x="320" y="291" font-size="11" fill="#FAF9F5">draw budgeted at 12W ceiling</text>
+  <text x="320" y="307" font-size="11" fill="#FAF9F5">surge + reverse-polarity protected</text>
+  <text x="320" y="330" font-size="11" fill="#1E8A63">DATA IN -&gt; buffer -&gt; DATA OUT</text>
+  <text x="320" y="346" font-size="11" fill="#1E8A63">(never loads the daisy chain)</text>
+
+  <!-- power drops to node -->
+  <line x1="360" y1="165" x2="360" y2="230" stroke="#C24545" stroke-width="4"/>
+  <line x1="385" y1="165" x2="385" y2="230" stroke="#1B2434" stroke-width="4"/>
+  <!-- data through node -->
+  <line x1="330" y1="145" x2="310" y2="145" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="310" y1="145" x2="310" y2="230" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="550" y1="230" x2="550" y2="145" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="550" y1="145" x2="620" y2="145" stroke="#1D7FB0" stroke-width="3" stroke-dasharray="6 3"/>
+  <line x1="620" y1="145" x2="620" y2="140" stroke="#1D7FB0" stroke-width="3"/>
+
+  <!-- rules -->
+  <text x="20" y="395" font-size="12" fill="#C24545">RULES: one camera node per 5A terminal. Cameras are continuous loads: never count them against the lights' duty-cycle headroom.</text>
+  <text x="20" y="410" font-size="12" fill="#C24545">Runs over 75 ft at 12V, or terminal over budget: use the injection kit (injection-kit.svg). NEC Class 2 only, never mains.</text>
+</svg>

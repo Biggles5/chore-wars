@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 380" font-family="monospace">
+  <!-- SightLine 48V clean-sheet rail, blind-mate bus.
+       (c) 2026 Ryan Brown / SightLine. Proprietary. -->
+  <rect width="860" height="380" fill="#FAF9F5"/>
+  <text x="20" y="30" font-size="18" fill="#1B2434" font-weight="bold">48V RAIL, BLIND-MATE BUS (SKU 2)</text>
+
+  <!-- supply -->
+  <rect x="20" y="70" width="140" height="80" fill="#fff" stroke="#1B2434" stroke-width="2"/>
+  <text x="35" y="95" font-size="13" fill="#1B2434">48V SUPPLY</text>
+  <text x="35" y="112" font-size="11" fill="#6E7480">384W, Class 2</text>
+  <text x="35" y="128" font-size="11" fill="#6E7480">garage / soffit</text>
+
+  <!-- rail -->
+  <rect x="160" y="95" width="660" height="26" fill="#C07A10"/>
+  <text x="380" y="87" font-size="11" fill="#C07A10">FACTORY-CUT RAIL: 48V + GND + DATA PAIR, continuous copper</text>
+
+  <!-- bus taps -->
+  <g>
+    <rect x="240" y="150" width="110" height="80" fill="#1B2434"/>
+    <text x="252" y="175" font-size="11" fill="#FAF9F5">TRACK NODE 1</text>
+    <text x="252" y="192" font-size="10" fill="#C07A10">7.5W cont.</text>
+    <text x="252" y="208" font-size="10" fill="#1E8A63">click-in, keyed</text>
+    <line x1="295" y1="121" x2="295" y2="150" stroke="#1B2434" stroke-width="6"/>
+  </g>
+  <g>
+    <rect x="430" y="150" width="110" height="80" fill="#1B2434"/>
+    <text x="442" y="175" font-size="11" fill="#FAF9F5">TRACK NODE 2</text>
+    <text x="442" y="192" font-size="10" fill="#C07A10">7.5W cont.</text>
+    <text x="442" y="208" font-size="10" fill="#1E8A63">click-in, keyed</text>
+    <line x1="485" y1="121" x2="485" y2="150" stroke="#1B2434" stroke-width="6"/>
+  </g>
+  <g>
+    <rect x="620" y="150" width="110" height="80" fill="#1B2434"/>
+    <text x="632" y="175" font-size="11" fill="#FAF9F5">TRACK NODE 3</text>
+    <text x="632" y="192" font-size="10" fill="#C07A10">7.5W cont.</text>
+    <text x="632" y="208" font-size="10" fill="#1E8A63">click-in, keyed</text>
+    <line x1="675" y1="121" x2="675" y2="150" stroke="#1B2434" stroke-width="6"/>
+  </g>
+
+  <!-- LEDs share rail -->
+  <text x="240" y="260" font-size="12" fill="#1B2434">LED emitters ride the same rail between nodes (lights keep their duty-cycle oversubscription).</text>
+  <text x="240" y="278" font-size="12" fill="#1B2434">Camera loads counted continuous: 3 track + 1 door + 160 ft LEDs = ~201W, headroom ~48%.</text>
+
+  <!-- notes -->
+  <text x="20" y="320" font-size="12" fill="#1E8A63">Blind-mate: node seats into the rail socket, one click. No terminal work, no polarity mistakes (keyed).</text>
+  <text x="20" y="338" font-size="12" fill="#1E8A63">Data pair doubles as control fallback when Wi-Fi is down (network.md).</text>
+  <text x="20" y="360" font-size="12" fill="#C24545">NEC Class 2. 48V at 8A max supply. Single-story install target: under 3 hours (dealer-install-48v.md).</text>
+</svg>
