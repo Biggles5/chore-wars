@@ -1,3 +1,32 @@
+# SPRINT-REPORT: Addendums 1 + 2 (the Brain and the Ops Engine)
+
+Date: 2026-09-06. Gates: car-prowler produces a scored, verified event with Guardian intervening, logging marginal cost, and the Guardian tab showing the night; econ threshold tests green; `make demo` prints AVS score, cost per home per month, and opssim week-12 under both models; the installer runbook for sample house 1 renders end to end with all QC gates; ops threshold tests green; zero em dashes. **All gates met and verified live.**
+
+## What works (all live-verified in this build)
+
+- **The realism fix**: synthetic frames now render as IR security-camera stills (night grading, white-hot subjects, film grain, OSD, detection boxes, DORI chips) and daylight grades for day events. Ryan's note was right and it transforms the demo. SIMULATED stamp retained: realism never touches the evidence policy.
+- **Guardian end to end**: the 2:14 AM story scores AVS-3 (confidence 0.95, operator-readable rationale), Guardian logs "intervene" with the edge reflex acknowledged, the mock central station accepts the AVS-01 payload (and 422s anything under score 2), and the app's Guardian tab shows the night, the decisions, the cost meter ($0.09/home/month compute at demo volumes; $4.17 modeled fully loaded), the insurance export surface, and the jurisdiction flags.
+- **Kill thresholds are executable**: CAC $285 < $1,000; marginal monitoring $4.17 < $6; blended margin 67.1% > 60%; the 8% attrition floor raises ValueError without a citation. Scenario reports (dealer-led, insurer-led, licensing-pivot) generate as light-theme HTML from the same module.
+- **Ops Engine end to end**: three sample scans produce kits (labeled cut lists, connector maps, injection plans, aim angles that land the 20 ft eave chokepoints inside the identify window, prices in band), the installer runbook renders with 5 QC gate types plus the 30-point commissioning check, and the browser-verified installer mode blocks "Next step" on a failed gate photo (with the exact plain-language redo: "Meter shows 12.1V...") and unlocks on a pass.
+- **The throughput thesis in numbers**: ops-sim week-12 in a new metro: 109 installs/month (Ops Engine) vs 27 (old model), backlog 0 vs 486 at week 26; q4-crunch and callback-storm scenarios both break the old model and not the new one. The chart embeds in the demo page; the dealer dashboard renders pipeline, route-aware schedule map, crew scorecards, QC boards, and the capacity forecast from the real engines.
+- **Jurisdiction and pivot switches are code**: IL/TX/Portland-OR face gates enforced in `flags.py` and `Guardian.face_id_allowed()`, tested; `SIGHTLINE_WHITE_LABEL=1` rebrands the app from the gateway.
+- 127 tests green.
+
+## What's honest about the numbers
+
+- All costs and rates carry (est.) except cited filings (ADT, Vivint, COPS pricing, Barnes multiples, AVS-01 dates). The econ engine is the single source: strategy docs cite it rather than restating numbers.
+- The QC agent's vision is a mock that parses measurement blocks a real vision model would extract; the judgment layer and redo language are production logic (D-031).
+- Learning curves, callback rates, and the recruitment funnel are models awaiting pilot data; every one is a named constant in `econ/throughput.py` so pilots reprice the thesis without touching the sim.
+- AVS level 4 is reserved, never simulated (D-027).
+
+## Top 3 risks
+
+1. **The $6 claim meets real token bills.** The cost meter models Claude-mode costs, but real night-vision inference and narration at fleet scale is the number that matters. Instrument from the first pilot night.
+2. **QC-gate friction vs installer patience.** Gates that feel like bureaucracy get gamed with photos of photos. The gate UX must stay under 30 seconds each, and Elite-tier trust levels (spot-check instead of every-gate) are the pressure valve.
+3. **The wholesale station conversation.** The whole monitoring stack presumes a receiver accepts `sightline.dispatch.v1`. Becklar is local and the spec is written; getting a real "yes, we would consume this" is worth more than any further code.
+
+---
+
 # SPRINT-REPORT: Sprint 4
 
 Date: 2026-09-06. Gate: a stranger can clone, run the demo, print the housing, and order the bench BOM using only the repo. **Gate met on this machine's evidence: demo runs from 3 commands, printable STL + ODM STEP are committed artifacts, the bench BOM is an orderable line-item CSV, and every procedure has a guide.**

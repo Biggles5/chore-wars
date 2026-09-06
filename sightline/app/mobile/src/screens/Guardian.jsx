@@ -12,6 +12,26 @@ const ACTION_LABEL = {
   handoff: ["Central station", "var(--red)"],
 };
 
+function InsuranceCard({ report }) {
+  const [note, setNote] = useState("");
+  return (
+    <div className="card" style={{ fontSize: 12.5 }}>
+      <div style={{ marginBottom: 6 }}>
+        Many carriers discount monitored, verified perimeters 5 to 15% (est.).
+        Export the documentation pack: system specs, armed-hours attestation,
+        verified-event summary. No video, no images, aggregates only.
+      </div>
+      <button className="btn" style={{ width: "100%" }}
+        onClick={() => setNote("Documentation pack prepared: coverage attestation, "
+          + `${report ? report.events_processed : 0} events summarized, deter outcomes included. `
+          + "Share it with your carrier from the files app (demo stub).")}>
+        Export for my insurer
+      </button>
+      {note && <div className="empty" role="status" style={{ padding: "10px 4px 0" }}>{note}</div>}
+    </div>
+  );
+}
+
 export default function Guardian({ stories, openStory }) {
   const [report, setReport] = useState(null);
   const [log, setLog] = useState([]);
@@ -72,6 +92,9 @@ export default function Guardian({ stories, openStory }) {
           </div>
         );
       })}
+
+      <div className="section-title">Insurance savings</div>
+      <InsuranceCard report={report} />
 
       <div className="section-title">What Guardian may never do</div>
       <div className="card" style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--muted)" }}>

@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.5.0 (2026-09-06) Addendums 1 + 2: the Brain and the Ops Engine
+
+- Realistic synthetic camera frames (IR night stills with OSD, grain, bounding boxes; daylight grading) replacing the pictograms, still SIMULATED-stamped.
+- AVS-01 scoring in the correlator (story.avs, additive); Guardian agent: escalation policy, latency budgets, cost meter, nightly report, code-enforced guardrails, mock central-station receiver that refuses sub-AVS-2 events.
+- Jurisdiction feature flags in code (IL/TX/Portland-OR face gates), white-label licensing pivot as env config, biometric matrix + AVS-01 reference + monitoring-license checklist in compliance.
+- econ/: unit economics with encoded kill thresholds (CAC < $1,000 at $285 blended; marginal monitoring < $6 at $4.17; margin > 60% at 67.1%; 8% attrition floor), 3 scenario HTML reports, throughput model (2.4 hr installs, learning curves, recruitment funnel, seasonality).
+- Ops Engine: scan.v1 + 3 sample houses, scan-to-kit (cut lists, connector maps, injection plans, aim angles, AR overlay, price with one source of truth), capacity/scheduling engine, installer runbook with QC gates + 30-point commissioning, QC agent (25 fixtures, 25/25), watchtower proactive tickets, certification package, dealer dashboard.
+- ops-sim: 26-week metro simulation, 3 scenarios; week-12: 109/mo vs 27/mo, backlog 0 vs 486; chart embedded in the demo page.
+- App: Guardian tab (night report, cost-of-protection meter, insurance export surface, jurisdiction flags), installer mode with live QC gating.
+- `make demo` prints the AVS-01 verdict, Guardian cost per home per month, and the opssim week-12 comparison.
+- Strategy docs (disruption thesis, market share plan, partnerships, counter-disruption, investor memo, ops disruption) and the partnerships kit.
+- 127 tests green including every encoded threshold.
+
 ## 0.4.0 (2026-09-06) Sprint 4
 
 - CAD: CadQuery parametric models with real committed exports (STL + STEP): track node housing (Gemstone 30mm channel), universal retrofit clips for three brand profiles, door node, bench fixture.

@@ -57,6 +57,35 @@ Beat generation keyed on per-entity level transitions flapped when multiple node
 ### D-018: uvicorn needs the `websockets` package for WS routes
 FastAPI's `@app.websocket` silently 404s under uvicorn without the `websockets` (or wsproto) protocol package. Pinned in requirements. Found in live testing, invisible in TestClient.
 
+## 2026-09-06 (Addendums 1 and 2: the Brain and the Ops Engine)
+
+### D-026: Realistic synthetic frames, still procedural SVG
+Ryan's feedback: the mockups were not realistic, and that matters for a demo that has to sell. The frame generator now renders IR-night security-camera stills (grain, vignette, white-hot subjects, OSD, bounding boxes, DORI chips) and daylight grading for day events. Still deterministic SVG, no image libraries, still stamped SIMULATED with `media.synthetic: true`: realism serves the demo, the evidence policy stays absolute.
+
+### D-027: AVS-01 computed in the correlator, not the agent
+The score rides the story (`avs` field, additive) so every consumer (app, Guardian, central station, monitoring spec) reads one number computed one way. Guardian consumes the score; it never invents its own. Level 4 is reserved: the simulator cannot produce threat-to-life indicators, and pretending otherwise would be demo theater.
+
+### D-028: Guardian's cost meter counts Claude-mode token costs even in mock mode
+Mock mode is deterministic, but the meter models what Claude-mode narration and scoring WOULD cost at Haiku-class prices (est.), so the $6/home/month claim is not an artifact of running the free path. Measured in the demo: about $0.09/home/month compute-only at simulated volumes; the econ model carries $0.42 with growth margin plus support and storage for $4.17 fully loaded.
+
+### D-029: Handoff receiver refuses sub-AVS-2 events by design
+The mock central station 422s anything below confirmed-human. That is the product position encoded: unverified noise never leaves the house, which is the entire answer to the 94 to 98% false-dispatch problem, and it keeps the wholesale-station relationship clean.
+
+### D-030: One camera node per scan chokepoint, price follows the plan
+Scan-to-kit places nodes at scan-marked chokepoints (not by roofline-length heuristic) and the quote engine takes the plan's node count (`n_track_override`). One source of truth: price, power check, cut list, aim angles, and the AR overlay all derive from the same placement.
+
+### D-031: QC mock parses measurements embedded in fixture SVGs
+The fixture "photos" carry the structured measurement block a vision model would extract from real pixels. The judgment layer (spec thresholds, redo language) is production logic; only `extract()` swaps when Claude vision lands. 25 fixtures, every one judged as its manifest expects, and a wrong-subject photo is caught.
+
+### D-032: Threshold "crew-hours" read as on-site duration
+Addendum 2 sets both "2.3 to 3 hrs, 3 jobs/day" and "modeled install <3.5 crew-hours single story." A 2-person crew at 2.4 wall-clock hours is 4.8 labor-hours, so the two statements only reconcile if the threshold means the crew's on-site duration. Encoded that way (install_hours("new") = 2.4 < 3.5) with the runbook total also under 3.5.
+
+### D-033: Watchtower dedupes one open ticket per node and failure kind
+The proactive loop's failure mode is ticket spam (every 30 s heartbeat re-triggering). One open ticket per (site, node, kind); resolution flow (dealer closes, re-arm detection) is Phase 1 work.
+
+### D-034: ops-sim is deterministic, no RNG in the core loop
+Demand, learning, callbacks, and weather all come from the named constants and shapes in econ/throughput.py, so the week-12 numbers printed by `make demo` are reproducible claims, not seeds. The dashboard's cosmetic variance uses a fixed seed.
+
 ## 2026-09-06 (Sprint 4)
 
 ### D-023: Audio-law matrix treats mixed and unsettled states as all-party
