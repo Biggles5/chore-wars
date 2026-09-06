@@ -1,0 +1,19 @@
+# SightLine HA package, Sprint 1 seed.
+# Sprint 3 fills in: zone-follow deter automation (camera zone -> WLED
+# segment range), quiet-hours variant, privacy-mask enforcement, arm modes.
+# Proprietary. (c) 2026 Ryan Brown / SightLine.
+
+input_boolean:
+  sightline_armed:
+    name: SightLine Armed
+    icon: mdi:shield-home
+
+input_datetime:
+  sightline_quiet_start:
+    name: Quiet hours start
+    has_time: true
+    initial: "22:00"
+  sightline_quiet_end:
+    name: Quiet hours end
+    has_time: true
+    initial: "07:00"

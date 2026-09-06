@@ -1,0 +1,41 @@
+# Frigate config for the SightLine gateway.
+# Accepts real node RTSP streams and the simulator alike. The sim publishes
+# detections directly over MQTT (no RTSP needed), so Frigate's own detection
+# is exercised with real cameras; with the sim, Frigate runs idle but the
+# stack layout matches production.
+# Proprietary. (c) 2026 Ryan Brown / SightLine.
+
+mqtt:
+  host: mosquitto
+  port: 1883
+  topic_prefix: frigate
+  client_id: frigate
+
+detectors:
+  # Bench: Coral USB TPU. Dev laptops: CPU fallback.
+  cpu1:
+    type: cpu
+
+cameras:
+  # Real node example (bench 8MP PoE reference cam). Enable when hardware
+  # is attached; the sim path needs no camera defined.
+  node-fr:
+    enabled: false
+    ffmpeg:
+      inputs:
+        - path: rtsp://node-fr.local:8554/wide
+          roles: [detect, record]
+    detect:
+      width: 1280
+      height: 720
+      fps: 5
+
+record:
+  enabled: true
+  retain:
+    days: 3  # mirrors the node's 72h loop on the gateway
+
+snapshots:
+  enabled: true
+  retain:
+    default: 3

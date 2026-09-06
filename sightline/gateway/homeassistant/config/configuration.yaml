@@ -1,0 +1,10 @@
+# SightLine Home Assistant seed config.
+# The SightLine package (deter loop, quiet hours, privacy masks) loads from
+# packages/. MQTT broker setup: Settings > Devices > MQTT > host "mosquitto".
+# Proprietary. (c) 2026 Ryan Brown / SightLine.
+
+default_config:
+
+homeassistant:
+  name: SightLine Gateway
+  packages: !include_dir_named packages

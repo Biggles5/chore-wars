@@ -1,0 +1,54 @@
+# SightLine gateway stack: broker, Frigate, correlator, Home Assistant.
+# `make gateway` from the repo root, or `docker compose up -d` from here.
+# The simulator publishes into this broker automatically when it is up.
+# Proprietary. (c) 2026 Ryan Brown / SightLine.
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: sightline-mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    restart: unless-stopped
+
+  correlator:
+    build:
+      context: .
+      dockerfile: correlator/Dockerfile
+    container_name: sightline-correlator
+    ports:
+      - "8091:8091"
+    environment:
+      SIGHTLINE_MQTT_HOST: mosquitto
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  frigate:
+    image: ghcr.io/blakeblackshear/frigate:0.14.1
+    container_name: sightline-frigate
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./frigate/config.yml:/config/config.yml:ro
+      - frigate-media:/media/frigate
+    shm_size: "128mb"
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:2024.12
+    container_name: sightline-ha
+    ports:
+      - "8123:8123"
+    volumes:
+      - ./homeassistant/config:/config
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+
+volumes:
+  frigate-media:
