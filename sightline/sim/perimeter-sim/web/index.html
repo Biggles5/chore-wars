@@ -1,0 +1,226 @@
+<!doctype html>
+<!-- SightLine perimeter sim, live top-down view.
+     Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SightLine Sim</title>
+<style>
+  :root {
+    --paper:#FAF9F5; --ink:#1B2434; --amber:#C07A10; --blue:#1D7FB0;
+    --green:#1E8A63; --red:#C24545;
+  }
+  * { box-sizing:border-box; margin:0; }
+  body {
+    background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans","Chakra Petch",system-ui,sans-serif;
+    display:flex; flex-direction:column; height:100vh; overflow:hidden;
+  }
+  header {
+    display:flex; align-items:baseline; gap:14px; padding:10px 16px;
+    border-bottom:2px solid var(--ink);
+  }
+  header h1 { font-family:"Chakra Petch",system-ui,sans-serif; font-size:18px; letter-spacing:1px; }
+  header .scn { font-family:"IBM Plex Mono",monospace; font-size:13px; color:var(--blue); }
+  header .clock { font-family:"IBM Plex Mono",monospace; font-size:16px; margin-left:auto; }
+  header .armed { font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; color:#fff; }
+  .armed.on { background:var(--red); } .armed.off { background:var(--green); }
+  main { display:flex; flex:1; min-height:0; }
+  #wrap { flex:1; position:relative; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  aside {
+    width:330px; border-left:1px solid #d8d5cc; display:flex; flex-direction:column;
+    background:#fff;
+  }
+  aside h2 {
+    font-family:"Chakra Petch",system-ui,sans-serif; font-size:12px; letter-spacing:1px;
+    text-transform:uppercase; padding:10px 12px 6px; color:#6b7280;
+  }
+  #feed { flex:1; overflow-y:auto; padding:0 10px 10px; }
+  .ev {
+    display:flex; gap:8px; padding:7px 8px; margin-bottom:6px; border-radius:8px;
+    background:var(--paper); border:1px solid #e6e3da; font-size:12px; align-items:center;
+  }
+  .ev img { width:52px; height:39px; border-radius:4px; background:var(--ink); }
+  .ev .t { font-family:"IBM Plex Mono",monospace; color:#6b7280; font-size:11px; }
+  .ev .cls { font-weight:600; }
+  .ev.deter { border-color:var(--red); background:#fdf1f1; }
+  footer {
+    font-family:"IBM Plex Mono",monospace; font-size:11px; color:#6b7280;
+    padding:6px 16px; border-top:1px solid #d8d5cc; display:flex; gap:18px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>SIGHTLINE</h1>
+  <span class="scn" id="scn"></span>
+  <span class="armed off" id="armed">DISARMED</span>
+  <span class="clock" id="clock">--:--:--</span>
+</header>
+<main>
+  <div id="wrap"><canvas id="cv"></canvas></div>
+  <aside>
+    <h2>Event feed</h2>
+    <div id="feed"></div>
+  </aside>
+</main>
+<footer>
+  <span id="bus"></span><span id="pub"></span><span id="counts"></span>
+</footer>
+<script>
+const C = { paper:"#FAF9F5", ink:"#1B2434", amber:"#C07A10", blue:"#1D7FB0",
+            green:"#1E8A63", red:"#C24545" };
+const CLASS_COLOR = { person:C.red, vehicle:C.amber, animal:C.green,
+                      package:C.blue, unknown:C.ink };
+let site = null, state = null, deterSegs = new Set();
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+
+// world bounds with margin
+let W = { x0:-8, y0:-20, x1:24, y1:22 };
+function fit() {
+  cv.width = cv.clientWidth * devicePixelRatio;
+  cv.height = cv.clientHeight * devicePixelRatio;
+}
+function tf() {
+  const sx = cv.width / (W.x1 - W.x0), sy = cv.height / (W.y1 - W.y0);
+  const s = Math.min(sx, sy);
+  const ox = (cv.width - s * (W.x1 - W.x0)) / 2;
+  const oy = (cv.height - s * (W.y1 - W.y0)) / 2;
+  return { s,
+    X: x => ox + (x - W.x0) * s,
+    Y: y => cv.height - (oy + (y - W.y0) * s) };  // +y is north, up
+}
+function poly(t, pts) {
+  ctx.beginPath();
+  pts.forEach((p, i) => i ? ctx.lineTo(t.X(p[0]), t.Y(p[1])) : ctx.moveTo(t.X(p[0]), t.Y(p[1])));
+  ctx.closePath();
+}
+// compass bearing (0=N, cw) to canvas angle (radians, y down)
+function ang(b) { return (b - 90) * Math.PI / 180; }
+
+function draw() {
+  if (!site) return;
+  const t = tf();
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.lineWidth = Math.max(1, t.s * 0.05);
+
+  // zones
+  for (const z of site.zones) {
+    poly(t, z.poly);
+    ctx.fillStyle = z.id === "street" ? "#eceae3" : "#f2f0e9";
+    ctx.fill();
+    ctx.strokeStyle = "#dedbd0"; ctx.stroke();
+    const cx = z.poly.reduce((a,p)=>a+p[0],0)/z.poly.length;
+    const cy = z.poly.reduce((a,p)=>a+p[1],0)/z.poly.length;
+    ctx.fillStyle = "#a8a49a"; ctx.font = `${t.s*0.55}px IBM Plex Mono, monospace`;
+    ctx.textAlign = "center"; ctx.fillText(z.id, t.X(cx), t.Y(cy));
+  }
+
+  // node coverage (identify ring wedge per channel)
+  for (const n of site.nodes) {
+    for (const ch of n.channels) {
+      const r = ch.rings[ch.name === "identity" ? "identify" : "detect"];
+      const rid = ch.rings.identify;
+      const a0 = ang(ch.boresight_deg - ch.hfov_deg / 2);
+      const a1 = ang(ch.boresight_deg + ch.hfov_deg / 2);
+      // wide channel: detect wedge, faint. identity: identify wedge, blue.
+      ctx.beginPath();
+      ctx.moveTo(t.X(n.pos[0]), t.Y(n.pos[1]));
+      ctx.arc(t.X(n.pos[0]), t.Y(n.pos[1]), (ch.name==="identity"?rid:r) * t.s, -a1, -a0, false);
+      ctx.closePath();
+      ctx.fillStyle = ch.name === "identity" ? "rgba(29,127,176,0.13)" : "rgba(27,36,52,0.05)";
+      ctx.fill();
+      if (ch.name === "identity") {
+        ctx.strokeStyle = "rgba(29,127,176,0.5)"; ctx.stroke();
+      }
+    }
+  }
+
+  // house footprint
+  poly(t, site.footprint);
+  ctx.fillStyle = "#fff"; ctx.fill();
+  ctx.strokeStyle = C.ink; ctx.lineWidth = Math.max(1.5, t.s*0.08); ctx.stroke();
+
+  // roofline segments (LED track), flash when deterring
+  const flash = Math.floor(Date.now() / 130) % 2 === 0;
+  for (const seg of site.segments) {
+    const hot = deterSegs.has(seg.id);
+    ctx.beginPath();
+    ctx.moveTo(t.X(seg.from[0]), t.Y(seg.from[1]));
+    ctx.lineTo(t.X(seg.to[0]), t.Y(seg.to[1]));
+    ctx.strokeStyle = hot ? (flash ? C.red : "#ffffff") : C.amber;
+    ctx.lineWidth = hot ? Math.max(4, t.s*0.25) : Math.max(2, t.s*0.12);
+    ctx.stroke();
+  }
+
+  // nodes
+  for (const n of site.nodes) {
+    ctx.beginPath();
+    ctx.arc(t.X(n.pos[0]), t.Y(n.pos[1]), Math.max(4, t.s*0.28), 0, 7);
+    ctx.fillStyle = n.kind === "door" ? C.green : C.blue; ctx.fill();
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = C.ink; ctx.font = `600 ${t.s*0.5}px IBM Plex Mono, monospace`;
+    ctx.textAlign = "center";
+    ctx.fillText(n.id, t.X(n.pos[0]), t.Y(n.pos[1]) - t.s*0.5);
+  }
+
+  // actors
+  if (state) for (const a of state.actors) {
+    ctx.beginPath();
+    ctx.arc(t.X(a.pos[0]), t.Y(a.pos[1]), Math.max(4, t.s*0.3), 0, 7);
+    ctx.fillStyle = CLASS_COLOR[a.class] || C.ink; ctx.fill();
+    if (a.fleeing) { ctx.strokeStyle = C.red; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.fillStyle = C.ink; ctx.font = `${t.s*0.45}px IBM Plex Sans, sans-serif`;
+    ctx.fillText(a.label || a.id, t.X(a.pos[0]), t.Y(a.pos[1]) + t.s*0.85);
+  }
+  requestAnimationFrame(draw);
+}
+
+function feedItem(p) {
+  const d = document.createElement("div");
+  d.className = "ev" + (p.type === "deter.fired" ? " deter" : "");
+  const g = p.geometry || {}, o = p.object || {};
+  const thumb = p.media && p.media.thumb_ref
+    ? `<img src="/run/${p.media.thumb_ref}" alt="">` : "";
+  d.innerHTML = `${thumb}<div>
+    <div><span class="cls" style="color:${CLASS_COLOR[o.class]||C.ink}">${o.class||p.type}</span>
+      ${p.type.replace("detection.","")} ${g.zone||""}</div>
+    <div class="t">${(p.ts||"").slice(11,19)} ${p.node_id} ${g.dori_level||""} ${g.px_per_m?g.px_per_m+" px/m":""}</div>
+  </div>`;
+  const feed = document.getElementById("feed");
+  feed.prepend(d);
+  while (feed.children.length > 60) feed.lastChild.remove();
+}
+
+async function boot() {
+  site = await (await fetch("/site")).json();
+  document.getElementById("scn").textContent =
+    site.scenario.name + " (" + site.scenario.timescale + "x)";
+  fit(); requestAnimationFrame(draw);
+  const es = new EventSource("/stream");
+  es.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.kind === "state") {
+      state = m;
+      deterSegs = new Set(m.deter);
+      document.getElementById("clock").textContent = m.clock;
+      const armed = document.getElementById("armed");
+      armed.textContent = m.armed ? "ARMED" : "DISARMED";
+      armed.className = "armed " + (m.armed ? "on" : "off");
+      document.getElementById("bus").textContent = m.mqtt;
+      document.getElementById("pub").textContent = m.published + " msgs";
+      document.getElementById("counts").textContent =
+        Object.entries(m.counts).map(([k,v])=>k.replace("detection.","")+":"+v).join("  ");
+    } else if (m.kind === "event" && m.payload.type !== "detection.update"
+               && m.payload.schema === "sightline.event.v1") {
+      feedItem(m.payload);
+    }
+  };
+}
+window.addEventListener("resize", fit);
+boot();
+</script>
+</body>
+</html>

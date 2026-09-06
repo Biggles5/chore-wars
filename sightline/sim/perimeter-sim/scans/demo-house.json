@@ -1,0 +1,66 @@
+{
+  "site_id": "site-demo",
+  "name": "Demo house (Gemstone 12V retrofit profile)",
+  "units": "meters",
+  "notes": "Origin at SW footprint corner. +x east, +y north. Front door faces south. Roofline segments carry the LED track; deter zones map to segment ranges.",
+  "footprint": [
+    [0, 0], [16, 0], [16, 10], [10, 10], [10, 13], [0, 13]
+  ],
+  "eave_height_m": 6.1,
+  "roofline_segments": [
+    { "id": "seg-front", "from": [0, 0], "to": [16, 0], "leds": 160 },
+    { "id": "seg-east", "from": [16, 0], "to": [16, 10], "leds": 100 },
+    { "id": "seg-rear-e", "from": [16, 10], "to": [10, 10], "leds": 60 },
+    { "id": "seg-rear-n", "from": [10, 13], "to": [0, 13], "leds": 100 },
+    { "id": "seg-west", "from": [0, 13], "to": [0, 0], "leds": 130 }
+  ],
+  "zones": [
+    { "id": "driveway", "poly": [[10, -14], [20, -14], [20, 0], [10, 0]] },
+    { "id": "porch", "poly": [[4, -3], [9, -3], [9, 0], [4, 0]] },
+    { "id": "front-walk", "poly": [[4, -14], [10, -14], [10, 0], [9, 0], [9, -3], [4, -3]] },
+    { "id": "side-yard-w", "poly": [[-6, -2], [0, -2], [0, 13], [-6, 13]] },
+    { "id": "back-yard", "poly": [[0, 13], [16, 13], [16, 20], [0, 20]] },
+    { "id": "street", "poly": [[-6, -18], [22, -18], [22, -14], [-6, -14]] }
+  ],
+  "nodes": [
+    {
+      "id": "node-fr",
+      "kind": "track",
+      "pos": [12, 0],
+      "height_m": 6.1,
+      "facing_deg": 180,
+      "wide": { "sensor": "8mp", "hfov_deg": 110 },
+      "identity": { "sensor": "12mp", "hfov_deg": 60, "aim": [14, -9] },
+      "deter_segments": ["seg-front", "seg-east"]
+    },
+    {
+      "id": "node-fl",
+      "kind": "track",
+      "pos": [4, 0],
+      "height_m": 6.1,
+      "facing_deg": 180,
+      "wide": { "sensor": "8mp", "hfov_deg": 110 },
+      "identity": { "sensor": "12mp", "hfov_deg": 60, "aim": [6, -8] },
+      "deter_segments": ["seg-front", "seg-west"]
+    },
+    {
+      "id": "node-rear",
+      "kind": "track",
+      "pos": [5, 13],
+      "height_m": 6.1,
+      "facing_deg": 0,
+      "wide": { "sensor": "8mp", "hfov_deg": 110 },
+      "identity": { "sensor": "12mp", "hfov_deg": 60, "aim": [8, 17] },
+      "deter_segments": ["seg-rear-n", "seg-rear-e"]
+    },
+    {
+      "id": "node-door",
+      "kind": "door",
+      "pos": [6.5, 0],
+      "height_m": 1.5,
+      "facing_deg": 180,
+      "wide": { "sensor": "8mp", "hfov_deg": 110 },
+      "deter_segments": ["seg-front"]
+    }
+  ]
+}
