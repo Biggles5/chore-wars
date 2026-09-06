@@ -1,0 +1,31 @@
+{
+  "schema": "sightline.event.v1",
+  "event_id": "6f1c2a34-9b1e-4b7a-8f21-3a9d0c5e7712",
+  "site_id": "site-demo",
+  "node_id": "node-fr",
+  "ts": "2026-09-06T02:14:07-06:00",
+  "type": "detection.start",
+  "object": {
+    "class": "person",
+    "confidence": 0.91,
+    "track_id": "node-fr:t042",
+    "attributes": { "hist": [0.12, 0.55, 0.2, 0.13], "carrying": false }
+  },
+  "geometry": {
+    "distance_m": 11.2,
+    "ground_m": 10.3,
+    "bearing_deg": -14.5,
+    "pitch_deg": 23.1,
+    "px_per_m": 296.9,
+    "dori_level": "identify",
+    "channel": "identity",
+    "zone": "driveway",
+    "pos": { "x": 4.2, "y": -9.4 }
+  },
+  "media": {
+    "thumb_ref": "runs/demo/thumbs/6f1c2a34.svg",
+    "clip_ref": "loop://node-fr/2026-09-06T02:14:05/12s",
+    "native_pixels": false,
+    "synthetic": true
+  }
+}

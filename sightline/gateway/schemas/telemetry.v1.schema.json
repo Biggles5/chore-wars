@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sightline.telemetry.v1",
+  "title": "SightLine node telemetry v1",
+  "description": "Heartbeat published by every node on sightline/<site>/<node>/telemetry, default every 30 s. (c) 2026 Ryan Brown / SightLine. Proprietary.",
+  "type": "object",
+  "required": ["schema", "site_id", "node_id", "ts", "uptime_s", "fw_version", "power"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "sightline.telemetry.v1" },
+    "site_id": { "type": "string", "minLength": 1 },
+    "node_id": { "type": "string", "minLength": 1 },
+    "ts": { "type": "string", "format": "date-time" },
+    "uptime_s": { "type": "number", "minimum": 0 },
+    "fw_version": { "type": "string" },
+    "temp_c": { "type": "number", "description": "Board temperature. Heater engages below -10 C ambient." },
+    "heater_on": { "type": "boolean" },
+    "wifi_rssi_dbm": { "type": "number" },
+    "power": {
+      "type": "object",
+      "required": ["rail_v", "draw_w"],
+      "additionalProperties": false,
+      "properties": {
+        "rail_v": { "type": "number", "description": "Input rail voltage at the tap (9 to 56V window)" },
+        "draw_w": { "type": "number", "description": "Continuous draw. Must stay under the 12W retrofit ceiling." }
+      }
+    },
+    "storage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "loop_hours": { "type": "number", "description": "Hours of footage currently on the 72h microSD loop" },
+        "used_pct": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "sightline.telemetry.v1",
+  "site_id": "site-demo",
+  "node_id": "node-fr",
+  "ts": "2026-09-06T02:14:30-06:00",
+  "uptime_s": 86412,
+  "fw_version": "0.1.0-sim",
+  "temp_c": 31.4,
+  "heater_on": false,
+  "wifi_rssi_dbm": -58,
+  "power": { "rail_v": 12.1, "draw_w": 4.8 },
+  "storage": { "loop_hours": 71.6, "used_pct": 94.0 }
+}

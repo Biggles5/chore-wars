@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+sim/perimeter-sim/runs/
+node_modules/
+dist/
+.env
+gateway/homeassistant/config/.storage/

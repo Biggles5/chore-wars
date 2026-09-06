@@ -1,0 +1,44 @@
+# DECISIONS.md
+
+Every assumption made while building, dated, with reasoning. Section 0 of the master build spec wins over anything here. Tensions are noted where they exist.
+
+## 2026-09-06 (Sprint 1)
+
+### D-001: Monorepo lives inside the chore-wars repository, under `sightline/`
+This session's GitHub scope is `biggles5/chore-wars` and the designated push branch is `claude/chores-wars-impact-check-xpsj0r`. Building in a `sightline/` subdirectory keeps the Chore Wars app (`index.html`) untouched, which was the standing instruction. When SightLine gets its own repo, `git filter-repo --path sightline/` or a plain copy migrates it cleanly. Nothing in SightLine references chore-wars files.
+
+### D-002: `make` over `just`
+`make` ships on every mac and Linux box a dealer or investor might clone on. `just` is nicer but adds an install step, which violates the "3 commands" bar. Makefile targets are thin wrappers over python and docker compose so nothing is trapped in make syntax.
+
+### D-003: Demo runs without Docker; Docker is the full-stack path
+The Sprint 1 gate is "make demo runs quiet-night end to end." Requiring Docker Desktop for the first-run demo would fail on locked-down laptops. So the simulator carries an in-process event bus with the exact MQTT topic layout and payloads, plus a JSONL event log, and serves its own web view. When a real broker is reachable (localhost:1883 by default, `SIGHTLINE_MQTT_HOST` to override) the sim publishes to it identically. `make gateway` boots the real broker + Frigate + correlator + Home Assistant via docker compose.
+
+### D-004: 12MP identity sensor assumed 4608 x 2592
+"12MP" is ambiguous. 4000 x 3000 (4:3, 12.0MP) gives an identify reach of 13.9 m at 60 degrees, which does not match the audited 16 m figure. 4608 x 2592 (16:9, 11.9MP, the common "12MP" security SKU, e.g. IMX515 class) gives 15.96 m, which matches. So 4608 horizontal pixels is the working assumption for the identity channel. Recorded in `hardware/dori_placement.py` and pinned by tests.
+
+### D-005: DORI density computed on ground distance, target face at 1.7 m
+The audited numbers (105 deg 8MP identify at 5.9 m with pitch 37 to 42 inside it, 60 deg 8MP at 13.3 m with pitch about 19 at the edge, pitch 30 boundary at 7.6 m for a 6.1 m eave) reproduce exactly when pixel density is horizontal_pixels / (2 * d * tan(HFOV/2)) with d as ground (horizontal) distance, and pitch as atan((eave - 1.7) / ground_distance). The pitch values pin d as ground distance: atan(4.4 / 5.9) = 36.7 degrees matches the audited "37" at the 5.9 m ring edge. Face height 1.7 m (est.) lands the 30 degree boundary at 7.62 m. Line-of-sight distance is derived for reporting. Thin-lens, distortion-free approximation; real lens tables replace it in Phase 1 without changing the interface.
+
+### D-006: Event schema is versioned by filename and by a `schema` field in every payload
+`gateway/schemas/event.v1.schema.json`, and every event carries `"schema": "sightline.event.v1"`. Consumers reject what they do not recognize instead of guessing. Same for telemetry.
+
+### D-007: Simulator timescale
+Real scenarios span minutes to hours. The sim runs on a configurable timescale (default 60x for timed scenarios, quiet-night compresses 8 hours into about 50 s wall time at 600x). Event timestamps are simulated wall-clock time (the scenario's clock, e.g. 02:14), not the developer's laptop time, so stories and the app read correctly.
+
+### D-008: Synthetic thumbnails are procedural SVG
+No image libraries, no binary assets, fully deterministic, tiny in git. Each event's `media.thumb_ref` points to an SVG rendered from the event geometry (class silhouette, node id, timestamp, DORI level). `media.native_pixels` is `true` only on real hardware; the sim marks frames `"synthetic": true` so nothing synthetic can ever masquerade as evidence. This is the evidence-policy rule enforced at the schema level from day one.
+
+### D-009: Correlator is a skeleton in Sprint 1
+Sprint 1's gate needs the gateway to boot, not to stitch stories. The correlator ships as a FastAPI service with health, ingest, recent-events, and an MQTT subscriber, with the track/story interfaces stubbed and typed so Sprint 2 fills them in without moving files.
+
+### D-010: CAD language decision deferred to Sprint 4, leaning CadQuery
+CAD work is a Sprint 4 deliverable. Current lean: CadQuery over OpenSCAD because it exports real STEP (ODMs need STEP; OpenSCAD does not export STEP natively) and parametric python fits the rest of the toolchain. Final call recorded here when the first housing file lands.
+
+### D-011: Python 3.11 stdlib + 5 pinned deps for the whole Sprint 1 runtime
+fastapi, uvicorn, paho-mqtt, jsonschema, pytest. Nothing else. Keeps `make setup` under 30 seconds and the offline story honest.
+
+### D-012: Sim web view uses Server-Sent Events, not websockets
+SSE is one-directional state streaming, which is all the top-down view needs, works through the same FastAPI app, and needs zero client libraries. The app prototype (Sprint 2) gets a websocket from the correlator, where bidirectional matters (Deter now button).
+
+### D-013: Deter logic lives in the sim for Sprint 1, moves to the correlator in Sprint 2
+The view needs to show deter zones firing now. The sim carries a placeholder rule (person or vehicle dwelling inside the identify ring during armed hours triggers zone-follow deter). Sprint 2 replaces this with the correlator issuing deter commands over `sightline/<site>/deter/cmd`, and the sim just obeys the bus. The topic and payload are already final so nothing downstream changes.
