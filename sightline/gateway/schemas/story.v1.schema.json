@@ -80,6 +80,47 @@
         }
       }
     },
+    "avs": {
+      "type": "object",
+      "description": "AVS-01 alarm score (TMA ANSI standard, IACP-ratified 2024). Computed by the correlator so every story is dispatch-grade by construction. Additive optional field.",
+      "required": ["score", "confidence", "rationale"],
+      "additionalProperties": false,
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 4, "description": "0 no call for service, 1 call with no additional info, 2 confirmed human presence, 3 threat to property, 4 threat to life" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "rationale": { "type": "string", "description": "Human-readable basis a central-station operator can read aloud" }
+      }
+    },
+    "guardian": {
+      "type": "object",
+      "description": "Guardian agent decision for this story. Additive optional field.",
+      "required": ["action"],
+      "additionalProperties": false,
+      "properties": {
+        "action": { "type": "string", "enum": ["dismiss", "watch", "notify", "intervene", "handoff"] },
+        "actions_taken": { "type": "array", "items": { "type": "string" } },
+        "decided_ts": { "type": "string", "format": "date-time" },
+        "latency_ms": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "score": { "type": "number" },
+            "intervene": { "type": "number" },
+            "handoff_decision": { "type": "number" }
+          }
+        },
+        "cost_usd": { "type": "number", "minimum": 0, "description": "Estimated marginal cost of processing this story" },
+        "handoff": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "sent": { "type": "boolean" },
+            "receiver": { "type": "string" },
+            "status": { "type": "integer" }
+          }
+        }
+      }
+    },
     "narrative": {
       "type": "object",
       "description": "Narrator agent output. Absent until narration runs.",

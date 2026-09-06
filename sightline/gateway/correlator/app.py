@@ -24,6 +24,11 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from core import Correlator, HistReID  # noqa: E402
 from ask import answer as ask_answer  # noqa: E402
+from flags import feature_flags, branding, jurisdiction  # noqa: E402
+
+_GUARDIAN_DIR = Path(__file__).resolve().parents[2] / "agents" / "guardian"
+sys.path.insert(0, str(_GUARDIAN_DIR))
+from guardian import Guardian  # noqa: E402
 
 _QUOTE = Path(__file__).resolve().parents[2] / "agents" / "quote"
 sys.path.insert(0, str(_QUOTE))
@@ -62,8 +67,12 @@ class State:
         self.seq = 0
         self.updates = deque(maxlen=1000)   # (seq, kind, payload dict)
         self.seen_event_ids = deque(maxlen=5000)
+        self.guardian = Guardian(
+            jurisdiction=jurisdiction(),
+            deter_fn=lambda site, zone: _cmd_deter(self, site, zone))
         self.correlator = Correlator(
-            reid=HistReID(), narrator=narrate, on_update=self._story_updated)
+            reid=HistReID(), narrator=narrate, on_update=self._story_updated,
+            armed_provider=_armed_now, guardian=self.guardian.decide)
 
     def _push(self, kind: str, payload: dict):
         self.seq += 1
@@ -96,8 +105,31 @@ class State:
         return out, top
 
 
+def _armed_now() -> bool:
+    """Active scene decides the armed state Guardian and AVS scoring see."""
+    try:
+        active = _scenes_store["active"]
+        scene = next(s for s in _scenes_store["scenes"] if s["name"] == active)
+        return bool(scene.get("armed", True))
+    except Exception:
+        return True
+
+
+def _cmd_deter(st, site_id: str, zone: str):
+    """Guardian-commanded deter: bus publish + app push, same path as manual."""
+    cmd = {"pattern": "zone-follow-strobe", "zone": zone,
+           "segments": ["auto"], "source": "guardian", "site_id": site_id}
+    st._push("deter_cmd", cmd)
+    client = getattr(st, "mqtt_client", None)
+    if client is not None and st.mqtt_status.startswith("connected"):
+        try:
+            client.publish(f"sightline/{site_id}/deter/cmd", json.dumps(cmd), qos=1)
+        except Exception:
+            pass
+
+
 state = State()
-app = FastAPI(title="SightLine correlator", version="0.2.0")
+app = FastAPI(title="SightLine correlator", version="0.3.0")
 
 
 def _mqtt_loop():
@@ -300,6 +332,28 @@ def design_scene(body: dict):
     }
     return {"scene": scene, "mode": "mock",
             "note": "parsed deterministically; Claude mode refines wording in a later sprint"}
+
+
+@app.get("/guardian/report")
+def guardian_report(homes: int = 1):
+    """The nightly report: what Guardian watched, dismissed, did, and what
+    it cost. The app's Guardian tab renders this; the econ tests assert it."""
+    return state.guardian.nightly_report(homes=homes)
+
+
+@app.get("/guardian/log")
+def guardian_log(limit: int = 50):
+    return state.guardian.log[-limit:]
+
+
+@app.get("/flags")
+def flags():
+    return feature_flags()
+
+
+@app.get("/branding")
+def get_branding():
+    return branding()
 
 
 @app.websocket("/ws")

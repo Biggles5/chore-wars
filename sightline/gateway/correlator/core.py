@@ -12,6 +12,8 @@ import math
 import uuid
 from datetime import datetime
 
+from avs import score_story
+
 CLOSE_GAP_EVENT_S = 120.0   # story closes after this much event-time silence
 FLEE_WINDOW_S = 60.0        # entity gone this soon after deter counts as fled
 PROTECTED_EXEMPT_ZONES = {"street"}
@@ -76,10 +78,13 @@ class Correlator:
     narrator and fires on_update once more with the narrative attached.
     """
 
-    def __init__(self, reid=None, narrator=None, on_update=None):
+    def __init__(self, reid=None, narrator=None, on_update=None,
+                 armed_provider=None, guardian=None):
         self.reid = reid or HistReID()
         self.narrator = narrator
         self.on_update = on_update
+        self.armed_provider = armed_provider   # () -> bool; default armed
+        self.guardian = guardian               # callable(story) -> guardian dict
         self.entities = []
         self.stories = {}        # story_id -> story dict
         self._open = {}          # site_id -> story_id
@@ -251,6 +256,8 @@ class Correlator:
 
         self._severity(story)
         self._title(story)
+        story["avs"] = score_story(
+            story, armed=self.armed_provider() if self.armed_provider else True)
         if self.on_update:
             self.on_update(story)
 
@@ -277,9 +284,16 @@ class Correlator:
         story["evidence_exportable"] = bool(media) and all(
             m.get("native_pixels") is True and m.get("synthetic") is not True
             for m in media)
+        story["avs"] = score_story(
+            story, armed=self.armed_provider() if self.armed_provider else True)
         if self.narrator:
             try:
                 story["narrative"] = self.narrator(story)
+            except Exception:
+                pass
+        if self.guardian:
+            try:
+                story["guardian"] = self.guardian(story)
             except Exception:
                 pass
         if self._open.get(story["site_id"]) == sid:
