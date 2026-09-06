@@ -1,0 +1,113 @@
+{
+  "description": "Narrator eval fixtures: story in, assertions on the mock output. Claude mode is judged against the same assertions when run manually with an API key.",
+  "cases": [
+    {
+      "name": "alert-deter-fled",
+      "story": {
+        "schema": "sightline.story.v1", "story_id": "s-eval000001", "site_id": "site-demo",
+        "started_ts": "2026-09-06T02:13:40-06:00", "ended_ts": "2026-09-06T02:15:10-06:00",
+        "status": "closed", "severity": "alert", "verified": true,
+        "title": "Person, driveway, 2:13 AM", "zones": ["street", "driveway"],
+        "nodes": ["node-fr"], "dwell_s": 90.0,
+        "deter": {"fired": true, "ts": "2026-09-06T02:14:01-06:00", "segments": ["seg-front"], "outcome": "fled"},
+        "entities": [{"entity_id": "e-1", "class": "person", "node_tracks": ["node-fr:t001"],
+          "best_frame": {"event_id": "ev-1", "ts": "2026-09-06T02:13:55-06:00", "node_id": "node-fr",
+            "channel": "identity", "dori_level": "identify", "px_per_m": 467.1}}],
+        "timeline": [
+          {"ts": "2026-09-06T02:13:40-06:00", "event_id": "ev-0", "beat": "person entered driveway (node-fr, wide)", "zone": "driveway"},
+          {"ts": "2026-09-06T02:13:55-06:00", "event_id": "ev-1", "beat": "identity-grade capture: 467.1 px/m on the identity channel (node-fr)", "node_id": "node-fr"},
+          {"ts": "2026-09-06T02:14:01-06:00", "event_id": "ev-2", "beat": "deter fired: zone-follow-strobe on seg-front"}
+        ],
+        "evidence_exportable": false
+      },
+      "homeowner_contains": ["2:13", "person", "driveway", "02:14:01", "left immediately"],
+      "police_contains": ["02:13:55", "identify grade", "467.1 px/m", "fled", "NOT available", "simulated"],
+      "never_contains": ["hoodie", "male", "female", "white", "black", "—"]
+    },
+    {
+      "name": "info-mail",
+      "story": {
+        "schema": "sightline.story.v1", "story_id": "s-eval000002", "site_id": "site-demo",
+        "started_ts": "2026-09-06T11:40:20-06:00", "ended_ts": "2026-09-06T11:42:00-06:00",
+        "status": "closed", "severity": "info", "verified": true,
+        "title": "Person, porch, 11:40 AM", "zones": ["front-walk", "porch"],
+        "nodes": ["node-fl", "node-door"], "dwell_s": 100.0,
+        "entities": [{"entity_id": "e-2", "class": "person", "node_tracks": ["node-fl:t001", "node-door:t001"],
+          "best_frame": {"event_id": "ev-3", "ts": "2026-09-06T11:41:05-06:00", "node_id": "node-door",
+            "channel": "door", "dori_level": "identify", "px_per_m": 512.0}}],
+        "timeline": [
+          {"ts": "2026-09-06T11:40:20-06:00", "event_id": "ev-2b", "beat": "person entered front-walk (node-fl, wide)", "zone": "front-walk"},
+          {"ts": "2026-09-06T11:41:05-06:00", "event_id": "ev-3", "beat": "person moved to porch", "zone": "porch"}
+        ],
+        "evidence_exportable": false
+      },
+      "homeowner_contains": ["11:40", "person"],
+      "police_contains": ["info", "node-door"],
+      "never_contains": ["deter", "uniform", "—"]
+    },
+    {
+      "name": "watch-vehicle-only",
+      "story": {
+        "schema": "sightline.story.v1", "story_id": "s-eval000003", "site_id": "site-demo",
+        "started_ts": "2026-09-06T23:50:00-06:00", "ended_ts": "2026-09-06T23:52:30-06:00",
+        "status": "closed", "severity": "watch", "verified": false,
+        "title": "Vehicle, driveway, 11:50 PM", "zones": ["street", "driveway"],
+        "nodes": ["node-fr"], "dwell_s": 150.0,
+        "entities": [{"entity_id": "e-3", "class": "vehicle", "node_tracks": ["node-fr:t004"],
+          "best_frame": {"event_id": "ev-4", "ts": "2026-09-06T23:50:40-06:00", "node_id": "node-fr",
+            "channel": "wide", "dori_level": "observe", "px_per_m": 88.0}}],
+        "timeline": [
+          {"ts": "2026-09-06T23:50:00-06:00", "event_id": "ev-4a", "beat": "vehicle entered driveway (node-fr, wide)", "zone": "driveway"}
+        ],
+        "evidence_exportable": false
+      },
+      "homeowner_contains": ["11:50", "vehicle", "driveway"],
+      "police_contains": ["watch", "observe grade"],
+      "never_contains": ["sedan", "truck", "license", "plate", "—"]
+    },
+    {
+      "name": "alert-package-theft",
+      "story": {
+        "schema": "sightline.story.v1", "story_id": "s-eval000004", "site_id": "site-demo",
+        "started_ts": "2026-09-06T14:05:30-06:00", "ended_ts": "2026-09-06T14:07:45-06:00",
+        "status": "closed", "severity": "alert", "verified": true,
+        "title": "Person, porch, 2:05 PM", "zones": ["front-walk", "porch"],
+        "nodes": ["node-fl", "node-door"], "dwell_s": 135.0,
+        "deter": {"fired": true, "ts": "2026-09-06T14:06:50-06:00", "segments": ["seg-front"], "outcome": "fled"},
+        "entities": [
+          {"entity_id": "e-4", "class": "person", "node_tracks": ["node-fl:t002", "node-door:t002"],
+           "best_frame": {"event_id": "ev-5", "ts": "2026-09-06T14:06:40-06:00", "node_id": "node-door",
+             "channel": "door", "dori_level": "identify", "px_per_m": 530.0}},
+          {"entity_id": "e-5", "class": "package", "node_tracks": ["node-door:t001"]}
+        ],
+        "timeline": [
+          {"ts": "2026-09-06T14:05:30-06:00", "event_id": "ev-5a", "beat": "person entered front-walk (node-fl, wide)", "zone": "front-walk"},
+          {"ts": "2026-09-06T14:06:40-06:00", "event_id": "ev-5", "beat": "identity-grade capture: 530.0 px/m on the door channel (node-door)"},
+          {"ts": "2026-09-06T14:06:50-06:00", "event_id": "ev-5b", "beat": "deter fired: zone-follow-strobe on seg-front"}
+        ],
+        "evidence_exportable": false
+      },
+      "homeowner_contains": ["2:05", "person", "package", "14:06:50"],
+      "police_contains": ["530.0 px/m", "identify grade", "14:06:40"],
+      "never_contains": ["backpack", "stolen goods", "—"]
+    },
+    {
+      "name": "open-story-no-deter",
+      "story": {
+        "schema": "sightline.story.v1", "story_id": "s-eval000005", "site_id": "site-demo",
+        "started_ts": "2026-09-06T03:00:10-06:00",
+        "status": "open", "severity": "info", "verified": false,
+        "title": "Animal, back-yard, 3:00 AM", "zones": ["back-yard"],
+        "nodes": ["node-rear"], "dwell_s": 0.0,
+        "entities": [{"entity_id": "e-6", "class": "animal", "node_tracks": ["node-rear:t001"]}],
+        "timeline": [
+          {"ts": "2026-09-06T03:00:10-06:00", "event_id": "ev-6", "beat": "animal entered back-yard (node-rear, wide)", "zone": "back-yard"}
+        ],
+        "evidence_exportable": false
+      },
+      "homeowner_contains": ["3:00", "animal", "back-yard"],
+      "police_contains": ["open", "info"],
+      "never_contains": ["deer", "coyote", "deter", "—"]
+    }
+  ]
+}

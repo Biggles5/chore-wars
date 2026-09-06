@@ -32,12 +32,14 @@ _CONF_BASE = {"person": 0.78, "vehicle": 0.80, "animal": 0.70,
 
 
 def _hist(actor_id: str) -> list:
-    """Deterministic 4-bin color histogram per actor. Same actor gives the
-    same histogram at every node, which is what the re-ID stub keys on."""
+    """Deterministic 8-bin color histogram per actor, sharpened so distinct
+    actors sit well apart in cosine space (worst cross-similarity ~0.86 vs
+    1.0 for the same actor). Same actor gives the same histogram at every
+    node, which is what the re-ID stub keys on."""
     h = hashlib.sha256(actor_id.encode()).digest()
-    bins = [1 + h[i] for i in range(4)]
+    bins = [(1 + h[i]) ** 2 for i in range(8)]
     total = float(sum(bins))
-    return [round(b / total, 3) for b in bins]
+    return [round(b / total, 4) for b in bins]
 
 
 class _Track:
@@ -231,6 +233,7 @@ class Engine:
             "armed": self.scn.armed,
             "done": self.done,
             "mqtt": self.bus.mqtt_status,
+            "correlator": getattr(self.bus, "http_status", "off"),
             "published": self.bus.published,
             "counts": self.counts,
             "actors": [

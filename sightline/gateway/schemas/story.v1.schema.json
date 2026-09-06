@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sightline.story.v1",
+  "title": "SightLine Event Story v1",
+  "description": "A correlated narrative assembled by the gateway from node events: one entity (or coordinated group) moving through the perimeter. Served to the app over REST and websocket. (c) 2026 Ryan Brown / SightLine. Proprietary.",
+  "type": "object",
+  "required": ["schema", "story_id", "site_id", "started_ts", "status", "severity", "entities", "timeline"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "sightline.story.v1" },
+    "story_id": { "type": "string", "minLength": 8 },
+    "site_id": { "type": "string" },
+    "started_ts": { "type": "string", "format": "date-time" },
+    "ended_ts": { "type": "string", "format": "date-time" },
+    "status": { "type": "string", "enum": ["open", "closed"] },
+    "severity": {
+      "type": "string",
+      "enum": ["info", "watch", "alert"],
+      "description": "info: expected patterns (mail, guests). watch: unclassified activity. alert: deter fired or identify-grade unknown person in a protected zone."
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "True when the story reached identify-grade capture or multi-node confirmation. This is the flag monitoring centers act on."
+    },
+    "title": { "type": "string", "description": "Short human title, e.g. 'Person, driveway, 2:14 AM'" },
+    "zones": { "type": "array", "items": { "type": "string" } },
+    "nodes": { "type": "array", "items": { "type": "string" } },
+    "dwell_s": { "type": "number", "minimum": 0 },
+    "deter": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fired": { "type": "boolean" },
+        "ts": { "type": "string", "format": "date-time" },
+        "segments": { "type": "array", "items": { "type": "string" } },
+        "outcome": { "type": "string", "enum": ["fled", "stayed", "unknown"] }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "class"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": { "type": "string", "description": "Site-level identity from re-ID stitching" },
+          "class": { "type": "string", "enum": ["person", "vehicle", "animal", "package", "unknown"] },
+          "node_tracks": { "type": "array", "items": { "type": "string" }, "description": "Node-local track ids stitched into this entity" },
+          "best_frame": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "event_id": { "type": "string" },
+              "ts": { "type": "string", "format": "date-time" },
+              "node_id": { "type": "string" },
+              "channel": { "type": "string" },
+              "dori_level": { "type": "string" },
+              "px_per_m": { "type": "number" },
+              "thumb_ref": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "description": "Ordered beats of the story, each anchored to a source event",
+      "items": {
+        "type": "object",
+        "required": ["ts", "event_id", "beat"],
+        "additionalProperties": false,
+        "properties": {
+          "ts": { "type": "string", "format": "date-time" },
+          "event_id": { "type": "string" },
+          "beat": { "type": "string", "description": "e.g. 'person entered driveway (node-fr, wide)'" },
+          "node_id": { "type": "string" },
+          "zone": { "type": "string" },
+          "dori_level": { "type": "string" },
+          "thumb_ref": { "type": "string" }
+        }
+      }
+    },
+    "narrative": {
+      "type": "object",
+      "description": "Narrator agent output. Absent until narration runs.",
+      "additionalProperties": false,
+      "properties": {
+        "homeowner": { "type": "string" },
+        "police_summary": { "type": "string" },
+        "mode": { "type": "string", "enum": ["mock", "claude"] },
+        "generated_ts": { "type": "string", "format": "date-time" }
+      }
+    },
+    "evidence_exportable": {
+      "type": "boolean",
+      "description": "True only when every referenced frame has native_pixels true and synthetic false. Always false for simulator stories."
+    }
+  }
+}
