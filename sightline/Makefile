@@ -5,7 +5,13 @@ PY ?= python3
 SCENARIO ?= quiet-night
 SIM_DIR = sim/perimeter-sim
 
-.PHONY: setup demo sim sim-headless gateway gateway-down test clean
+.PHONY: setup demo sim sim-headless correlator app gateway gateway-down test clean
+
+correlator:
+	cd gateway && $(PY) -m uvicorn correlator.app:app --port 8091
+
+app:
+	cd app/mobile && npm install --no-fund --no-audit && npm run dev
 
 setup:
 	$(PY) -m pip install -q fastapi uvicorn paho-mqtt jsonschema pytest

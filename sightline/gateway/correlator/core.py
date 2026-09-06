@@ -58,6 +58,7 @@ class _Entity:
         self.zones = []
         self.last_zone = None
         self.last_level = None
+        self.ident_beaten = False
 
     def public(self) -> dict:
         out = {"entity_id": self.entity_id, "class": self.cls,
@@ -200,16 +201,10 @@ class Correlator:
                 entity.last_zone = zone
             entity.last_level = geo.get("dori_level")
         elif etype == "detection.update" and entity:
-            level = geo.get("dori_level")
             if zone and entity.last_zone and zone != entity.last_zone:
                 self._beat(story, event, f"{obj['class']} moved to {zone}")
             entity.last_zone = zone or entity.last_zone
-            if (level in ("identify", "validate")
-                    and entity.last_level not in ("identify", "validate")):
-                self._beat(story, event,
-                           f"identity-grade capture: {geo.get('px_per_m')} px/m on the "
-                           f"{geo.get('channel')} channel ({event['node_id']})")
-            entity.last_level = level
+            entity.last_level = geo.get("dori_level")
         elif etype == "detection.end" and entity:
             dwell = event.get("dwell_s")
             self._beat(story, event,
@@ -224,6 +219,14 @@ class Correlator:
             self._beat(story, event,
                        "deter fired: " + det.get("pattern", "strobe")
                        + " on " + ", ".join(det.get("segments", [])))
+
+        # one identity-grade beat per entity, whichever node lands it first
+        if (entity and not entity.ident_beaten
+                and geo.get("dori_level") in ("identify", "validate")):
+            entity.ident_beaten = True
+            self._beat(story, event,
+                       f"identity-grade capture: {geo.get('px_per_m')} px/m on the "
+                       f"{geo.get('channel')} channel ({event['node_id']})")
 
         # verified: identify-grade capture, or the same entity confirmed by 2+ nodes
         if entity:

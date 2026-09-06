@@ -40,5 +40,22 @@ fastapi, uvicorn, paho-mqtt, jsonschema, pytest. Nothing else. Keeps `make setup
 ### D-012: Sim web view uses Server-Sent Events, not websockets
 SSE is one-directional state streaming, which is all the top-down view needs, works through the same FastAPI app, and needs zero client libraries. The app prototype (Sprint 2) gets a websocket from the correlator, where bidirectional matters (Deter now button).
 
+## 2026-09-06 (Sprint 2)
+
+### D-014: Sim-to-correlator HTTP bridge for the no-Docker path
+Without a broker the correlator would sit blind. The sim bus grew a fourth sink: POST to the correlator's `/ingest` when one is reachable (SIGHTLINE_CORRELATOR_URL). The correlator dedupes by event_id, so when a broker IS present and both paths deliver, nothing double-counts. thumb_refs are rewritten to absolute sim-view URLs on this path so the app can render thumbnails (SIGHTLINE_SIM_BASE).
+
+### D-015: Node-local deter stays; the correlator records and can also command
+The deter latency budget is <1 s local. That argues for the edge owning the reflex (node/sim decides, fires, publishes deter.fired) with the correlator recording it into the story and able to issue its own deter over `sightline/<site>/deter/cmd` (app Deter Now). This mirrors the real firmware plan: reflex at the edge, judgment at the gateway. Supersedes the "moves entirely to the correlator" wording of D-013.
+
+### D-016: App times render in the house's clock, never the browser's
+Event timestamps carry the site's UTC offset. The app formats from the ISO string itself instead of `new Date().toLocaleTimeString()`, so a 2:14 AM prowler reads 2:14 AM from any timezone. Found the hard way: the dev browser (UTC) showed 8:10 AM.
+
+### D-017: One identity-grade beat per entity
+Beat generation keyed on per-entity level transitions flapped when multiple nodes at different DORI grades interleaved (about 80 duplicate beats in one story). An entity now gets exactly one "identity-grade capture" beat, from whichever node lands it first. Best-frame tracking still upgrades continuously.
+
+### D-018: uvicorn needs the `websockets` package for WS routes
+FastAPI's `@app.websocket` silently 404s under uvicorn without the `websockets` (or wsproto) protocol package. Pinned in requirements. Found in live testing, invisible in TestClient.
+
 ### D-013: Deter logic lives in the sim for Sprint 1, moves to the correlator in Sprint 2
 The view needs to show deter zones firing now. The sim carries a placeholder rule (person or vehicle dwelling inside the identify ring during armed hours triggers zone-follow deter). Sprint 2 replaces this with the correlator issuing deter commands over `sightline/<site>/deter/cmd`, and the sim just obeys the bus. The topic and payload are already final so nothing downstream changes.

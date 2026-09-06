@@ -41,6 +41,16 @@ Headless run (writes validated event JSONL to `sim/perimeter-sim/runs/`):
 make sim-headless SCENARIO=quiet-night
 ```
 
+Full live demo (three terminals, no Docker needed):
+
+```bash
+make correlator                        # gateway brain on :8091
+make sim SCENARIO=car-prowler-0214     # sim + live view on :8090
+make app                               # app prototype on :5173
+```
+
+Open http://localhost:5173: watch the 2:14 AM story assemble, deter fire, and the narrator write it up, live.
+
 Full gateway stack (broker + Frigate + correlator + Home Assistant, requires Docker):
 
 ```bash

@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.2.0 (2026-09-06) Sprint 2
+
+- `story.v1` schema: entities, timeline beats, best frames, deter outcome, verified flag, evidence rule.
+- Correlator: histogram re-ID (swap-in interface for real embeddings), story assembly, severity, fled/stayed outcomes, narrator on close, websocket push, dedupe across MQTT + HTTP delivery.
+- Sim bus: HTTP ingest bridge to the correlator so the full pipeline runs with no Docker.
+- Narrator agent: mock + Claude modes, versioned guardrailed prompt, 5 eval fixtures.
+- App prototype (React + Vite, 390px, light theme): Home and Verified Event live against the sim; house map SVG, narrator card, live tiles, re-ID chips, timeline with thumbnails, police export preview, Deter now wired to the gateway.
+- Browser-verified gate: car-prowler-0214 renders the full story in the app, deter fires in the sim view, narrative cites frame timestamps.
+- 29 tests green.
+
 ## 0.1.0 (2026-09-06) Sprint 1
 
 - Repo scaffold: README, DECISIONS, ROADMAP, Makefile, requirements.
