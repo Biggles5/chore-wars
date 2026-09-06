@@ -8,10 +8,13 @@ import EventScreen from "./screens/Event.jsx";
 import Ask from "./screens/Ask.jsx";
 import Scenes from "./screens/Scenes.jsx";
 import Setup from "./screens/Setup.jsx";
+import GuardianScreen from "./screens/Guardian.jsx";
+import Installer from "./screens/Installer.jsx";
 import { t } from "./i18n.js";
 
 const TABS = [
   { id: "home", label: t("tab.home"), ico: "⌂" },
+  { id: "guardian", label: "Guardian", ico: "◉" },
   { id: "ask", label: t("tab.ask"), ico: "?" },
   { id: "scenes", label: t("tab.scenes"), ico: "◧" },
   { id: "setup", label: t("tab.setup"), ico: "✚" },
@@ -22,9 +25,25 @@ export default function App() {
   const site = useSite();
   const [tab, setTab] = useState("home");
   const [storyId, setStoryId] = useState(null);
+  const [installer, setInstaller] = useState(false);
+  const [brand, setBrand] = useState("SIGHTLINE");
 
-  const inStory = (tab === "home" || tab === "ask") && storyId;
+  React.useEffect(() => {
+    fetch("/api/branding").then(r => r.json())
+      .then(b => setBrand((b.name || "SightLine").toUpperCase()))
+      .catch(() => {});
+  }, []);
+
+  const inStory = (tab === "home" || tab === "ask" || tab === "guardian") && storyId;
   const armed = site ? site.scenario.armed : false;
+
+  if (installer) {
+    return (
+      <div className="phone">
+        <Installer exit={() => setInstaller(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="phone">
@@ -32,7 +51,7 @@ export default function App() {
         {inStory
           ? <button className="back" aria-label="Back" onClick={() => setStoryId(null)}>‹</button>
           : null}
-        <span className="brand">SIGHTLINE</span>
+        <span className="brand">{brand}</span>
         <span style={{ flex: 1 }} />
         <span className={"chip " + (armed ? "armed" : "disarmed")} role="status">
           {armed ? t("chip.armed") : t("chip.home")}
@@ -46,9 +65,11 @@ export default function App() {
         <Home site={site} stories={stories} events={events}
           openStory={id => setStoryId(id)} />}
       {inStory && <EventScreen site={site} story={byId[storyId]} />}
+      {tab === "guardian" && !inStory &&
+        <GuardianScreen stories={stories} openStory={id => setStoryId(id)} />}
       {tab === "ask" && !inStory && <Ask openStory={id => setStoryId(id)} />}
       {tab === "scenes" && <Scenes site={site} />}
-      {tab === "setup" && <Setup />}
+      {tab === "setup" && <Setup enterInstaller={() => setInstaller(true)} />}
 
       <nav className="tabbar">
         {TABS.map(t => (

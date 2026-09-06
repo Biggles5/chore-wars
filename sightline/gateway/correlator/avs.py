@@ -82,10 +82,12 @@ def score_story(story: dict, armed: bool = True) -> dict:
         threat_bits.append("associated vehicle present")
 
     if threat_bits:
+        evidence = ("native frames on the gateway" if story.get("evidence_exportable")
+                    else "frames on the gateway (simulated in this demo)")
         return {"score": 3, "confidence": conf,
                 "rationale": "Verified human presence with property-threat indicators: "
                              + "; ".join(threat_bits)
-                             + ". Video-verified, native frames on the gateway."}
+                             + f". Video-verified, {evidence}."}
     return {"score": 2, "confidence": conf,
             "rationale": "Confirmed human presence on the property"
                          + (f" ({', '.join(zones[:2])})" if zones else "")

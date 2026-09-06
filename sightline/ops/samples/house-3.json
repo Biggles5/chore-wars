@@ -1,0 +1,22 @@
+{
+  "schema": "sightline.scan.v1",
+  "site_id": "sample-3-newbuild-48v",
+  "zip": "84005",
+  "stories": 1,
+  "brand": "none",
+  "segments": [
+    { "id": "front", "from": [0, 0], "to": [64, 0], "eave_ft": 12 },
+    { "id": "east", "from": [64, 0], "to": [64, 30], "eave_ft": 12 },
+    { "id": "rear-e", "from": [64, 30], "to": [36, 30], "eave_ft": 12 },
+    { "id": "rear-jog", "from": [36, 30], "to": [36, 44], "eave_ft": 12 },
+    { "id": "rear-w", "from": [36, 44], "to": [0, 44], "eave_ft": 12 },
+    { "id": "west", "from": [0, 44], "to": [0, 0], "eave_ft": 12 }
+  ],
+  "chokepoints": [
+    { "id": "drive-mouth", "pos": [54, -34], "kind": "driveway" },
+    { "id": "walk-gate", "pos": [14, -26], "kind": "walk" },
+    { "id": "back-slider", "pos": [20, 58], "kind": "other" }
+  ],
+  "door": { "pos": [26, 0], "jamb_side": "right" },
+  "notes": "No existing lights: SKU 2 factory-cut 48V rail, the sub-3-hour install. L-shaped rear with a jog: six cut segments."
+}

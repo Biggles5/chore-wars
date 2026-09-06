@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+<metadata id="qc">{"latch_engaged": false, "conductor_exposed_mm": 0.0, "check": "connector_clicked"}</metadata>
+<defs><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"/>
+<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0"/></filter>
+<radialGradient id="v" cx="50%" cy="45%" r="75%"><stop offset="70%" stop-color="#000" stop-opacity="0"/>
+<stop offset="100%" stop-color="#000" stop-opacity="0.3"/></radialGradient></defs>
+<rect width="320" height="240" fill="#8d9297"/>
+<rect y="140" width="320" height="100" fill="#5d6660"/><rect x="60" y="100" width="140" height="44" rx="8" fill="#e8e4da"/><rect x="70" y="110" width="26" height="24" rx="4" fill="#c2453f"/><rect x="104" y="110" width="26" height="24" rx="4" fill="#3f8f5a"/><path d="M20 122 h40 M200 122 h80" stroke="#20242a" stroke-width="7"/>
+<rect width="320" height="240" filter="url(#g)"/><rect width="320" height="240" fill="url(#v)"/>
+<rect y="220" width="320" height="20" fill="#000" opacity="0.45"/>
+<text x="6" y="234" font-family="monospace" font-size="10" fill="#fff">connector_clicked #4 · SIMULATED FIXTURE</text>
+</svg>

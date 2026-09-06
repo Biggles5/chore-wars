@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+<metadata id="qc">{"meter_v": 12.1, "strain_relief": true, "check": "controller_wiring"}</metadata>
+<defs><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"/>
+<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0"/></filter>
+<radialGradient id="v" cx="50%" cy="45%" r="75%"><stop offset="70%" stop-color="#000" stop-opacity="0"/>
+<stop offset="100%" stop-color="#000" stop-opacity="0.3"/></radialGradient></defs>
+<rect width="320" height="240" fill="#8d9297"/>
+<rect x="40" y="40" width="150" height="160" rx="8" fill="#d8d4cc"/><rect x="56" y="60" width="118" height="40" fill="#2e3338"/><circle cx="70" cy="80" r="6" fill="#c0c4c8"/><circle cx="96" cy="80" r="6" fill="#c0c4c8"/><circle cx="122" cy="80" r="6" fill="#c0c4c8"/><circle cx="148" cy="80" r="6" fill="#c0c4c8"/><path d="M190 156 q40 -10 90 -6" stroke="#20242a" stroke-width="6" fill="none"/><rect x="196" y="150" width="30" height="12" rx="3" fill="#3c4045"/><rect x="210" y="60" width="84" height="56" rx="8" fill="#1b1e22"/><text x="222" y="94" font-family="monospace" font-size="20" fill="#7fd08f">12.1V</text>
+<rect width="320" height="240" filter="url(#g)"/><rect width="320" height="240" fill="url(#v)"/>
+<rect y="220" width="320" height="20" fill="#000" opacity="0.45"/>
+<text x="6" y="234" font-family="monospace" font-size="10" fill="#fff">controller_wiring #4 · SIMULATED FIXTURE</text>
+</svg>

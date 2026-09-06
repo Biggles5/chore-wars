@@ -1,0 +1,127 @@
+[
+  {
+    "file": "rail_level_spacing-1-pass.svg",
+    "check": "rail_level_spacing",
+    "expected_pass": true
+  },
+  {
+    "file": "rail_level_spacing-2-pass.svg",
+    "check": "rail_level_spacing",
+    "expected_pass": true
+  },
+  {
+    "file": "rail_level_spacing-3-pass.svg",
+    "check": "rail_level_spacing",
+    "expected_pass": true
+  },
+  {
+    "file": "rail_level_spacing-4-fail.svg",
+    "check": "rail_level_spacing",
+    "expected_pass": false
+  },
+  {
+    "file": "rail_level_spacing-5-fail.svg",
+    "check": "rail_level_spacing",
+    "expected_pass": false
+  },
+  {
+    "file": "gasket_seated-1-pass.svg",
+    "check": "gasket_seated",
+    "expected_pass": true
+  },
+  {
+    "file": "gasket_seated-2-pass.svg",
+    "check": "gasket_seated",
+    "expected_pass": true
+  },
+  {
+    "file": "gasket_seated-3-pass.svg",
+    "check": "gasket_seated",
+    "expected_pass": true
+  },
+  {
+    "file": "gasket_seated-4-fail.svg",
+    "check": "gasket_seated",
+    "expected_pass": false
+  },
+  {
+    "file": "gasket_seated-5-fail.svg",
+    "check": "gasket_seated",
+    "expected_pass": false
+  },
+  {
+    "file": "connector_clicked-1-pass.svg",
+    "check": "connector_clicked",
+    "expected_pass": true
+  },
+  {
+    "file": "connector_clicked-2-pass.svg",
+    "check": "connector_clicked",
+    "expected_pass": true
+  },
+  {
+    "file": "connector_clicked-3-pass.svg",
+    "check": "connector_clicked",
+    "expected_pass": true
+  },
+  {
+    "file": "connector_clicked-4-fail.svg",
+    "check": "connector_clicked",
+    "expected_pass": false
+  },
+  {
+    "file": "connector_clicked-5-fail.svg",
+    "check": "connector_clicked",
+    "expected_pass": false
+  },
+  {
+    "file": "node_aim-1-pass.svg",
+    "check": "node_aim",
+    "expected_pass": true
+  },
+  {
+    "file": "node_aim-2-pass.svg",
+    "check": "node_aim",
+    "expected_pass": true
+  },
+  {
+    "file": "node_aim-3-pass.svg",
+    "check": "node_aim",
+    "expected_pass": true
+  },
+  {
+    "file": "node_aim-4-fail.svg",
+    "check": "node_aim",
+    "expected_pass": false
+  },
+  {
+    "file": "node_aim-5-fail.svg",
+    "check": "node_aim",
+    "expected_pass": false
+  },
+  {
+    "file": "controller_wiring-1-pass.svg",
+    "check": "controller_wiring",
+    "expected_pass": true
+  },
+  {
+    "file": "controller_wiring-2-pass.svg",
+    "check": "controller_wiring",
+    "expected_pass": true
+  },
+  {
+    "file": "controller_wiring-3-pass.svg",
+    "check": "controller_wiring",
+    "expected_pass": true
+  },
+  {
+    "file": "controller_wiring-4-fail.svg",
+    "check": "controller_wiring",
+    "expected_pass": false
+  },
+  {
+    "file": "controller_wiring-5-fail.svg",
+    "check": "controller_wiring",
+    "expected_pass": false
+  }
+]

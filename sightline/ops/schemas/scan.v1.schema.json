@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sightline.scan.v1",
+  "title": "SightLine house scan v1",
+  "description": "Output of the phone photogrammetry scan (HOVER-class, ~2.6% variance vs tape). Input to scan-to-kit, the quote agent, and the simulator's house builder. Units: feet, site frame with origin at the front-left footprint corner, +x right along the front, +y toward the back. (c) 2026 Ryan Brown / SightLine. Proprietary.",
+  "type": "object",
+  "required": ["schema", "site_id", "zip", "stories", "brand", "segments"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": { "const": "sightline.scan.v1" },
+    "site_id": { "type": "string" },
+    "zip": { "type": "string" },
+    "stories": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "brand": { "type": "string", "enum": ["gemstone", "trimlight", "jellyfish", "oelo", "everlights", "govee", "none"], "description": "existing lighting; none = SKU 2 48V rail" },
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "model": { "type": "string" },
+        "terminals": { "type": "integer" },
+        "location": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "led_load_w_per_terminal": { "type": "number" }
+      }
+    },
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "from", "to", "eave_ft"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "to": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "eave_ft": { "type": "number" },
+          "facing_deg": { "type": "number", "description": "outward normal compass bearing; derived from geometry when absent" }
+        }
+      }
+    },
+    "chokepoints": {
+      "type": "array",
+      "description": "Scan-marked approach points (driveway mouth, walk gate, porch line). Identity channels aim here.",
+      "items": {
+        "type": "object",
+        "required": ["id", "pos"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "pos": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+          "kind": { "type": "string", "enum": ["driveway", "walk", "porch", "gate", "other"] }
+        }
+      }
+    },
+    "door": {
+      "type": "object",
+      "description": "Front door position for the eye-level node",
+      "required": ["pos"],
+      "additionalProperties": false,
+      "properties": {
+        "pos": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+        "jamb_side": { "type": "string", "enum": ["left", "right"] }
+      }
+    },
+    "notes": { "type": "string" }
+  }
+}

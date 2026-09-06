@@ -74,6 +74,19 @@
 </section>
 
 <section>
+  <h2>The third disruption: install throughput (one metro, 26 weeks)</h2>
+  <div class="frame">
+    <div class="bar"><span>ops-sim: new-metro-launch, old model vs Ops Engine</span><span>sim/ops-sim</span></div>
+    <canvas id="opschart" width="1032" height="300" style="width:100%;display:block;background:#fff"></canvas>
+    <div class="bar" id="opssummary" style="border-top:1px solid #E4E1D8;border-bottom:0"></div>
+  </div>
+  <div class="beats" style="margin-top:14px">
+    <div class="beat"><b>Why the gap exists</b><p>The scan does the measuring, the factory does the cutting, the connector does the wiring, the AR runbook does the knowing, the QC agent does the supervising. Skill moved off the ladder, so labor is a recruitment funnel, not a hiring plan.</p></div>
+    <div class="beat"><b>The installer's math</b><p>A certified two-person crew runs 3 installs a day and keeps about $840 of $1,350 grossed (est.). Christmas-light money, twelve months a year. That is the recruiting pitch, and it is why capacity spins up in weeks.</p></div>
+  </div>
+</section>
+
+<section>
   <h2>Run it yourself</h2>
   <div class="steps">
     <ol>
@@ -97,7 +110,46 @@
 </section>
 
 <footer>Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved. Simulated imagery is labeled SIMULATED and can never enter an evidence path.</footer>
+<script src="opssim-data.js"></script>
 <script>
+  // Ops throughput chart: installs/week, old vs new, drawn from ops-sim output.
+  (function () {
+    if (!window.OPSSIM) return;
+    const cv = document.getElementById("opschart"), ctx = cv.getContext("2d");
+    const weeks = OPSSIM.weeks, s = OPSSIM.summary;
+    const maxY = Math.max(...weeks.map(w => Math.max(w.old.installs, w.new.installs, w.demand))) * 1.15;
+    const X = i => 46 + i * (cv.width - 70) / (weeks.length - 1);
+    const Y = v => cv.height - 34 - v * (cv.height - 60) / maxY;
+    ctx.font = "12px IBM Plex Mono, monospace";
+    ctx.strokeStyle = "#E4E1D8";
+    for (let g = 0; g <= 4; g++) {
+      const v = maxY * g / 4;
+      ctx.beginPath(); ctx.moveTo(46, Y(v)); ctx.lineTo(cv.width - 20, Y(v)); ctx.stroke();
+      ctx.fillStyle = "#6E7480"; ctx.fillText(v.toFixed(0), 8, Y(v) + 4);
+    }
+    function line(key, color, width, dash) {
+      ctx.beginPath(); ctx.setLineDash(dash || []);
+      weeks.forEach((w, i) => {
+        const v = key === "demand" ? w.demand : w[key].installs;
+        i ? ctx.lineTo(X(i), Y(v)) : ctx.moveTo(X(i), Y(v));
+      });
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.stroke(); ctx.setLineDash([]);
+    }
+    line("demand", "#9aa0a8", 1.5, [5, 4]);
+    line("old", "#C24545", 2.5);
+    line("new", "#1E8A63", 2.5);
+    ctx.fillStyle = "#1B2434";
+    ctx.fillText("weeks 1 to " + weeks.length, cv.width / 2 - 40, cv.height - 10);
+    ctx.fillStyle = "#1E8A63"; ctx.fillText("Ops Engine installs/wk", cv.width - 220, 24);
+    ctx.fillStyle = "#C24545"; ctx.fillText("old-model installs/wk", cv.width - 220, 42);
+    ctx.fillStyle = "#9aa0a8"; ctx.fillText("demand", cv.width - 220, 60);
+    document.getElementById("opssummary").innerHTML =
+      "<span>week-12 rate: <b style='color:#1E8A63'>" + s.week12_installs_per_month.new +
+      "/mo</b> vs <b style='color:#C24545'>" + s.week12_installs_per_month.old +
+      "/mo</b></span><span>ending backlog: " + s.ending_backlog.new + " vs " +
+      s.ending_backlog.old + " jobs</span>";
+  })();
+
   // If the local demo isn't running, show the hint instead of a broken frame.
   document.querySelectorAll("iframe").forEach(function (f, i) {
     var t = setTimeout(function () {

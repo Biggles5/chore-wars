@@ -76,10 +76,10 @@ def dori_plan(eave_heights_ft: list) -> list:
 
 def quote(roofline_ft: float, corners: int, eave_heights_ft: list,
           brand: str = "gemstone", led_load_w_per_terminal: float = 40.0,
-          node_run_ft: float = 50.0) -> dict:
+          node_run_ft: float = 50.0, n_track_override: int = None) -> dict:
     """The quote. brand 'sightline48' prices SKU 2; everything else is the
     SKU 1 retrofit against that brand's rail rules."""
-    n_track = node_count(roofline_ft, corners)
+    n_track = n_track_override if n_track_override else node_count(roofline_ft, corners)
     n_door = 1
     is_48 = brand == "sightline48"
     b = pb.BRANDS[brand]

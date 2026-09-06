@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+<metadata id="qc">{"azimuth_err_deg": 9.0, "cant_err_deg": 1.0, "check": "node_aim"}</metadata>
+<defs><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"/>
+<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0"/></filter>
+<radialGradient id="v" cx="50%" cy="45%" r="75%"><stop offset="70%" stop-color="#000" stop-opacity="0"/>
+<stop offset="100%" stop-color="#000" stop-opacity="0.3"/></radialGradient></defs>
+<rect width="320" height="240" fill="#8d9297"/>
+<rect width="320" height="240" fill="#1b2434"/><circle cx="160.0" cy="110" r="56" fill="none" stroke="#1d7fb0" stroke-width="2" stroke-dasharray="8 5"/><circle cx="214.0" cy="118.0" r="10" fill="none" stroke="#c07a10" stroke-width="3"/><line x1="196.0" y1="118.0" x2="232.0" y2="118.0" stroke="#c07a10"/><line x1="214.0" y1="100.0" x2="214.0" y2="136.0" stroke="#c07a10"/><text x="12" y="24" font-family="monospace" font-size="11" fill="#faf9f5">AIM VIEW · node-drive-mouth</text>
+<rect width="320" height="240" filter="url(#g)"/><rect width="320" height="240" fill="url(#v)"/>
+<rect y="220" width="320" height="20" fill="#000" opacity="0.45"/>
+<text x="6" y="234" font-family="monospace" font-size="10" fill="#fff">node_aim #4 · SIMULATED FIXTURE</text>
+</svg>

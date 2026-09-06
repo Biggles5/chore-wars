@@ -56,7 +56,7 @@ function CoverageRings({ plan }) {
   );
 }
 
-export default function Setup() {
+export default function Setup({ enterInstaller }) {
   const [form, setForm] = useState({
     roofline_ft: 160, corners: 4, eaves: "20, 10", brand: "gemstone", run: 50,
   });
@@ -87,6 +87,17 @@ export default function Setup() {
 
   return (
     <main>
+      {enterInstaller && (
+        <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Certified installer?</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>
+              Guided runbook with QC gates for today's job
+            </div>
+          </div>
+          <button className="btn" onClick={enterInstaller}>Installer mode</button>
+        </div>
+      )}
       <div className="section-title">Scan your roofline</div>
       <div className="card">
         <Field label="Roofline length (ft)">

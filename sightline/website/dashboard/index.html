@@ -1,0 +1,137 @@
+<!doctype html>
+<!-- SightLine dealer/ops dashboard, read-only demo wired to ops-sim data.
+     Regenerate data: python3 ops/make_dashboard_data.py
+     Proprietary. (c) 2026 Ryan Brown / SightLine. All rights reserved. -->
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SightLine Ops Dashboard</title>
+<style>
+  :root { --paper:#FAF9F5; --ink:#1B2434; --amber:#C07A10; --blue:#1D7FB0;
+          --green:#1E8A63; --red:#C24545; --line:#E4E1D8; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--paper); color:var(--ink);
+         font-family:"IBM Plex Sans",system-ui,sans-serif; padding:22px; }
+  h1 { font-family:"Chakra Petch",system-ui,sans-serif; font-size:20px; letter-spacing:1px; }
+  h1 small { color:#6E7480; font-size:12px; font-weight:400; margin-left:10px; }
+  h2 { font-family:"Chakra Petch",system-ui,sans-serif; font-size:12px; letter-spacing:1.5px;
+       text-transform:uppercase; color:var(--amber); margin:22px 0 8px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+  .kpi { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; }
+  .kpi .l { font-size:10px; color:#6E7480; text-transform:uppercase; letter-spacing:1px; }
+  .kpi .v { font-family:"Chakra Petch",monospace; font-size:24px; font-weight:700; }
+  table { border-collapse:collapse; width:100%; font-size:12.5px; }
+  td,th { padding:6px 8px; border-bottom:1px solid #EFEDE6; text-align:left; }
+  th { font-size:10px; text-transform:uppercase; letter-spacing:1px; color:#6E7480; }
+  .tier { font-size:10px; font-weight:700; padding:2px 8px; border-radius:999px; color:#fff; }
+  .tier.elite { background:var(--ink); } .tier.pro { background:var(--blue); }
+  .tier.certified { background:var(--green); }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:4px; }
+  .passed { background:var(--green); } .pending { background:#cfccc2; } .failed { background:var(--red); }
+  canvas { width:100%; display:block; }
+  .foot { color:#8a8f99; font-size:11px; margin-top:22px; }
+  .good { color:var(--green); } .bad { color:var(--red); }
+</style>
+</head>
+<body>
+<h1>SIGHTLINE OPS<small id="metro"></small></h1>
+<div class="kpis" id="kpis"></div>
+
+<div class="grid" style="margin-top:14px">
+  <div class="card" style="grid-column:span 2">
+    <h2 style="margin-top:0">Scheduled jobs (metro map, next 6 days)</h2>
+    <canvas id="map" width="640" height="330"></canvas>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0">Capacity forecast</h2>
+    <div id="forecast" style="font-size:13px; line-height:1.7"></div>
+    <h2>Week-12 rate (ops-sim)</h2>
+    <div id="simline" style="font-size:13px"></div>
+  </div>
+</div>
+
+<h2>Crew scorecards</h2>
+<div class="card"><table id="crews"></table></div>
+
+<h2>QC status, active installs</h2>
+<div class="card"><table id="qc"></table></div>
+
+<div class="foot">Read-only demo wired to ops-sim and the capacity engine. All numbers estimates.
+Tier consequences: <span id="tiers"></span>. Proprietary. (c) 2026 Ryan Brown / SightLine.</div>
+
+<script src="dashboard-data.js"></script>
+<script>
+const D = window.DASH;
+document.getElementById("metro").textContent = D.metro + " · dealer portal seed";
+const P = D.pipeline;
+document.getElementById("kpis").innerHTML = [
+  ["Open quotes", P.quotes_open], ["Booked", P.jobs_booked],
+  ["Scheduled this wk", P.scheduled_this_week],
+  ["Avg est hours", P.avg_est_hours],
+  ["Unplaced", P.unplaced.length],
+].map(([l, v]) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div></div>`).join("");
+
+// map
+const cv = document.getElementById("map"), ctx = cv.getContext("2d");
+const X = m => 30 + m * (cv.width - 60) / 18, Y = m => cv.height - 24 - m * (cv.height - 48) / 18;
+ctx.strokeStyle = "#EFEDE6";
+for (let g = 0; g <= 6; g++) {
+  ctx.beginPath(); ctx.moveTo(X(g * 3), Y(0)); ctx.lineTo(X(g * 3), Y(18)); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(X(0), Y(g * 3)); ctx.lineTo(X(18), Y(g * 3)); ctx.stroke();
+}
+const crewColor = {};
+const palette = ["#1D7FB0", "#1E8A63", "#C07A10", "#C24545", "#6E5AA8", "#1B2434"];
+D.crews.forEach((c, i) => crewColor[c.id] = palette[i % palette.length]);
+D.crews.forEach(c => {
+  ctx.fillStyle = crewColor[c.id];
+  ctx.fillRect(X(c.home_base[0]) - 5, Y(c.home_base[1]) - 5, 10, 10);
+});
+D.schedule.forEach(j => {
+  ctx.beginPath();
+  ctx.arc(X(j.site[0]), Y(j.site[1]), 5, 0, 7);
+  ctx.fillStyle = crewColor[j.crew] || "#999"; ctx.fill();
+  ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+});
+ctx.font = "11px monospace"; ctx.fillStyle = "#6E7480";
+ctx.fillText("squares = crew bases, dots = jobs colored by assigned crew (route-aware)", 30, 16);
+
+// forecast
+const F = D.forecast;
+document.getElementById("forecast").innerHTML =
+  `Target: <b>${F.installs_per_month}/mo</b><br>` +
+  `Per-crew capacity: <b>${F.capacity_per_crew_mo}/mo</b><br>` +
+  `Crews needed: <b>${F.crews_needed}</b><br>` +
+  `Funnel adds: <b>${F.crews_certified_per_month_from_funnel}/mo</b><br>` +
+  `Months to capacity: <b class="good">${F.months_to_capacity}</b>`;
+const S = D.opssim;
+document.getElementById("simline").innerHTML =
+  `Ops Engine <b class="good">${S.week12_installs_per_month.new}/mo</b> vs ` +
+  `old model <b class="bad">${S.week12_installs_per_month.old}/mo</b><br>` +
+  `Backlog wk-26: <b class="good">${S.ending_backlog.new}</b> vs <b class="bad">${S.ending_backlog.old}</b>`;
+
+// crews
+document.getElementById("crews").innerHTML =
+  `<tr><th>Crew</th><th>Tier</th><th>Jobs</th><th>Avg hr (target ${D.crews[0].target_hr})</th>
+   <th>QC first-pass</th><th>90d callbacks</th><th>Rating</th></tr>` +
+  D.crews.map(c => `<tr><td>${c.name}</td>
+    <td><span class="tier ${c.tier}">${c.tier.toUpperCase()}</span></td>
+    <td>${c.jobs_done}</td>
+    <td class="${c.avg_install_hr <= 3.5 ? 'good' : 'bad'}">${c.avg_install_hr}</td>
+    <td class="${c.qc_first_pass >= 0.85 ? 'good' : ''}">${(c.qc_first_pass * 100).toFixed(0)}%</td>
+    <td class="${c.callback_90d < 0.05 ? 'good' : 'bad'}">${(c.callback_90d * 100).toFixed(1)}%</td>
+    <td>${c.rating}</td></tr>`).join("");
+
+// qc board
+document.getElementById("qc").innerHTML =
+  `<tr><th>Job</th><th>Crew</th><th>Gates</th></tr>` +
+  D.qc_board.map(r => `<tr><td>${r.job}</td><td>${r.crew}</td><td>` +
+    r.gates.map(g => `<span class="dot ${g.status}" title="${g.gate}"></span>${g.gate.replace(/_/g, " ")}&nbsp;&nbsp;`).join("") +
+    `</td></tr>`).join("");
+
+document.getElementById("tiers").textContent =
+  Object.entries(D.tiers).map(([t, v]) => `${t} ${v.rev_share_plans_pct}% plan rev-share, ${v.priority}`).join(" · ");
+</script>
+</body>
+</html>

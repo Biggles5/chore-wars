@@ -30,6 +30,18 @@ _GUARDIAN_DIR = Path(__file__).resolve().parents[2] / "agents" / "guardian"
 sys.path.insert(0, str(_GUARDIAN_DIR))
 from guardian import Guardian  # noqa: E402
 
+_OPS = Path(__file__).resolve().parents[2] / "ops"
+_QC = Path(__file__).resolve().parents[2] / "agents" / "qc"
+sys.path.insert(0, str(_OPS))
+sys.path.insert(0, str(_QC))
+try:
+    from scan_to_kit import kit_from_scan, load_sample  # noqa: E402
+    from runbook import runbook_from_kit  # noqa: E402
+    from watchtower import Watchtower  # noqa: E402
+    import qc as qc_agent  # noqa: E402
+except ImportError:
+    kit_from_scan = load_sample = runbook_from_kit = Watchtower = qc_agent = None
+
 _QUOTE = Path(__file__).resolve().parents[2] / "agents" / "quote"
 sys.path.insert(0, str(_QUOTE))
 try:
@@ -67,6 +79,7 @@ class State:
         self.seq = 0
         self.updates = deque(maxlen=1000)   # (seq, kind, payload dict)
         self.seen_event_ids = deque(maxlen=5000)
+        self.watchtower = Watchtower() if Watchtower else None
         self.guardian = Guardian(
             jurisdiction=jurisdiction(),
             deter_fn=lambda site, zone: _cmd_deter(self, site, zone))
@@ -97,6 +110,11 @@ class State:
         TELEM_VALIDATOR.validate(payload)
         with self.lock:
             self.telemetry[payload["node_id"]] = payload
+        if self.watchtower is not None:
+            try:
+                self.watchtower.observe(payload)
+            except Exception:
+                pass
 
     def updates_since(self, last: int) -> tuple:
         with self.lock:
@@ -349,6 +367,71 @@ def guardian_log(limit: int = 50):
 @app.get("/flags")
 def flags():
     return feature_flags()
+
+
+# ---- Ops Engine surface ----
+
+@app.post("/kit")
+def kit(scan: dict):
+    """Scan-to-kit: the full pipeline, one scan JSON in."""
+    if kit_from_scan is None:
+        raise HTTPException(503, "ops engine unavailable")
+    try:
+        return kit_from_scan(scan)
+    except jsonschema.ValidationError as e:
+        raise HTTPException(422, e.message)
+
+
+@app.get("/runbook/sample/{n}")
+def runbook_sample(n: int):
+    """Installer runbook for one of the three sample houses."""
+    if runbook_from_kit is None or not 1 <= n <= 3:
+        raise HTTPException(404, "sample 1 to 3")
+    return runbook_from_kit(kit_from_scan(load_sample(n)))
+
+
+@app.post("/qc/review")
+def qc_review(body: dict):
+    """One QC gate: {check, photo} where photo is SVG text or a fixture
+    name from /qc/fixtures (the demo's stand-in for the camera)."""
+    if qc_agent is None:
+        raise HTTPException(503, "qc agent unavailable")
+    check = (body or {}).get("check")
+    photo = (body or {}).get("photo", "")
+    if not check or not photo:
+        raise HTTPException(422, "check and photo required")
+    if "/" not in photo and photo.endswith(".svg"):
+        photo = str(_QC / "fixtures" / photo)
+    try:
+        return qc_agent.review(photo, check)
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+
+
+@app.get("/qc/fixtures")
+def qc_fixtures():
+    manifest = _QC / "fixtures" / "manifest.json"
+    if not manifest.exists():
+        return []
+    return json.loads(manifest.read_text())
+
+
+@app.get("/qc/fixtures/{name}")
+def qc_fixture_file(name: str):
+    from fastapi.responses import FileResponse
+    f = _QC / "fixtures" / name
+    if not f.exists() or not name.endswith(".svg"):
+        raise HTTPException(404, "no such fixture")
+    return FileResponse(f, media_type="image/svg+xml")
+
+
+@app.get("/watchtower/tickets")
+def watchtower_tickets(site_id: str = None):
+    if state.watchtower is None:
+        return []
+    state.watchtower.sweep_offline(
+        max((t.get("ts", "") for t in state.telemetry.values()), default=""))
+    return state.watchtower.open_tickets(site_id)
 
 
 @app.get("/branding")

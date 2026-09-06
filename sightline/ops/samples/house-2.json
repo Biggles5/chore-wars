@@ -1,0 +1,21 @@
+{
+  "schema": "sightline.scan.v1",
+  "site_id": "sample-2-twostory",
+  "zip": "84604",
+  "stories": 2,
+  "brand": "trimlight",
+  "controller": { "model": "2ATV8TRIMLIGHT-class", "terminals": 4, "location": [0, 6], "led_load_w_per_terminal": 48 },
+  "segments": [
+    { "id": "front-w", "from": [0, 0], "to": [30, 0], "eave_ft": 20 },
+    { "id": "front-e", "from": [30, 0], "to": [58, 0], "eave_ft": 20 },
+    { "id": "east", "from": [58, 0], "to": [58, 40], "eave_ft": 20 },
+    { "id": "rear", "from": [58, 40], "to": [0, 40], "eave_ft": 10 },
+    { "id": "west", "from": [0, 40], "to": [0, 0], "eave_ft": 20 }
+  ],
+  "chokepoints": [
+    { "id": "drive-mouth", "pos": [48, -40], "kind": "driveway" },
+    { "id": "porch-line", "pos": [20, -28], "kind": "porch" }
+  ],
+  "door": { "pos": [24, 0], "jamb_side": "left" },
+  "notes": "Two-story front, 20 ft eaves: the hard optics case; identity aim windows are 25 to 52 ft. Long runs from a garage-corner controller: expect injection on the far side."
+}

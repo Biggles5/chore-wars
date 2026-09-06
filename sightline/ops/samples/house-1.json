@@ -1,0 +1,21 @@
+{
+  "schema": "sightline.scan.v1",
+  "site_id": "sample-1-rambler",
+  "zip": "84003",
+  "stories": 1,
+  "brand": "gemstone",
+  "controller": { "model": "GEM40012-4", "terminals": 4, "location": [52, 0], "led_load_w_per_terminal": 40 },
+  "segments": [
+    { "id": "front", "from": [0, 0], "to": [52, 0], "eave_ft": 10 },
+    { "id": "east", "from": [52, 0], "to": [52, 34], "eave_ft": 10 },
+    { "id": "rear", "from": [52, 34], "to": [0, 34], "eave_ft": 10 },
+    { "id": "west", "from": [0, 34], "to": [0, 0], "eave_ft": 10 }
+  ],
+  "chokepoints": [
+    { "id": "drive-mouth", "pos": [40, -30], "kind": "driveway" },
+    { "id": "front-walk", "pos": [18, -22], "kind": "walk" },
+    { "id": "back-gate", "pos": [10, 48], "kind": "gate" }
+  ],
+  "door": { "pos": [21, 0], "jamb_side": "right" },
+  "notes": "Single-story rambler, the easy case: 10 ft eaves are benign beyond 8 ft ground distance."
+}

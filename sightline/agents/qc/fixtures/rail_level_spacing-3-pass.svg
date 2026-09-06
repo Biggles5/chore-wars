@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240">
+<metadata id="qc">{"tilt_deg": 1.4, "spacing_var_pct": 7.5, "check": "rail_level_spacing"}</metadata>
+<defs><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"/>
+<feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0"/></filter>
+<radialGradient id="v" cx="50%" cy="45%" r="75%"><stop offset="70%" stop-color="#000" stop-opacity="0"/>
+<stop offset="100%" stop-color="#000" stop-opacity="0.3"/></radialGradient></defs>
+<rect width="320" height="240" fill="#8d9297"/>
+<rect y="40" width="320" height="70" fill="#b9bcb6"/><rect y="110" width="320" height="130" fill="#6f7a70"/><g transform="rotate(1.4 160.0 90)"><rect x="20" y="86" width="280" height="9" fill="#3c4045"/><rect x="34.0" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="72.5" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="101.0" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="149.5" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="168.0" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="226.5" y="84" width="9" height="13" rx="3" fill="#e8e4da"/><rect x="235.0" y="84" width="9" height="13" rx="3" fill="#e8e4da"/></g><line x1="20" y1="116" x2="300" y2="116" stroke="#d8524a" stroke-dasharray="6 4" stroke-width="1.6"/>
+<rect width="320" height="240" filter="url(#g)"/><rect width="320" height="240" fill="url(#v)"/>
+<rect y="220" width="320" height="20" fill="#000" opacity="0.45"/>
+<text x="6" y="234" font-family="monospace" font-size="10" fill="#fff">rail_level_spacing #3 · SIMULATED FIXTURE</text>
+</svg>

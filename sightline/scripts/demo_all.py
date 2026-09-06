@@ -104,6 +104,52 @@ def main():
     else:
         print("app: npm not found, skipping (sim view still shows the demo)")
 
+    # ops-sim: the throughput thesis, printed with the demo (definition of done)
+    sys.path.insert(0, str(ROOT / "sim" / "ops-sim"))
+    try:
+        import opssim
+        s = opssim.simulate("new-metro-launch")["summary"]
+        print("\nops-sim new-metro-launch, week-12 installs/month:")
+        print(f"  old model: {s['week12_installs_per_month']['old']:.0f}/mo   "
+              f"Ops Engine: {s['week12_installs_per_month']['new']:.0f}/mo   "
+              f"(ending backlog {s['ending_backlog']['old']:.0f} vs {s['ending_backlog']['new']:.0f})")
+    except Exception as e:
+        print(f"ops-sim unavailable: {e}")
+
+    # background reporter: AVS score + Guardian cost once the story closes
+    import json
+    import threading
+
+    def report_story():
+        deadline = time.time() + 90
+        while time.time() < deadline:
+            try:
+                with urllib.request.urlopen(
+                        "http://localhost:8091/stories", timeout=2) as r:
+                    stories = json.loads(r.read())
+                closed = [s for s in stories
+                          if s.get("status") == "closed" and s.get("avs")]
+                if closed:
+                    s = closed[0]
+                    g = s.get("guardian", {})
+                    print(f"\n[scenario verdict] {s.get('title', '')}")
+                    print(f"  AVS-01 score: {s['avs']['score']} "
+                          f"(confidence {s['avs']['confidence']}): {s['avs']['rationale']}")
+                    print(f"  Guardian: {g.get('action', 'n/a')} "
+                          f"(event cost ${g.get('cost_usd', 0):.4f})")
+                    with urllib.request.urlopen(
+                            "http://localhost:8091/guardian/report", timeout=2) as r:
+                        rep = json.loads(r.read())
+                    print(f"  simulated cost per home per month: "
+                          f"${rep['cost_per_home_month_usd_est']:.2f} "
+                          f"(target < $6.00: {'PASS' if rep['under_target'] else 'MISS'})")
+                    return
+            except Exception:
+                pass
+            time.sleep(3)
+
+    threading.Thread(target=report_story, daemon=True).start()
+
     print("\nSightLine demo running. Open the app, watch the story assemble.")
     print("Ctrl-C to stop.")
     while True:
